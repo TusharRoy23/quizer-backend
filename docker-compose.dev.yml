@@ -1,0 +1,19 @@
+services:
+  dev:
+    container_name: quizer-dev
+    image: quizer-api
+    env_file:
+      - ./.envs/.local/.env
+    build:
+      context: .
+      dockerfile: ./dockerfiles/Dockerfile-dev
+    volumes:
+      - .:/app # create volumn in current directory of container
+      - /app/node_modules # anonymus/unnamed volumn in container
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    restart: unless-stopped
+    networks:
+      - quiz_api
+networks:
+  quiz_api:

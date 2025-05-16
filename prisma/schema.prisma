@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model department {
+  id                                 Int      @id @default(autoincrement())
+  created_at                         DateTime @default(now()) @db.Timestamptz(6)
+  name                               String?  @unique @db.VarChar
+  uuid                               String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  topic_topic_departmentTodepartment topic[]  @relation("topic_departmentTodepartment")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model participant {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  email      String   @db.VarChar
+  name       String   @db.VarChar
+  uuid       String   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model topic {
+  id                                      Int         @id @default(autoincrement())
+  created_at                              DateTime    @default(now()) @db.Timestamptz(6)
+  name                                    String?     @db.VarChar
+  department                              Int?
+  uuid                                    String      @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  department_topic_departmentTodepartment department? @relation("topic_departmentTodepartment", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
+}

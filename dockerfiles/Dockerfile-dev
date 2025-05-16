@@ -1,0 +1,28 @@
+FROM node:20-alpine
+
+# Set environment variables
+ENV NODE_ENV=dev
+ENV PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=true
+
+WORKDIR /app
+
+# 1. Copy package files first for optimal caching
+COPY package.json package-lock.json ./
+
+# 2. Install all dependencies
+RUN npm install
+
+# 3. Copy Prisma schema
+COPY prisma/schema.prisma ./prisma/
+
+# 4. Generate Prisma client (must happen before app code)
+RUN npx prisma generate
+
+# 5. Copy environment variables (for Supabase connection)
+COPY .envs/.local/.env ./.env
+
+# 6. Copy the rest of the application
+COPY . .
+
+EXPOSE 8000
+CMD ["npm", "run", "start:watch"]
