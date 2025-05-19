@@ -3,6 +3,7 @@ import { IDepartmentRepository } from "../interface/IDepartment.repository";
 import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BaseRepository } from "../../../../core/repository/base.repository";
+import { Department, Topic } from "../../types/public.type";
 
 @injectable()
 export class DepartmentRepository extends BaseRepository implements IDepartmentRepository {

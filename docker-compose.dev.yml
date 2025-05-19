@@ -12,6 +12,7 @@ services:
       - /app/node_modules # anonymus/unnamed volumn in container
     ports:
       - "${APP_PORT}:${APP_PORT}"
+      - "9229:9229" # for debugging
     restart: unless-stopped
     networks:
       - quiz_api

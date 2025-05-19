@@ -1,6 +1,7 @@
 import { injectable } from "inversify";
 import { IDepartmentRepository } from "../interface/IDepartment.repository";
 import { IDepartmentService } from "../interface/IDepartment.service";
+import { Department, Topic } from "../../types/public.type";
 
 @injectable()
 export class DepartmentService implements IDepartmentService {

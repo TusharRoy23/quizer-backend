@@ -4,7 +4,8 @@
     ],
     "ext": "ts",
     "ignore": [
-        "src/modules/**/*.spec.ts"
+        "src/modules/**/*.spec.ts",
+        "node_modules"
     ],
     "exec": "npm run start"
 }
