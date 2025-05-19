@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
+import { inject } from "inversify";
 import { controller, httpPost, requestBody } from "inversify-express-utils";
 import { DtoValidationMiddleware } from "../../../../middlewares/dto-validation.middleware";
 import { QuestionPayloadDto, QuestionPayloadType } from "../dto/question-payload.dto";
-import { inject } from "inversify";
 import { TYPES } from "../../../../core/type.core";
 import { IQuestionService } from "../interface/IQuestion.service";
 

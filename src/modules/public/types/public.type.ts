@@ -1,10 +1,10 @@
-type Department = {
+export type Department = {
     uuid: string;
     name: string;
     created_at: Date;
 }
 
-type Topic = {
+export type Topic = {
     uuid: string;
     name: string;
     department: Department
