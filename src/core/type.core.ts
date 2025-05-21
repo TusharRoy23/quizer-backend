@@ -4,4 +4,6 @@ export const TYPES = {
     IDepartmentRepository: Symbol.for("IDepartmentRepository"),
     IQuestionService: Symbol.for("IQuestionService"),
     IQuestionRepository: Symbol.for("IQuestionRepository"),
+    IOpenAIService: Symbol.for("IOpenAIService"),
+    IOpenAIRepository: Symbol.for("IOpenAIRepository"),
 }

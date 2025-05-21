@@ -44,4 +44,39 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
             throw new Error('Failed to fetch topics');
         }
     }
+
+    async getDepartmentByUUID(uuid: string): Promise<Department | null> {
+        try {
+            const prisma = await this.prisma$();
+            const department = await prisma.department.findFirst({
+                where: {
+                    uuid: uuid
+                }
+            });
+
+            return department as Department;
+        } catch (error) {
+            throw new Error('Failed to fetch department');
+        }
+    }
+
+    async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string): Promise<Topic[] | null> {
+        try {
+            const prisma = await this.prisma$();
+            const topics = await prisma.topic.findMany({
+                where: {
+                    uuid: {
+                        in: uuids
+                    },
+                    department_topic_departmentTodepartment: {
+                        uuid: departmentUuid
+                    }
+                },
+            });
+
+            return topics as Topic[];
+        } catch (error) {
+            throw new Error('Failed to fetch topic');
+        }
+    }
 }

@@ -1,3 +1,5 @@
+import { QuestionPayloadType } from "../dto/question-payload.dto";
+
 export interface IQuestionService {
-    generatedQuestions: (payload: any) => Promise<string>;
+    generatedQuestions: (payload: QuestionPayloadType) => Promise<string>;
 }

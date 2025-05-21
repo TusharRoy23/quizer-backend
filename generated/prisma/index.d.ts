@@ -31,6 +31,21 @@ export type participant = $Result.DefaultSelection<Prisma.$participantPayload>
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type topic = $Result.DefaultSelection<Prisma.$topicPayload>
+/**
+ * Model user
+ * 
+ */
+export type user = $Result.DefaultSelection<Prisma.$userPayload>
+/**
+ * Model question_log
+ * 
+ */
+export type question_log = $Result.DefaultSelection<Prisma.$question_logPayload>
+/**
+ * Model question_log_topic
+ * 
+ */
+export type question_log_topic = $Result.DefaultSelection<Prisma.$question_log_topicPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -186,6 +201,36 @@ export class PrismaClient<
     * ```
     */
   get topic(): Prisma.topicDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.user`: Exposes CRUD operations for the **user** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Users
+    * const users = await prisma.user.findMany()
+    * ```
+    */
+  get user(): Prisma.userDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.question_log`: Exposes CRUD operations for the **question_log** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Question_logs
+    * const question_logs = await prisma.question_log.findMany()
+    * ```
+    */
+  get question_log(): Prisma.question_logDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.question_log_topic`: Exposes CRUD operations for the **question_log_topic** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Question_log_topics
+    * const question_log_topics = await prisma.question_log_topic.findMany()
+    * ```
+    */
+  get question_log_topic(): Prisma.question_log_topicDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -628,7 +673,10 @@ export namespace Prisma {
   export const ModelName: {
     department: 'department',
     participant: 'participant',
-    topic: 'topic'
+    topic: 'topic',
+    user: 'user',
+    question_log: 'question_log',
+    question_log_topic: 'question_log_topic'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -647,7 +695,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "participant" | "topic"
+      modelProps: "department" | "participant" | "topic" | "user" | "question_log" | "question_log_topic"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -873,6 +921,228 @@ export namespace Prisma {
           }
         }
       }
+      user: {
+        payload: Prisma.$userPayload<ExtArgs>
+        fields: Prisma.userFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.userFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.userFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>
+          }
+          findFirst: {
+            args: Prisma.userFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.userFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>
+          }
+          findMany: {
+            args: Prisma.userFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>[]
+          }
+          create: {
+            args: Prisma.userCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>
+          }
+          createMany: {
+            args: Prisma.userCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.userCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>[]
+          }
+          delete: {
+            args: Prisma.userDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>
+          }
+          update: {
+            args: Prisma.userUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>
+          }
+          deleteMany: {
+            args: Prisma.userDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.userUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.userUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>[]
+          }
+          upsert: {
+            args: Prisma.userUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$userPayload>
+          }
+          aggregate: {
+            args: Prisma.UserAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUser>
+          }
+          groupBy: {
+            args: Prisma.userGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.userCountArgs<ExtArgs>
+            result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      question_log: {
+        payload: Prisma.$question_logPayload<ExtArgs>
+        fields: Prisma.question_logFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.question_logFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.question_logFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>
+          }
+          findFirst: {
+            args: Prisma.question_logFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.question_logFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>
+          }
+          findMany: {
+            args: Prisma.question_logFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>[]
+          }
+          create: {
+            args: Prisma.question_logCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>
+          }
+          createMany: {
+            args: Prisma.question_logCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.question_logCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>[]
+          }
+          delete: {
+            args: Prisma.question_logDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>
+          }
+          update: {
+            args: Prisma.question_logUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>
+          }
+          deleteMany: {
+            args: Prisma.question_logDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.question_logUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.question_logUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>[]
+          }
+          upsert: {
+            args: Prisma.question_logUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_logPayload>
+          }
+          aggregate: {
+            args: Prisma.Question_logAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuestion_log>
+          }
+          groupBy: {
+            args: Prisma.question_logGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Question_logGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.question_logCountArgs<ExtArgs>
+            result: $Utils.Optional<Question_logCountAggregateOutputType> | number
+          }
+        }
+      }
+      question_log_topic: {
+        payload: Prisma.$question_log_topicPayload<ExtArgs>
+        fields: Prisma.question_log_topicFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.question_log_topicFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.question_log_topicFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>
+          }
+          findFirst: {
+            args: Prisma.question_log_topicFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.question_log_topicFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>
+          }
+          findMany: {
+            args: Prisma.question_log_topicFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>[]
+          }
+          create: {
+            args: Prisma.question_log_topicCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>
+          }
+          createMany: {
+            args: Prisma.question_log_topicCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.question_log_topicCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>[]
+          }
+          delete: {
+            args: Prisma.question_log_topicDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>
+          }
+          update: {
+            args: Prisma.question_log_topicUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>
+          }
+          deleteMany: {
+            args: Prisma.question_log_topicDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.question_log_topicUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.question_log_topicUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>[]
+          }
+          upsert: {
+            args: Prisma.question_log_topicUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_log_topicPayload>
+          }
+          aggregate: {
+            args: Prisma.Question_log_topicAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuestion_log_topic>
+          }
+          groupBy: {
+            args: Prisma.question_log_topicGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Question_log_topicGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.question_log_topicCountArgs<ExtArgs>
+            result: $Utils.Optional<Question_log_topicCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -960,6 +1230,9 @@ export namespace Prisma {
     department?: departmentOmit
     participant?: participantOmit
     topic?: topicOmit
+    user?: userOmit
+    question_log?: question_logOmit
+    question_log_topic?: question_log_topicOmit
   }
 
   /* Types for Logging */
@@ -1055,10 +1328,12 @@ export namespace Prisma {
 
   export type DepartmentCountOutputType = {
     topic_topic_departmentTodepartment: number
+    question_log_question_department: number
   }
 
   export type DepartmentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     topic_topic_departmentTodepartment?: boolean | DepartmentCountOutputTypeCountTopic_topic_departmentTodepartmentArgs
+    question_log_question_department?: boolean | DepartmentCountOutputTypeCountQuestion_log_question_departmentArgs
   }
 
   // Custom InputTypes
@@ -1077,6 +1352,106 @@ export namespace Prisma {
    */
   export type DepartmentCountOutputTypeCountTopic_topic_departmentTodepartmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: topicWhereInput
+  }
+
+  /**
+   * DepartmentCountOutputType without action
+   */
+  export type DepartmentCountOutputTypeCountQuestion_log_question_departmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_logWhereInput
+  }
+
+
+  /**
+   * Count Type TopicCountOutputType
+   */
+
+  export type TopicCountOutputType = {
+    question_logs: number
+  }
+
+  export type TopicCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_logs?: boolean | TopicCountOutputTypeCountQuestion_logsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TopicCountOutputType without action
+   */
+  export type TopicCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TopicCountOutputType
+     */
+    select?: TopicCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TopicCountOutputType without action
+   */
+  export type TopicCountOutputTypeCountQuestion_logsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_log_topicWhereInput
+  }
+
+
+  /**
+   * Count Type UserCountOutputType
+   */
+
+  export type UserCountOutputType = {
+    question_log: number
+  }
+
+  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log?: boolean | UserCountOutputTypeCountQuestion_logArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserCountOutputType
+     */
+    select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountQuestion_logArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_logWhereInput
+  }
+
+
+  /**
+   * Count Type Question_logCountOutputType
+   */
+
+  export type Question_logCountOutputType = {
+    topics: number
+  }
+
+  export type Question_logCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    topics?: boolean | Question_logCountOutputTypeCountTopicsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * Question_logCountOutputType without action
+   */
+  export type Question_logCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Question_logCountOutputType
+     */
+    select?: Question_logCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * Question_logCountOutputType without action
+   */
+  export type Question_logCountOutputTypeCountTopicsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_log_topicWhereInput
   }
 
 
@@ -1101,18 +1476,18 @@ export namespace Prisma {
   }
 
   export type DepartmentSumAggregateOutputType = {
-    id: bigint | null
+    id: number | null
   }
 
   export type DepartmentMinAggregateOutputType = {
-    id: bigint | null
+    id: number | null
     created_at: Date | null
     name: string | null
     uuid: string | null
   }
 
   export type DepartmentMaxAggregateOutputType = {
-    id: bigint | null
+    id: number | null
     created_at: Date | null
     name: string | null
     uuid: string | null
@@ -1244,7 +1619,7 @@ export namespace Prisma {
   }
 
   export type DepartmentGroupByOutputType = {
-    id: bigint
+    id: number
     created_at: Date
     name: string | null
     uuid: string | null
@@ -1275,6 +1650,7 @@ export namespace Prisma {
     name?: boolean
     uuid?: boolean
     topic_topic_departmentTodepartment?: boolean | department$topic_topic_departmentTodepartmentArgs<ExtArgs>
+    question_log_question_department?: boolean | department$question_log_question_departmentArgs<ExtArgs>
     _count?: boolean | DepartmentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["department"]>
 
@@ -1302,6 +1678,7 @@ export namespace Prisma {
   export type departmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "name" | "uuid", ExtArgs["result"]["department"]>
   export type departmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     topic_topic_departmentTodepartment?: boolean | department$topic_topic_departmentTodepartmentArgs<ExtArgs>
+    question_log_question_department?: boolean | department$question_log_question_departmentArgs<ExtArgs>
     _count?: boolean | DepartmentCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type departmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1311,9 +1688,10 @@ export namespace Prisma {
     name: "department"
     objects: {
       topic_topic_departmentTodepartment: Prisma.$topicPayload<ExtArgs>[]
+      question_log_question_department: Prisma.$question_logPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: bigint
+      id: number
       created_at: Date
       name: string | null
       uuid: string | null
@@ -1712,6 +2090,7 @@ export namespace Prisma {
   export interface Prisma__departmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     topic_topic_departmentTodepartment<T extends department$topic_topic_departmentTodepartmentArgs<ExtArgs> = {}>(args?: Subset<T, department$topic_topic_departmentTodepartmentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$topicPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    question_log_question_department<T extends department$question_log_question_departmentArgs<ExtArgs> = {}>(args?: Subset<T, department$question_log_question_departmentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1741,7 +2120,7 @@ export namespace Prisma {
    * Fields of the department model
    */
   interface departmentFieldRefs {
-    readonly id: FieldRef<"department", 'BigInt'>
+    readonly id: FieldRef<"department", 'Int'>
     readonly created_at: FieldRef<"department", 'DateTime'>
     readonly name: FieldRef<"department", 'String'>
     readonly uuid: FieldRef<"department", 'String'>
@@ -2154,6 +2533,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TopicScalarFieldEnum | TopicScalarFieldEnum[]
+  }
+
+  /**
+   * department.question_log_question_department
+   */
+  export type department$question_log_question_departmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    where?: question_logWhereInput
+    orderBy?: question_logOrderByWithRelationInput | question_logOrderByWithRelationInput[]
+    cursor?: question_logWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Question_logScalarFieldEnum | Question_logScalarFieldEnum[]
   }
 
   /**
@@ -3222,23 +3625,23 @@ export namespace Prisma {
   }
 
   export type TopicSumAggregateOutputType = {
-    id: bigint | null
-    department: bigint | null
+    id: number | null
+    department: number | null
   }
 
   export type TopicMinAggregateOutputType = {
-    id: bigint | null
+    id: number | null
     created_at: Date | null
     name: string | null
-    department: bigint | null
+    department: number | null
     uuid: string | null
   }
 
   export type TopicMaxAggregateOutputType = {
-    id: bigint | null
+    id: number | null
     created_at: Date | null
     name: string | null
-    department: bigint | null
+    department: number | null
     uuid: string | null
   }
 
@@ -3374,10 +3777,10 @@ export namespace Prisma {
   }
 
   export type TopicGroupByOutputType = {
-    id: bigint
+    id: number
     created_at: Date
     name: string | null
-    department: bigint | null
+    department: number | null
     uuid: string
     _count: TopicCountAggregateOutputType | null
     _avg: TopicAvgAggregateOutputType | null
@@ -3407,6 +3810,8 @@ export namespace Prisma {
     department?: boolean
     uuid?: boolean
     department_topic_departmentTodepartment?: boolean | topic$department_topic_departmentTodepartmentArgs<ExtArgs>
+    question_logs?: boolean | topic$question_logsArgs<ExtArgs>
+    _count?: boolean | TopicCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["topic"]>
 
   export type topicSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3438,6 +3843,8 @@ export namespace Prisma {
   export type topicOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "name" | "department" | "uuid", ExtArgs["result"]["topic"]>
   export type topicInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     department_topic_departmentTodepartment?: boolean | topic$department_topic_departmentTodepartmentArgs<ExtArgs>
+    question_logs?: boolean | topic$question_logsArgs<ExtArgs>
+    _count?: boolean | TopicCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type topicIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     department_topic_departmentTodepartment?: boolean | topic$department_topic_departmentTodepartmentArgs<ExtArgs>
@@ -3450,12 +3857,13 @@ export namespace Prisma {
     name: "topic"
     objects: {
       department_topic_departmentTodepartment: Prisma.$departmentPayload<ExtArgs> | null
+      question_logs: Prisma.$question_log_topicPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: bigint
+      id: number
       created_at: Date
       name: string | null
-      department: bigint | null
+      department: number | null
       uuid: string
     }, ExtArgs["result"]["topic"]>
     composites: {}
@@ -3852,6 +4260,7 @@ export namespace Prisma {
   export interface Prisma__topicClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     department_topic_departmentTodepartment<T extends topic$department_topic_departmentTodepartmentArgs<ExtArgs> = {}>(args?: Subset<T, topic$department_topic_departmentTodepartmentArgs<ExtArgs>>): Prisma__departmentClient<$Result.GetResult<Prisma.$departmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    question_logs<T extends topic$question_logsArgs<ExtArgs> = {}>(args?: Subset<T, topic$question_logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3881,10 +4290,10 @@ export namespace Prisma {
    * Fields of the topic model
    */
   interface topicFieldRefs {
-    readonly id: FieldRef<"topic", 'BigInt'>
+    readonly id: FieldRef<"topic", 'Int'>
     readonly created_at: FieldRef<"topic", 'DateTime'>
     readonly name: FieldRef<"topic", 'String'>
-    readonly department: FieldRef<"topic", 'BigInt'>
+    readonly department: FieldRef<"topic", 'Int'>
     readonly uuid: FieldRef<"topic", 'String'>
   }
     
@@ -4301,6 +4710,30 @@ export namespace Prisma {
   }
 
   /**
+   * topic.question_logs
+   */
+  export type topic$question_logsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    where?: question_log_topicWhereInput
+    orderBy?: question_log_topicOrderByWithRelationInput | question_log_topicOrderByWithRelationInput[]
+    cursor?: question_log_topicWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Question_log_topicScalarFieldEnum | Question_log_topicScalarFieldEnum[]
+  }
+
+  /**
    * topic without action
    */
   export type topicDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4316,6 +4749,3343 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: topicInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model user
+   */
+
+  export type AggregateUser = {
+    _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
+    _min: UserMinAggregateOutputType | null
+    _max: UserMaxAggregateOutputType | null
+  }
+
+  export type UserAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type UserSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type UserMinAggregateOutputType = {
+    id: number | null
+    created_at: Date | null
+    email: string | null
+    name: string | null
+    uuid: string | null
+  }
+
+  export type UserMaxAggregateOutputType = {
+    id: number | null
+    created_at: Date | null
+    email: string | null
+    name: string | null
+    uuid: string | null
+  }
+
+  export type UserCountAggregateOutputType = {
+    id: number
+    created_at: number
+    email: number
+    name: number
+    uuid: number
+    _all: number
+  }
+
+
+  export type UserAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type UserSumAggregateInputType = {
+    id?: true
+  }
+
+  export type UserMinAggregateInputType = {
+    id?: true
+    created_at?: true
+    email?: true
+    name?: true
+    uuid?: true
+  }
+
+  export type UserMaxAggregateInputType = {
+    id?: true
+    created_at?: true
+    email?: true
+    name?: true
+    uuid?: true
+  }
+
+  export type UserCountAggregateInputType = {
+    id?: true
+    created_at?: true
+    email?: true
+    name?: true
+    uuid?: true
+    _all?: true
+  }
+
+  export type UserAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which user to aggregate.
+     */
+    where?: userWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of users to fetch.
+     */
+    orderBy?: userOrderByWithRelationInput | userOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: userWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned users
+    **/
+    _count?: true | UserCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: UserAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UserSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserMaxAggregateInputType
+  }
+
+  export type GetUserAggregateType<T extends UserAggregateArgs> = {
+        [P in keyof T & keyof AggregateUser]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUser[P]>
+      : GetScalarType<T[P], AggregateUser[P]>
+  }
+
+
+
+
+  export type userGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: userWhereInput
+    orderBy?: userOrderByWithAggregationInput | userOrderByWithAggregationInput[]
+    by: UserScalarFieldEnum[] | UserScalarFieldEnum
+    having?: userScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserCountAggregateInputType | true
+    _avg?: UserAvgAggregateInputType
+    _sum?: UserSumAggregateInputType
+    _min?: UserMinAggregateInputType
+    _max?: UserMaxAggregateInputType
+  }
+
+  export type UserGroupByOutputType = {
+    id: number
+    created_at: Date
+    email: string
+    name: string
+    uuid: string
+    _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
+    _min: UserMinAggregateOutputType | null
+    _max: UserMaxAggregateOutputType | null
+  }
+
+  type GetUserGroupByPayload<T extends userGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserGroupByOutputType[P]>
+            : GetScalarType<T[P], UserGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type userSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    email?: boolean
+    name?: boolean
+    uuid?: boolean
+    question_log?: boolean | user$question_logArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["user"]>
+
+  export type userSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    email?: boolean
+    name?: boolean
+    uuid?: boolean
+  }, ExtArgs["result"]["user"]>
+
+  export type userSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    email?: boolean
+    name?: boolean
+    uuid?: boolean
+  }, ExtArgs["result"]["user"]>
+
+  export type userSelectScalar = {
+    id?: boolean
+    created_at?: boolean
+    email?: boolean
+    name?: boolean
+    uuid?: boolean
+  }
+
+  export type userOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "email" | "name" | "uuid", ExtArgs["result"]["user"]>
+  export type userInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log?: boolean | user$question_logArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type userIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type userIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $userPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "user"
+    objects: {
+      question_log: Prisma.$question_logPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      created_at: Date
+      email: string
+      name: string
+      uuid: string
+    }, ExtArgs["result"]["user"]>
+    composites: {}
+  }
+
+  type userGetPayload<S extends boolean | null | undefined | userDefaultArgs> = $Result.GetResult<Prisma.$userPayload, S>
+
+  type userCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<userFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserCountAggregateInputType | true
+    }
+
+  export interface userDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user'], meta: { name: 'user' } }
+    /**
+     * Find zero or one User that matches the filter.
+     * @param {userFindUniqueArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends userFindUniqueArgs>(args: SelectSubset<T, userFindUniqueArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one User that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {userFindUniqueOrThrowArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends userFindUniqueOrThrowArgs>(args: SelectSubset<T, userFindUniqueOrThrowArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {userFindFirstArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends userFindFirstArgs>(args?: SelectSubset<T, userFindFirstArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {userFindFirstOrThrowArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends userFindFirstOrThrowArgs>(args?: SelectSubset<T, userFindFirstOrThrowArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Users that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {userFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Users
+     * const users = await prisma.user.findMany()
+     * 
+     * // Get first 10 Users
+     * const users = await prisma.user.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends userFindManyArgs>(args?: SelectSubset<T, userFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a User.
+     * @param {userCreateArgs} args - Arguments to create a User.
+     * @example
+     * // Create one User
+     * const User = await prisma.user.create({
+     *   data: {
+     *     // ... data to create a User
+     *   }
+     * })
+     * 
+     */
+    create<T extends userCreateArgs>(args: SelectSubset<T, userCreateArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Users.
+     * @param {userCreateManyArgs} args - Arguments to create many Users.
+     * @example
+     * // Create many Users
+     * const user = await prisma.user.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends userCreateManyArgs>(args?: SelectSubset<T, userCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Users and returns the data saved in the database.
+     * @param {userCreateManyAndReturnArgs} args - Arguments to create many Users.
+     * @example
+     * // Create many Users
+     * const user = await prisma.user.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Users and only return the `id`
+     * const userWithIdOnly = await prisma.user.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends userCreateManyAndReturnArgs>(args?: SelectSubset<T, userCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a User.
+     * @param {userDeleteArgs} args - Arguments to delete one User.
+     * @example
+     * // Delete one User
+     * const User = await prisma.user.delete({
+     *   where: {
+     *     // ... filter to delete one User
+     *   }
+     * })
+     * 
+     */
+    delete<T extends userDeleteArgs>(args: SelectSubset<T, userDeleteArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one User.
+     * @param {userUpdateArgs} args - Arguments to update one User.
+     * @example
+     * // Update one User
+     * const user = await prisma.user.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends userUpdateArgs>(args: SelectSubset<T, userUpdateArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Users.
+     * @param {userDeleteManyArgs} args - Arguments to filter Users to delete.
+     * @example
+     * // Delete a few Users
+     * const { count } = await prisma.user.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends userDeleteManyArgs>(args?: SelectSubset<T, userDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Users.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {userUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Users
+     * const user = await prisma.user.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends userUpdateManyArgs>(args: SelectSubset<T, userUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Users and returns the data updated in the database.
+     * @param {userUpdateManyAndReturnArgs} args - Arguments to update many Users.
+     * @example
+     * // Update many Users
+     * const user = await prisma.user.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Users and only return the `id`
+     * const userWithIdOnly = await prisma.user.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends userUpdateManyAndReturnArgs>(args: SelectSubset<T, userUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one User.
+     * @param {userUpsertArgs} args - Arguments to update or create a User.
+     * @example
+     * // Update or create a User
+     * const user = await prisma.user.upsert({
+     *   create: {
+     *     // ... data to create a User
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the User we want to update
+     *   }
+     * })
+     */
+    upsert<T extends userUpsertArgs>(args: SelectSubset<T, userUpsertArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Users.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {userCountArgs} args - Arguments to filter Users to count.
+     * @example
+     * // Count the number of Users
+     * const count = await prisma.user.count({
+     *   where: {
+     *     // ... the filter for the Users we want to count
+     *   }
+     * })
+    **/
+    count<T extends userCountArgs>(
+      args?: Subset<T, userCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a User.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserAggregateArgs>(args: Subset<T, UserAggregateArgs>): Prisma.PrismaPromise<GetUserAggregateType<T>>
+
+    /**
+     * Group by User.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {userGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends userGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: userGroupByArgs['orderBy'] }
+        : { orderBy?: userGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, userGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the user model
+   */
+  readonly fields: userFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for user.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__userClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    question_log<T extends user$question_logArgs<ExtArgs> = {}>(args?: Subset<T, user$question_logArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the user model
+   */
+  interface userFieldRefs {
+    readonly id: FieldRef<"user", 'Int'>
+    readonly created_at: FieldRef<"user", 'DateTime'>
+    readonly email: FieldRef<"user", 'String'>
+    readonly name: FieldRef<"user", 'String'>
+    readonly uuid: FieldRef<"user", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * user findUnique
+   */
+  export type userFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * Filter, which user to fetch.
+     */
+    where: userWhereUniqueInput
+  }
+
+  /**
+   * user findUniqueOrThrow
+   */
+  export type userFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * Filter, which user to fetch.
+     */
+    where: userWhereUniqueInput
+  }
+
+  /**
+   * user findFirst
+   */
+  export type userFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * Filter, which user to fetch.
+     */
+    where?: userWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of users to fetch.
+     */
+    orderBy?: userOrderByWithRelationInput | userOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for users.
+     */
+    cursor?: userWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of users.
+     */
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * user findFirstOrThrow
+   */
+  export type userFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * Filter, which user to fetch.
+     */
+    where?: userWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of users to fetch.
+     */
+    orderBy?: userOrderByWithRelationInput | userOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for users.
+     */
+    cursor?: userWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of users.
+     */
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * user findMany
+   */
+  export type userFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * Filter, which users to fetch.
+     */
+    where?: userWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of users to fetch.
+     */
+    orderBy?: userOrderByWithRelationInput | userOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing users.
+     */
+    cursor?: userWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` users.
+     */
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * user create
+   */
+  export type userCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * The data needed to create a user.
+     */
+    data: XOR<userCreateInput, userUncheckedCreateInput>
+  }
+
+  /**
+   * user createMany
+   */
+  export type userCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many users.
+     */
+    data: userCreateManyInput | userCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * user createManyAndReturn
+   */
+  export type userCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * The data used to create many users.
+     */
+    data: userCreateManyInput | userCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * user update
+   */
+  export type userUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * The data needed to update a user.
+     */
+    data: XOR<userUpdateInput, userUncheckedUpdateInput>
+    /**
+     * Choose, which user to update.
+     */
+    where: userWhereUniqueInput
+  }
+
+  /**
+   * user updateMany
+   */
+  export type userUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update users.
+     */
+    data: XOR<userUpdateManyMutationInput, userUncheckedUpdateManyInput>
+    /**
+     * Filter which users to update
+     */
+    where?: userWhereInput
+    /**
+     * Limit how many users to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * user updateManyAndReturn
+   */
+  export type userUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * The data used to update users.
+     */
+    data: XOR<userUpdateManyMutationInput, userUncheckedUpdateManyInput>
+    /**
+     * Filter which users to update
+     */
+    where?: userWhereInput
+    /**
+     * Limit how many users to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * user upsert
+   */
+  export type userUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * The filter to search for the user to update in case it exists.
+     */
+    where: userWhereUniqueInput
+    /**
+     * In case the user found by the `where` argument doesn't exist, create a new user with this data.
+     */
+    create: XOR<userCreateInput, userUncheckedCreateInput>
+    /**
+     * In case the user was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<userUpdateInput, userUncheckedUpdateInput>
+  }
+
+  /**
+   * user delete
+   */
+  export type userDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    /**
+     * Filter which user to delete.
+     */
+    where: userWhereUniqueInput
+  }
+
+  /**
+   * user deleteMany
+   */
+  export type userDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which users to delete
+     */
+    where?: userWhereInput
+    /**
+     * Limit how many users to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * user.question_log
+   */
+  export type user$question_logArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    where?: question_logWhereInput
+    orderBy?: question_logOrderByWithRelationInput | question_logOrderByWithRelationInput[]
+    cursor?: question_logWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Question_logScalarFieldEnum | Question_logScalarFieldEnum[]
+  }
+
+  /**
+   * user without action
+   */
+  export type userDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model question_log
+   */
+
+  export type AggregateQuestion_log = {
+    _count: Question_logCountAggregateOutputType | null
+    _avg: Question_logAvgAggregateOutputType | null
+    _sum: Question_logSumAggregateOutputType | null
+    _min: Question_logMinAggregateOutputType | null
+    _max: Question_logMaxAggregateOutputType | null
+  }
+
+  export type Question_logAvgAggregateOutputType = {
+    id: number | null
+    department: number | null
+    user: number | null
+    timer: number | null
+  }
+
+  export type Question_logSumAggregateOutputType = {
+    id: number | null
+    department: number | null
+    user: number | null
+    timer: number | null
+  }
+
+  export type Question_logMinAggregateOutputType = {
+    id: number | null
+    created_at: Date | null
+    uuid: string | null
+    department: number | null
+    user: number | null
+    timer: number | null
+    difficulty: string | null
+  }
+
+  export type Question_logMaxAggregateOutputType = {
+    id: number | null
+    created_at: Date | null
+    uuid: string | null
+    department: number | null
+    user: number | null
+    timer: number | null
+    difficulty: string | null
+  }
+
+  export type Question_logCountAggregateOutputType = {
+    id: number
+    created_at: number
+    uuid: number
+    department: number
+    user: number
+    timer: number
+    difficulty: number
+    _all: number
+  }
+
+
+  export type Question_logAvgAggregateInputType = {
+    id?: true
+    department?: true
+    user?: true
+    timer?: true
+  }
+
+  export type Question_logSumAggregateInputType = {
+    id?: true
+    department?: true
+    user?: true
+    timer?: true
+  }
+
+  export type Question_logMinAggregateInputType = {
+    id?: true
+    created_at?: true
+    uuid?: true
+    department?: true
+    user?: true
+    timer?: true
+    difficulty?: true
+  }
+
+  export type Question_logMaxAggregateInputType = {
+    id?: true
+    created_at?: true
+    uuid?: true
+    department?: true
+    user?: true
+    timer?: true
+    difficulty?: true
+  }
+
+  export type Question_logCountAggregateInputType = {
+    id?: true
+    created_at?: true
+    uuid?: true
+    department?: true
+    user?: true
+    timer?: true
+    difficulty?: true
+    _all?: true
+  }
+
+  export type Question_logAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which question_log to aggregate.
+     */
+    where?: question_logWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_logs to fetch.
+     */
+    orderBy?: question_logOrderByWithRelationInput | question_logOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: question_logWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_logs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned question_logs
+    **/
+    _count?: true | Question_logCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Question_logAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Question_logSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Question_logMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Question_logMaxAggregateInputType
+  }
+
+  export type GetQuestion_logAggregateType<T extends Question_logAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuestion_log]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuestion_log[P]>
+      : GetScalarType<T[P], AggregateQuestion_log[P]>
+  }
+
+
+
+
+  export type question_logGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_logWhereInput
+    orderBy?: question_logOrderByWithAggregationInput | question_logOrderByWithAggregationInput[]
+    by: Question_logScalarFieldEnum[] | Question_logScalarFieldEnum
+    having?: question_logScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Question_logCountAggregateInputType | true
+    _avg?: Question_logAvgAggregateInputType
+    _sum?: Question_logSumAggregateInputType
+    _min?: Question_logMinAggregateInputType
+    _max?: Question_logMaxAggregateInputType
+  }
+
+  export type Question_logGroupByOutputType = {
+    id: number
+    created_at: Date
+    uuid: string
+    department: number
+    user: number
+    timer: number
+    difficulty: string
+    _count: Question_logCountAggregateOutputType | null
+    _avg: Question_logAvgAggregateOutputType | null
+    _sum: Question_logSumAggregateOutputType | null
+    _min: Question_logMinAggregateOutputType | null
+    _max: Question_logMaxAggregateOutputType | null
+  }
+
+  type GetQuestion_logGroupByPayload<T extends question_logGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Question_logGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Question_logGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Question_logGroupByOutputType[P]>
+            : GetScalarType<T[P], Question_logGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type question_logSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    uuid?: boolean
+    department?: boolean
+    user?: boolean
+    timer?: boolean
+    difficulty?: boolean
+    question_generator?: boolean | userDefaultArgs<ExtArgs>
+    question_department?: boolean | departmentDefaultArgs<ExtArgs>
+    topics?: boolean | question_log$topicsArgs<ExtArgs>
+    _count?: boolean | Question_logCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_log"]>
+
+  export type question_logSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    uuid?: boolean
+    department?: boolean
+    user?: boolean
+    timer?: boolean
+    difficulty?: boolean
+    question_generator?: boolean | userDefaultArgs<ExtArgs>
+    question_department?: boolean | departmentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_log"]>
+
+  export type question_logSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    uuid?: boolean
+    department?: boolean
+    user?: boolean
+    timer?: boolean
+    difficulty?: boolean
+    question_generator?: boolean | userDefaultArgs<ExtArgs>
+    question_department?: boolean | departmentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_log"]>
+
+  export type question_logSelectScalar = {
+    id?: boolean
+    created_at?: boolean
+    uuid?: boolean
+    department?: boolean
+    user?: boolean
+    timer?: boolean
+    difficulty?: boolean
+  }
+
+  export type question_logOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "uuid" | "department" | "user" | "timer" | "difficulty", ExtArgs["result"]["question_log"]>
+  export type question_logInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_generator?: boolean | userDefaultArgs<ExtArgs>
+    question_department?: boolean | departmentDefaultArgs<ExtArgs>
+    topics?: boolean | question_log$topicsArgs<ExtArgs>
+    _count?: boolean | Question_logCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type question_logIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_generator?: boolean | userDefaultArgs<ExtArgs>
+    question_department?: boolean | departmentDefaultArgs<ExtArgs>
+  }
+  export type question_logIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_generator?: boolean | userDefaultArgs<ExtArgs>
+    question_department?: boolean | departmentDefaultArgs<ExtArgs>
+  }
+
+  export type $question_logPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "question_log"
+    objects: {
+      question_generator: Prisma.$userPayload<ExtArgs>
+      question_department: Prisma.$departmentPayload<ExtArgs>
+      topics: Prisma.$question_log_topicPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      created_at: Date
+      uuid: string
+      department: number
+      user: number
+      timer: number
+      difficulty: string
+    }, ExtArgs["result"]["question_log"]>
+    composites: {}
+  }
+
+  type question_logGetPayload<S extends boolean | null | undefined | question_logDefaultArgs> = $Result.GetResult<Prisma.$question_logPayload, S>
+
+  type question_logCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<question_logFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Question_logCountAggregateInputType | true
+    }
+
+  export interface question_logDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['question_log'], meta: { name: 'question_log' } }
+    /**
+     * Find zero or one Question_log that matches the filter.
+     * @param {question_logFindUniqueArgs} args - Arguments to find a Question_log
+     * @example
+     * // Get one Question_log
+     * const question_log = await prisma.question_log.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends question_logFindUniqueArgs>(args: SelectSubset<T, question_logFindUniqueArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Question_log that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {question_logFindUniqueOrThrowArgs} args - Arguments to find a Question_log
+     * @example
+     * // Get one Question_log
+     * const question_log = await prisma.question_log.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends question_logFindUniqueOrThrowArgs>(args: SelectSubset<T, question_logFindUniqueOrThrowArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Question_log that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_logFindFirstArgs} args - Arguments to find a Question_log
+     * @example
+     * // Get one Question_log
+     * const question_log = await prisma.question_log.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends question_logFindFirstArgs>(args?: SelectSubset<T, question_logFindFirstArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Question_log that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_logFindFirstOrThrowArgs} args - Arguments to find a Question_log
+     * @example
+     * // Get one Question_log
+     * const question_log = await prisma.question_log.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends question_logFindFirstOrThrowArgs>(args?: SelectSubset<T, question_logFindFirstOrThrowArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Question_logs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_logFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Question_logs
+     * const question_logs = await prisma.question_log.findMany()
+     * 
+     * // Get first 10 Question_logs
+     * const question_logs = await prisma.question_log.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const question_logWithIdOnly = await prisma.question_log.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends question_logFindManyArgs>(args?: SelectSubset<T, question_logFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Question_log.
+     * @param {question_logCreateArgs} args - Arguments to create a Question_log.
+     * @example
+     * // Create one Question_log
+     * const Question_log = await prisma.question_log.create({
+     *   data: {
+     *     // ... data to create a Question_log
+     *   }
+     * })
+     * 
+     */
+    create<T extends question_logCreateArgs>(args: SelectSubset<T, question_logCreateArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Question_logs.
+     * @param {question_logCreateManyArgs} args - Arguments to create many Question_logs.
+     * @example
+     * // Create many Question_logs
+     * const question_log = await prisma.question_log.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends question_logCreateManyArgs>(args?: SelectSubset<T, question_logCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Question_logs and returns the data saved in the database.
+     * @param {question_logCreateManyAndReturnArgs} args - Arguments to create many Question_logs.
+     * @example
+     * // Create many Question_logs
+     * const question_log = await prisma.question_log.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Question_logs and only return the `id`
+     * const question_logWithIdOnly = await prisma.question_log.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends question_logCreateManyAndReturnArgs>(args?: SelectSubset<T, question_logCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Question_log.
+     * @param {question_logDeleteArgs} args - Arguments to delete one Question_log.
+     * @example
+     * // Delete one Question_log
+     * const Question_log = await prisma.question_log.delete({
+     *   where: {
+     *     // ... filter to delete one Question_log
+     *   }
+     * })
+     * 
+     */
+    delete<T extends question_logDeleteArgs>(args: SelectSubset<T, question_logDeleteArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Question_log.
+     * @param {question_logUpdateArgs} args - Arguments to update one Question_log.
+     * @example
+     * // Update one Question_log
+     * const question_log = await prisma.question_log.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends question_logUpdateArgs>(args: SelectSubset<T, question_logUpdateArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Question_logs.
+     * @param {question_logDeleteManyArgs} args - Arguments to filter Question_logs to delete.
+     * @example
+     * // Delete a few Question_logs
+     * const { count } = await prisma.question_log.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends question_logDeleteManyArgs>(args?: SelectSubset<T, question_logDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Question_logs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_logUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Question_logs
+     * const question_log = await prisma.question_log.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends question_logUpdateManyArgs>(args: SelectSubset<T, question_logUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Question_logs and returns the data updated in the database.
+     * @param {question_logUpdateManyAndReturnArgs} args - Arguments to update many Question_logs.
+     * @example
+     * // Update many Question_logs
+     * const question_log = await prisma.question_log.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Question_logs and only return the `id`
+     * const question_logWithIdOnly = await prisma.question_log.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends question_logUpdateManyAndReturnArgs>(args: SelectSubset<T, question_logUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Question_log.
+     * @param {question_logUpsertArgs} args - Arguments to update or create a Question_log.
+     * @example
+     * // Update or create a Question_log
+     * const question_log = await prisma.question_log.upsert({
+     *   create: {
+     *     // ... data to create a Question_log
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Question_log we want to update
+     *   }
+     * })
+     */
+    upsert<T extends question_logUpsertArgs>(args: SelectSubset<T, question_logUpsertArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Question_logs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_logCountArgs} args - Arguments to filter Question_logs to count.
+     * @example
+     * // Count the number of Question_logs
+     * const count = await prisma.question_log.count({
+     *   where: {
+     *     // ... the filter for the Question_logs we want to count
+     *   }
+     * })
+    **/
+    count<T extends question_logCountArgs>(
+      args?: Subset<T, question_logCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Question_logCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Question_log.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Question_logAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Question_logAggregateArgs>(args: Subset<T, Question_logAggregateArgs>): Prisma.PrismaPromise<GetQuestion_logAggregateType<T>>
+
+    /**
+     * Group by Question_log.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_logGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends question_logGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: question_logGroupByArgs['orderBy'] }
+        : { orderBy?: question_logGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, question_logGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuestion_logGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the question_log model
+   */
+  readonly fields: question_logFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for question_log.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__question_logClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    question_generator<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    question_department<T extends departmentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, departmentDefaultArgs<ExtArgs>>): Prisma__departmentClient<$Result.GetResult<Prisma.$departmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    topics<T extends question_log$topicsArgs<ExtArgs> = {}>(args?: Subset<T, question_log$topicsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the question_log model
+   */
+  interface question_logFieldRefs {
+    readonly id: FieldRef<"question_log", 'Int'>
+    readonly created_at: FieldRef<"question_log", 'DateTime'>
+    readonly uuid: FieldRef<"question_log", 'String'>
+    readonly department: FieldRef<"question_log", 'Int'>
+    readonly user: FieldRef<"question_log", 'Int'>
+    readonly timer: FieldRef<"question_log", 'Int'>
+    readonly difficulty: FieldRef<"question_log", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * question_log findUnique
+   */
+  export type question_logFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log to fetch.
+     */
+    where: question_logWhereUniqueInput
+  }
+
+  /**
+   * question_log findUniqueOrThrow
+   */
+  export type question_logFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log to fetch.
+     */
+    where: question_logWhereUniqueInput
+  }
+
+  /**
+   * question_log findFirst
+   */
+  export type question_logFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log to fetch.
+     */
+    where?: question_logWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_logs to fetch.
+     */
+    orderBy?: question_logOrderByWithRelationInput | question_logOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for question_logs.
+     */
+    cursor?: question_logWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_logs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of question_logs.
+     */
+    distinct?: Question_logScalarFieldEnum | Question_logScalarFieldEnum[]
+  }
+
+  /**
+   * question_log findFirstOrThrow
+   */
+  export type question_logFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log to fetch.
+     */
+    where?: question_logWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_logs to fetch.
+     */
+    orderBy?: question_logOrderByWithRelationInput | question_logOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for question_logs.
+     */
+    cursor?: question_logWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_logs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of question_logs.
+     */
+    distinct?: Question_logScalarFieldEnum | Question_logScalarFieldEnum[]
+  }
+
+  /**
+   * question_log findMany
+   */
+  export type question_logFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * Filter, which question_logs to fetch.
+     */
+    where?: question_logWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_logs to fetch.
+     */
+    orderBy?: question_logOrderByWithRelationInput | question_logOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing question_logs.
+     */
+    cursor?: question_logWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_logs.
+     */
+    skip?: number
+    distinct?: Question_logScalarFieldEnum | Question_logScalarFieldEnum[]
+  }
+
+  /**
+   * question_log create
+   */
+  export type question_logCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * The data needed to create a question_log.
+     */
+    data: XOR<question_logCreateInput, question_logUncheckedCreateInput>
+  }
+
+  /**
+   * question_log createMany
+   */
+  export type question_logCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many question_logs.
+     */
+    data: question_logCreateManyInput | question_logCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * question_log createManyAndReturn
+   */
+  export type question_logCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * The data used to create many question_logs.
+     */
+    data: question_logCreateManyInput | question_logCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * question_log update
+   */
+  export type question_logUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * The data needed to update a question_log.
+     */
+    data: XOR<question_logUpdateInput, question_logUncheckedUpdateInput>
+    /**
+     * Choose, which question_log to update.
+     */
+    where: question_logWhereUniqueInput
+  }
+
+  /**
+   * question_log updateMany
+   */
+  export type question_logUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update question_logs.
+     */
+    data: XOR<question_logUpdateManyMutationInput, question_logUncheckedUpdateManyInput>
+    /**
+     * Filter which question_logs to update
+     */
+    where?: question_logWhereInput
+    /**
+     * Limit how many question_logs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * question_log updateManyAndReturn
+   */
+  export type question_logUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * The data used to update question_logs.
+     */
+    data: XOR<question_logUpdateManyMutationInput, question_logUncheckedUpdateManyInput>
+    /**
+     * Filter which question_logs to update
+     */
+    where?: question_logWhereInput
+    /**
+     * Limit how many question_logs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * question_log upsert
+   */
+  export type question_logUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * The filter to search for the question_log to update in case it exists.
+     */
+    where: question_logWhereUniqueInput
+    /**
+     * In case the question_log found by the `where` argument doesn't exist, create a new question_log with this data.
+     */
+    create: XOR<question_logCreateInput, question_logUncheckedCreateInput>
+    /**
+     * In case the question_log was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<question_logUpdateInput, question_logUncheckedUpdateInput>
+  }
+
+  /**
+   * question_log delete
+   */
+  export type question_logDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+    /**
+     * Filter which question_log to delete.
+     */
+    where: question_logWhereUniqueInput
+  }
+
+  /**
+   * question_log deleteMany
+   */
+  export type question_logDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which question_logs to delete
+     */
+    where?: question_logWhereInput
+    /**
+     * Limit how many question_logs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * question_log.topics
+   */
+  export type question_log$topicsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    where?: question_log_topicWhereInput
+    orderBy?: question_log_topicOrderByWithRelationInput | question_log_topicOrderByWithRelationInput[]
+    cursor?: question_log_topicWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Question_log_topicScalarFieldEnum | Question_log_topicScalarFieldEnum[]
+  }
+
+  /**
+   * question_log without action
+   */
+  export type question_logDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log
+     */
+    select?: question_logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log
+     */
+    omit?: question_logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_logInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model question_log_topic
+   */
+
+  export type AggregateQuestion_log_topic = {
+    _count: Question_log_topicCountAggregateOutputType | null
+    _avg: Question_log_topicAvgAggregateOutputType | null
+    _sum: Question_log_topicSumAggregateOutputType | null
+    _min: Question_log_topicMinAggregateOutputType | null
+    _max: Question_log_topicMaxAggregateOutputType | null
+  }
+
+  export type Question_log_topicAvgAggregateOutputType = {
+    question_log_id: number | null
+    topic_id: number | null
+  }
+
+  export type Question_log_topicSumAggregateOutputType = {
+    question_log_id: number | null
+    topic_id: number | null
+  }
+
+  export type Question_log_topicMinAggregateOutputType = {
+    question_log_id: number | null
+    topic_id: number | null
+  }
+
+  export type Question_log_topicMaxAggregateOutputType = {
+    question_log_id: number | null
+    topic_id: number | null
+  }
+
+  export type Question_log_topicCountAggregateOutputType = {
+    question_log_id: number
+    topic_id: number
+    _all: number
+  }
+
+
+  export type Question_log_topicAvgAggregateInputType = {
+    question_log_id?: true
+    topic_id?: true
+  }
+
+  export type Question_log_topicSumAggregateInputType = {
+    question_log_id?: true
+    topic_id?: true
+  }
+
+  export type Question_log_topicMinAggregateInputType = {
+    question_log_id?: true
+    topic_id?: true
+  }
+
+  export type Question_log_topicMaxAggregateInputType = {
+    question_log_id?: true
+    topic_id?: true
+  }
+
+  export type Question_log_topicCountAggregateInputType = {
+    question_log_id?: true
+    topic_id?: true
+    _all?: true
+  }
+
+  export type Question_log_topicAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which question_log_topic to aggregate.
+     */
+    where?: question_log_topicWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_log_topics to fetch.
+     */
+    orderBy?: question_log_topicOrderByWithRelationInput | question_log_topicOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: question_log_topicWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_log_topics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_log_topics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned question_log_topics
+    **/
+    _count?: true | Question_log_topicCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Question_log_topicAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Question_log_topicSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Question_log_topicMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Question_log_topicMaxAggregateInputType
+  }
+
+  export type GetQuestion_log_topicAggregateType<T extends Question_log_topicAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuestion_log_topic]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuestion_log_topic[P]>
+      : GetScalarType<T[P], AggregateQuestion_log_topic[P]>
+  }
+
+
+
+
+  export type question_log_topicGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_log_topicWhereInput
+    orderBy?: question_log_topicOrderByWithAggregationInput | question_log_topicOrderByWithAggregationInput[]
+    by: Question_log_topicScalarFieldEnum[] | Question_log_topicScalarFieldEnum
+    having?: question_log_topicScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Question_log_topicCountAggregateInputType | true
+    _avg?: Question_log_topicAvgAggregateInputType
+    _sum?: Question_log_topicSumAggregateInputType
+    _min?: Question_log_topicMinAggregateInputType
+    _max?: Question_log_topicMaxAggregateInputType
+  }
+
+  export type Question_log_topicGroupByOutputType = {
+    question_log_id: number
+    topic_id: number
+    _count: Question_log_topicCountAggregateOutputType | null
+    _avg: Question_log_topicAvgAggregateOutputType | null
+    _sum: Question_log_topicSumAggregateOutputType | null
+    _min: Question_log_topicMinAggregateOutputType | null
+    _max: Question_log_topicMaxAggregateOutputType | null
+  }
+
+  type GetQuestion_log_topicGroupByPayload<T extends question_log_topicGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Question_log_topicGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Question_log_topicGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Question_log_topicGroupByOutputType[P]>
+            : GetScalarType<T[P], Question_log_topicGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type question_log_topicSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    question_log_id?: boolean
+    topic_id?: boolean
+    question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    topic?: boolean | topicDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_log_topic"]>
+
+  export type question_log_topicSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    question_log_id?: boolean
+    topic_id?: boolean
+    question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    topic?: boolean | topicDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_log_topic"]>
+
+  export type question_log_topicSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    question_log_id?: boolean
+    topic_id?: boolean
+    question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    topic?: boolean | topicDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_log_topic"]>
+
+  export type question_log_topicSelectScalar = {
+    question_log_id?: boolean
+    topic_id?: boolean
+  }
+
+  export type question_log_topicOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"question_log_id" | "topic_id", ExtArgs["result"]["question_log_topic"]>
+  export type question_log_topicInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    topic?: boolean | topicDefaultArgs<ExtArgs>
+  }
+  export type question_log_topicIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    topic?: boolean | topicDefaultArgs<ExtArgs>
+  }
+  export type question_log_topicIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    topic?: boolean | topicDefaultArgs<ExtArgs>
+  }
+
+  export type $question_log_topicPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "question_log_topic"
+    objects: {
+      question_log: Prisma.$question_logPayload<ExtArgs>
+      topic: Prisma.$topicPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      question_log_id: number
+      topic_id: number
+    }, ExtArgs["result"]["question_log_topic"]>
+    composites: {}
+  }
+
+  type question_log_topicGetPayload<S extends boolean | null | undefined | question_log_topicDefaultArgs> = $Result.GetResult<Prisma.$question_log_topicPayload, S>
+
+  type question_log_topicCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<question_log_topicFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Question_log_topicCountAggregateInputType | true
+    }
+
+  export interface question_log_topicDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['question_log_topic'], meta: { name: 'question_log_topic' } }
+    /**
+     * Find zero or one Question_log_topic that matches the filter.
+     * @param {question_log_topicFindUniqueArgs} args - Arguments to find a Question_log_topic
+     * @example
+     * // Get one Question_log_topic
+     * const question_log_topic = await prisma.question_log_topic.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends question_log_topicFindUniqueArgs>(args: SelectSubset<T, question_log_topicFindUniqueArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Question_log_topic that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {question_log_topicFindUniqueOrThrowArgs} args - Arguments to find a Question_log_topic
+     * @example
+     * // Get one Question_log_topic
+     * const question_log_topic = await prisma.question_log_topic.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends question_log_topicFindUniqueOrThrowArgs>(args: SelectSubset<T, question_log_topicFindUniqueOrThrowArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Question_log_topic that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_log_topicFindFirstArgs} args - Arguments to find a Question_log_topic
+     * @example
+     * // Get one Question_log_topic
+     * const question_log_topic = await prisma.question_log_topic.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends question_log_topicFindFirstArgs>(args?: SelectSubset<T, question_log_topicFindFirstArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Question_log_topic that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_log_topicFindFirstOrThrowArgs} args - Arguments to find a Question_log_topic
+     * @example
+     * // Get one Question_log_topic
+     * const question_log_topic = await prisma.question_log_topic.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends question_log_topicFindFirstOrThrowArgs>(args?: SelectSubset<T, question_log_topicFindFirstOrThrowArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Question_log_topics that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_log_topicFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Question_log_topics
+     * const question_log_topics = await prisma.question_log_topic.findMany()
+     * 
+     * // Get first 10 Question_log_topics
+     * const question_log_topics = await prisma.question_log_topic.findMany({ take: 10 })
+     * 
+     * // Only select the `question_log_id`
+     * const question_log_topicWithQuestion_log_idOnly = await prisma.question_log_topic.findMany({ select: { question_log_id: true } })
+     * 
+     */
+    findMany<T extends question_log_topicFindManyArgs>(args?: SelectSubset<T, question_log_topicFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Question_log_topic.
+     * @param {question_log_topicCreateArgs} args - Arguments to create a Question_log_topic.
+     * @example
+     * // Create one Question_log_topic
+     * const Question_log_topic = await prisma.question_log_topic.create({
+     *   data: {
+     *     // ... data to create a Question_log_topic
+     *   }
+     * })
+     * 
+     */
+    create<T extends question_log_topicCreateArgs>(args: SelectSubset<T, question_log_topicCreateArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Question_log_topics.
+     * @param {question_log_topicCreateManyArgs} args - Arguments to create many Question_log_topics.
+     * @example
+     * // Create many Question_log_topics
+     * const question_log_topic = await prisma.question_log_topic.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends question_log_topicCreateManyArgs>(args?: SelectSubset<T, question_log_topicCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Question_log_topics and returns the data saved in the database.
+     * @param {question_log_topicCreateManyAndReturnArgs} args - Arguments to create many Question_log_topics.
+     * @example
+     * // Create many Question_log_topics
+     * const question_log_topic = await prisma.question_log_topic.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Question_log_topics and only return the `question_log_id`
+     * const question_log_topicWithQuestion_log_idOnly = await prisma.question_log_topic.createManyAndReturn({
+     *   select: { question_log_id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends question_log_topicCreateManyAndReturnArgs>(args?: SelectSubset<T, question_log_topicCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Question_log_topic.
+     * @param {question_log_topicDeleteArgs} args - Arguments to delete one Question_log_topic.
+     * @example
+     * // Delete one Question_log_topic
+     * const Question_log_topic = await prisma.question_log_topic.delete({
+     *   where: {
+     *     // ... filter to delete one Question_log_topic
+     *   }
+     * })
+     * 
+     */
+    delete<T extends question_log_topicDeleteArgs>(args: SelectSubset<T, question_log_topicDeleteArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Question_log_topic.
+     * @param {question_log_topicUpdateArgs} args - Arguments to update one Question_log_topic.
+     * @example
+     * // Update one Question_log_topic
+     * const question_log_topic = await prisma.question_log_topic.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends question_log_topicUpdateArgs>(args: SelectSubset<T, question_log_topicUpdateArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Question_log_topics.
+     * @param {question_log_topicDeleteManyArgs} args - Arguments to filter Question_log_topics to delete.
+     * @example
+     * // Delete a few Question_log_topics
+     * const { count } = await prisma.question_log_topic.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends question_log_topicDeleteManyArgs>(args?: SelectSubset<T, question_log_topicDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Question_log_topics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_log_topicUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Question_log_topics
+     * const question_log_topic = await prisma.question_log_topic.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends question_log_topicUpdateManyArgs>(args: SelectSubset<T, question_log_topicUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Question_log_topics and returns the data updated in the database.
+     * @param {question_log_topicUpdateManyAndReturnArgs} args - Arguments to update many Question_log_topics.
+     * @example
+     * // Update many Question_log_topics
+     * const question_log_topic = await prisma.question_log_topic.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Question_log_topics and only return the `question_log_id`
+     * const question_log_topicWithQuestion_log_idOnly = await prisma.question_log_topic.updateManyAndReturn({
+     *   select: { question_log_id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends question_log_topicUpdateManyAndReturnArgs>(args: SelectSubset<T, question_log_topicUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Question_log_topic.
+     * @param {question_log_topicUpsertArgs} args - Arguments to update or create a Question_log_topic.
+     * @example
+     * // Update or create a Question_log_topic
+     * const question_log_topic = await prisma.question_log_topic.upsert({
+     *   create: {
+     *     // ... data to create a Question_log_topic
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Question_log_topic we want to update
+     *   }
+     * })
+     */
+    upsert<T extends question_log_topicUpsertArgs>(args: SelectSubset<T, question_log_topicUpsertArgs<ExtArgs>>): Prisma__question_log_topicClient<$Result.GetResult<Prisma.$question_log_topicPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Question_log_topics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_log_topicCountArgs} args - Arguments to filter Question_log_topics to count.
+     * @example
+     * // Count the number of Question_log_topics
+     * const count = await prisma.question_log_topic.count({
+     *   where: {
+     *     // ... the filter for the Question_log_topics we want to count
+     *   }
+     * })
+    **/
+    count<T extends question_log_topicCountArgs>(
+      args?: Subset<T, question_log_topicCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Question_log_topicCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Question_log_topic.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Question_log_topicAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Question_log_topicAggregateArgs>(args: Subset<T, Question_log_topicAggregateArgs>): Prisma.PrismaPromise<GetQuestion_log_topicAggregateType<T>>
+
+    /**
+     * Group by Question_log_topic.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_log_topicGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends question_log_topicGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: question_log_topicGroupByArgs['orderBy'] }
+        : { orderBy?: question_log_topicGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, question_log_topicGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuestion_log_topicGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the question_log_topic model
+   */
+  readonly fields: question_log_topicFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for question_log_topic.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__question_log_topicClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    question_log<T extends question_logDefaultArgs<ExtArgs> = {}>(args?: Subset<T, question_logDefaultArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    topic<T extends topicDefaultArgs<ExtArgs> = {}>(args?: Subset<T, topicDefaultArgs<ExtArgs>>): Prisma__topicClient<$Result.GetResult<Prisma.$topicPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the question_log_topic model
+   */
+  interface question_log_topicFieldRefs {
+    readonly question_log_id: FieldRef<"question_log_topic", 'Int'>
+    readonly topic_id: FieldRef<"question_log_topic", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * question_log_topic findUnique
+   */
+  export type question_log_topicFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log_topic to fetch.
+     */
+    where: question_log_topicWhereUniqueInput
+  }
+
+  /**
+   * question_log_topic findUniqueOrThrow
+   */
+  export type question_log_topicFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log_topic to fetch.
+     */
+    where: question_log_topicWhereUniqueInput
+  }
+
+  /**
+   * question_log_topic findFirst
+   */
+  export type question_log_topicFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log_topic to fetch.
+     */
+    where?: question_log_topicWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_log_topics to fetch.
+     */
+    orderBy?: question_log_topicOrderByWithRelationInput | question_log_topicOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for question_log_topics.
+     */
+    cursor?: question_log_topicWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_log_topics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_log_topics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of question_log_topics.
+     */
+    distinct?: Question_log_topicScalarFieldEnum | Question_log_topicScalarFieldEnum[]
+  }
+
+  /**
+   * question_log_topic findFirstOrThrow
+   */
+  export type question_log_topicFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log_topic to fetch.
+     */
+    where?: question_log_topicWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_log_topics to fetch.
+     */
+    orderBy?: question_log_topicOrderByWithRelationInput | question_log_topicOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for question_log_topics.
+     */
+    cursor?: question_log_topicWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_log_topics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_log_topics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of question_log_topics.
+     */
+    distinct?: Question_log_topicScalarFieldEnum | Question_log_topicScalarFieldEnum[]
+  }
+
+  /**
+   * question_log_topic findMany
+   */
+  export type question_log_topicFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * Filter, which question_log_topics to fetch.
+     */
+    where?: question_log_topicWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_log_topics to fetch.
+     */
+    orderBy?: question_log_topicOrderByWithRelationInput | question_log_topicOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing question_log_topics.
+     */
+    cursor?: question_log_topicWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_log_topics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_log_topics.
+     */
+    skip?: number
+    distinct?: Question_log_topicScalarFieldEnum | Question_log_topicScalarFieldEnum[]
+  }
+
+  /**
+   * question_log_topic create
+   */
+  export type question_log_topicCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * The data needed to create a question_log_topic.
+     */
+    data: XOR<question_log_topicCreateInput, question_log_topicUncheckedCreateInput>
+  }
+
+  /**
+   * question_log_topic createMany
+   */
+  export type question_log_topicCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many question_log_topics.
+     */
+    data: question_log_topicCreateManyInput | question_log_topicCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * question_log_topic createManyAndReturn
+   */
+  export type question_log_topicCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * The data used to create many question_log_topics.
+     */
+    data: question_log_topicCreateManyInput | question_log_topicCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * question_log_topic update
+   */
+  export type question_log_topicUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * The data needed to update a question_log_topic.
+     */
+    data: XOR<question_log_topicUpdateInput, question_log_topicUncheckedUpdateInput>
+    /**
+     * Choose, which question_log_topic to update.
+     */
+    where: question_log_topicWhereUniqueInput
+  }
+
+  /**
+   * question_log_topic updateMany
+   */
+  export type question_log_topicUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update question_log_topics.
+     */
+    data: XOR<question_log_topicUpdateManyMutationInput, question_log_topicUncheckedUpdateManyInput>
+    /**
+     * Filter which question_log_topics to update
+     */
+    where?: question_log_topicWhereInput
+    /**
+     * Limit how many question_log_topics to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * question_log_topic updateManyAndReturn
+   */
+  export type question_log_topicUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * The data used to update question_log_topics.
+     */
+    data: XOR<question_log_topicUpdateManyMutationInput, question_log_topicUncheckedUpdateManyInput>
+    /**
+     * Filter which question_log_topics to update
+     */
+    where?: question_log_topicWhereInput
+    /**
+     * Limit how many question_log_topics to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * question_log_topic upsert
+   */
+  export type question_log_topicUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * The filter to search for the question_log_topic to update in case it exists.
+     */
+    where: question_log_topicWhereUniqueInput
+    /**
+     * In case the question_log_topic found by the `where` argument doesn't exist, create a new question_log_topic with this data.
+     */
+    create: XOR<question_log_topicCreateInput, question_log_topicUncheckedCreateInput>
+    /**
+     * In case the question_log_topic was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<question_log_topicUpdateInput, question_log_topicUncheckedUpdateInput>
+  }
+
+  /**
+   * question_log_topic delete
+   */
+  export type question_log_topicDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
+    /**
+     * Filter which question_log_topic to delete.
+     */
+    where: question_log_topicWhereUniqueInput
+  }
+
+  /**
+   * question_log_topic deleteMany
+   */
+  export type question_log_topicDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which question_log_topics to delete
+     */
+    where?: question_log_topicWhereInput
+    /**
+     * Limit how many question_log_topics to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * question_log_topic without action
+   */
+  export type question_log_topicDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_log_topic
+     */
+    select?: question_log_topicSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_log_topic
+     */
+    omit?: question_log_topicOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_log_topicInclude<ExtArgs> | null
   }
 
 
@@ -4365,6 +8135,38 @@ export namespace Prisma {
   export type TopicScalarFieldEnum = (typeof TopicScalarFieldEnum)[keyof typeof TopicScalarFieldEnum]
 
 
+  export const UserScalarFieldEnum: {
+    id: 'id',
+    created_at: 'created_at',
+    email: 'email',
+    name: 'name',
+    uuid: 'uuid'
+  };
+
+  export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const Question_logScalarFieldEnum: {
+    id: 'id',
+    created_at: 'created_at',
+    uuid: 'uuid',
+    department: 'department',
+    user: 'user',
+    timer: 'timer',
+    difficulty: 'difficulty'
+  };
+
+  export type Question_logScalarFieldEnum = (typeof Question_logScalarFieldEnum)[keyof typeof Question_logScalarFieldEnum]
+
+
+  export const Question_log_topicScalarFieldEnum: {
+    question_log_id: 'question_log_id',
+    topic_id: 'topic_id'
+  };
+
+  export type Question_log_topicScalarFieldEnum = (typeof Question_log_topicScalarFieldEnum)[keyof typeof Question_log_topicScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -4395,16 +8197,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'BigInt'
+   * Reference to a field of type 'Int'
    */
-  export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
     
 
 
   /**
-   * Reference to a field of type 'BigInt[]'
+   * Reference to a field of type 'Int[]'
    */
-  export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -4437,16 +8239,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Int'
+   * Reference to a field of type 'BigInt'
    */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+  export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
     
 
 
   /**
-   * Reference to a field of type 'Int[]'
+   * Reference to a field of type 'BigInt[]'
    */
-  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+  export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
     
 
 
@@ -4471,11 +8273,12 @@ export namespace Prisma {
     AND?: departmentWhereInput | departmentWhereInput[]
     OR?: departmentWhereInput[]
     NOT?: departmentWhereInput | departmentWhereInput[]
-    id?: BigIntFilter<"department"> | bigint | number
+    id?: IntFilter<"department"> | number
     created_at?: DateTimeFilter<"department"> | Date | string
     name?: StringNullableFilter<"department"> | string | null
     uuid?: UuidNullableFilter<"department"> | string | null
     topic_topic_departmentTodepartment?: TopicListRelationFilter
+    question_log_question_department?: Question_logListRelationFilter
   }
 
   export type departmentOrderByWithRelationInput = {
@@ -4484,10 +8287,11 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     uuid?: SortOrderInput | SortOrder
     topic_topic_departmentTodepartment?: topicOrderByRelationAggregateInput
+    question_log_question_department?: question_logOrderByRelationAggregateInput
   }
 
   export type departmentWhereUniqueInput = Prisma.AtLeast<{
-    id?: bigint | number
+    id?: number
     name?: string
     AND?: departmentWhereInput | departmentWhereInput[]
     OR?: departmentWhereInput[]
@@ -4495,6 +8299,7 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"department"> | Date | string
     uuid?: UuidNullableFilter<"department"> | string | null
     topic_topic_departmentTodepartment?: TopicListRelationFilter
+    question_log_question_department?: Question_logListRelationFilter
   }, "id" | "name">
 
   export type departmentOrderByWithAggregationInput = {
@@ -4513,7 +8318,7 @@ export namespace Prisma {
     AND?: departmentScalarWhereWithAggregatesInput | departmentScalarWhereWithAggregatesInput[]
     OR?: departmentScalarWhereWithAggregatesInput[]
     NOT?: departmentScalarWhereWithAggregatesInput | departmentScalarWhereWithAggregatesInput[]
-    id?: BigIntWithAggregatesFilter<"department"> | bigint | number
+    id?: IntWithAggregatesFilter<"department"> | number
     created_at?: DateTimeWithAggregatesFilter<"department"> | Date | string
     name?: StringNullableWithAggregatesFilter<"department"> | string | null
     uuid?: UuidNullableWithAggregatesFilter<"department"> | string | null
@@ -4577,12 +8382,13 @@ export namespace Prisma {
     AND?: topicWhereInput | topicWhereInput[]
     OR?: topicWhereInput[]
     NOT?: topicWhereInput | topicWhereInput[]
-    id?: BigIntFilter<"topic"> | bigint | number
+    id?: IntFilter<"topic"> | number
     created_at?: DateTimeFilter<"topic"> | Date | string
     name?: StringNullableFilter<"topic"> | string | null
-    department?: BigIntNullableFilter<"topic"> | bigint | number | null
+    department?: IntNullableFilter<"topic"> | number | null
     uuid?: UuidFilter<"topic"> | string
     department_topic_departmentTodepartment?: XOR<DepartmentNullableScalarRelationFilter, departmentWhereInput> | null
+    question_logs?: Question_log_topicListRelationFilter
   }
 
   export type topicOrderByWithRelationInput = {
@@ -4592,18 +8398,20 @@ export namespace Prisma {
     department?: SortOrderInput | SortOrder
     uuid?: SortOrder
     department_topic_departmentTodepartment?: departmentOrderByWithRelationInput
+    question_logs?: question_log_topicOrderByRelationAggregateInput
   }
 
   export type topicWhereUniqueInput = Prisma.AtLeast<{
-    id?: bigint | number
+    id?: number
     AND?: topicWhereInput | topicWhereInput[]
     OR?: topicWhereInput[]
     NOT?: topicWhereInput | topicWhereInput[]
     created_at?: DateTimeFilter<"topic"> | Date | string
     name?: StringNullableFilter<"topic"> | string | null
-    department?: BigIntNullableFilter<"topic"> | bigint | number | null
+    department?: IntNullableFilter<"topic"> | number | null
     uuid?: UuidFilter<"topic"> | string
     department_topic_departmentTodepartment?: XOR<DepartmentNullableScalarRelationFilter, departmentWhereInput> | null
+    question_logs?: Question_log_topicListRelationFilter
   }, "id">
 
   export type topicOrderByWithAggregationInput = {
@@ -4623,61 +8431,238 @@ export namespace Prisma {
     AND?: topicScalarWhereWithAggregatesInput | topicScalarWhereWithAggregatesInput[]
     OR?: topicScalarWhereWithAggregatesInput[]
     NOT?: topicScalarWhereWithAggregatesInput | topicScalarWhereWithAggregatesInput[]
-    id?: BigIntWithAggregatesFilter<"topic"> | bigint | number
+    id?: IntWithAggregatesFilter<"topic"> | number
     created_at?: DateTimeWithAggregatesFilter<"topic"> | Date | string
     name?: StringNullableWithAggregatesFilter<"topic"> | string | null
-    department?: BigIntNullableWithAggregatesFilter<"topic"> | bigint | number | null
+    department?: IntNullableWithAggregatesFilter<"topic"> | number | null
     uuid?: UuidWithAggregatesFilter<"topic"> | string
   }
 
+  export type userWhereInput = {
+    AND?: userWhereInput | userWhereInput[]
+    OR?: userWhereInput[]
+    NOT?: userWhereInput | userWhereInput[]
+    id?: IntFilter<"user"> | number
+    created_at?: DateTimeFilter<"user"> | Date | string
+    email?: StringFilter<"user"> | string
+    name?: StringFilter<"user"> | string
+    uuid?: UuidFilter<"user"> | string
+    question_log?: Question_logListRelationFilter
+  }
+
+  export type userOrderByWithRelationInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    uuid?: SortOrder
+    question_log?: question_logOrderByRelationAggregateInput
+  }
+
+  export type userWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: userWhereInput | userWhereInput[]
+    OR?: userWhereInput[]
+    NOT?: userWhereInput | userWhereInput[]
+    created_at?: DateTimeFilter<"user"> | Date | string
+    email?: StringFilter<"user"> | string
+    name?: StringFilter<"user"> | string
+    uuid?: UuidFilter<"user"> | string
+    question_log?: Question_logListRelationFilter
+  }, "id">
+
+  export type userOrderByWithAggregationInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    uuid?: SortOrder
+    _count?: userCountOrderByAggregateInput
+    _avg?: userAvgOrderByAggregateInput
+    _max?: userMaxOrderByAggregateInput
+    _min?: userMinOrderByAggregateInput
+    _sum?: userSumOrderByAggregateInput
+  }
+
+  export type userScalarWhereWithAggregatesInput = {
+    AND?: userScalarWhereWithAggregatesInput | userScalarWhereWithAggregatesInput[]
+    OR?: userScalarWhereWithAggregatesInput[]
+    NOT?: userScalarWhereWithAggregatesInput | userScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"user"> | number
+    created_at?: DateTimeWithAggregatesFilter<"user"> | Date | string
+    email?: StringWithAggregatesFilter<"user"> | string
+    name?: StringWithAggregatesFilter<"user"> | string
+    uuid?: UuidWithAggregatesFilter<"user"> | string
+  }
+
+  export type question_logWhereInput = {
+    AND?: question_logWhereInput | question_logWhereInput[]
+    OR?: question_logWhereInput[]
+    NOT?: question_logWhereInput | question_logWhereInput[]
+    id?: IntFilter<"question_log"> | number
+    created_at?: DateTimeFilter<"question_log"> | Date | string
+    uuid?: UuidFilter<"question_log"> | string
+    department?: IntFilter<"question_log"> | number
+    user?: IntFilter<"question_log"> | number
+    timer?: IntFilter<"question_log"> | number
+    difficulty?: StringFilter<"question_log"> | string
+    question_generator?: XOR<UserScalarRelationFilter, userWhereInput>
+    question_department?: XOR<DepartmentScalarRelationFilter, departmentWhereInput>
+    topics?: Question_log_topicListRelationFilter
+  }
+
+  export type question_logOrderByWithRelationInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    uuid?: SortOrder
+    department?: SortOrder
+    user?: SortOrder
+    timer?: SortOrder
+    difficulty?: SortOrder
+    question_generator?: userOrderByWithRelationInput
+    question_department?: departmentOrderByWithRelationInput
+    topics?: question_log_topicOrderByRelationAggregateInput
+  }
+
+  export type question_logWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: question_logWhereInput | question_logWhereInput[]
+    OR?: question_logWhereInput[]
+    NOT?: question_logWhereInput | question_logWhereInput[]
+    created_at?: DateTimeFilter<"question_log"> | Date | string
+    uuid?: UuidFilter<"question_log"> | string
+    department?: IntFilter<"question_log"> | number
+    user?: IntFilter<"question_log"> | number
+    timer?: IntFilter<"question_log"> | number
+    difficulty?: StringFilter<"question_log"> | string
+    question_generator?: XOR<UserScalarRelationFilter, userWhereInput>
+    question_department?: XOR<DepartmentScalarRelationFilter, departmentWhereInput>
+    topics?: Question_log_topicListRelationFilter
+  }, "id">
+
+  export type question_logOrderByWithAggregationInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    uuid?: SortOrder
+    department?: SortOrder
+    user?: SortOrder
+    timer?: SortOrder
+    difficulty?: SortOrder
+    _count?: question_logCountOrderByAggregateInput
+    _avg?: question_logAvgOrderByAggregateInput
+    _max?: question_logMaxOrderByAggregateInput
+    _min?: question_logMinOrderByAggregateInput
+    _sum?: question_logSumOrderByAggregateInput
+  }
+
+  export type question_logScalarWhereWithAggregatesInput = {
+    AND?: question_logScalarWhereWithAggregatesInput | question_logScalarWhereWithAggregatesInput[]
+    OR?: question_logScalarWhereWithAggregatesInput[]
+    NOT?: question_logScalarWhereWithAggregatesInput | question_logScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"question_log"> | number
+    created_at?: DateTimeWithAggregatesFilter<"question_log"> | Date | string
+    uuid?: UuidWithAggregatesFilter<"question_log"> | string
+    department?: IntWithAggregatesFilter<"question_log"> | number
+    user?: IntWithAggregatesFilter<"question_log"> | number
+    timer?: IntWithAggregatesFilter<"question_log"> | number
+    difficulty?: StringWithAggregatesFilter<"question_log"> | string
+  }
+
+  export type question_log_topicWhereInput = {
+    AND?: question_log_topicWhereInput | question_log_topicWhereInput[]
+    OR?: question_log_topicWhereInput[]
+    NOT?: question_log_topicWhereInput | question_log_topicWhereInput[]
+    question_log_id?: IntFilter<"question_log_topic"> | number
+    topic_id?: IntFilter<"question_log_topic"> | number
+    question_log?: XOR<Question_logScalarRelationFilter, question_logWhereInput>
+    topic?: XOR<TopicScalarRelationFilter, topicWhereInput>
+  }
+
+  export type question_log_topicOrderByWithRelationInput = {
+    question_log_id?: SortOrder
+    topic_id?: SortOrder
+    question_log?: question_logOrderByWithRelationInput
+    topic?: topicOrderByWithRelationInput
+  }
+
+  export type question_log_topicWhereUniqueInput = Prisma.AtLeast<{
+    question_log_id_topic_id?: question_log_topicQuestion_log_idTopic_idCompoundUniqueInput
+    AND?: question_log_topicWhereInput | question_log_topicWhereInput[]
+    OR?: question_log_topicWhereInput[]
+    NOT?: question_log_topicWhereInput | question_log_topicWhereInput[]
+    question_log_id?: IntFilter<"question_log_topic"> | number
+    topic_id?: IntFilter<"question_log_topic"> | number
+    question_log?: XOR<Question_logScalarRelationFilter, question_logWhereInput>
+    topic?: XOR<TopicScalarRelationFilter, topicWhereInput>
+  }, "question_log_id_topic_id">
+
+  export type question_log_topicOrderByWithAggregationInput = {
+    question_log_id?: SortOrder
+    topic_id?: SortOrder
+    _count?: question_log_topicCountOrderByAggregateInput
+    _avg?: question_log_topicAvgOrderByAggregateInput
+    _max?: question_log_topicMaxOrderByAggregateInput
+    _min?: question_log_topicMinOrderByAggregateInput
+    _sum?: question_log_topicSumOrderByAggregateInput
+  }
+
+  export type question_log_topicScalarWhereWithAggregatesInput = {
+    AND?: question_log_topicScalarWhereWithAggregatesInput | question_log_topicScalarWhereWithAggregatesInput[]
+    OR?: question_log_topicScalarWhereWithAggregatesInput[]
+    NOT?: question_log_topicScalarWhereWithAggregatesInput | question_log_topicScalarWhereWithAggregatesInput[]
+    question_log_id?: IntWithAggregatesFilter<"question_log_topic"> | number
+    topic_id?: IntWithAggregatesFilter<"question_log_topic"> | number
+  }
+
   export type departmentCreateInput = {
-    id?: bigint | number
     created_at?: Date | string
     name?: string | null
     uuid?: string | null
     topic_topic_departmentTodepartment?: topicCreateNestedManyWithoutDepartment_topic_departmentTodepartmentInput
+    question_log_question_department?: question_logCreateNestedManyWithoutQuestion_departmentInput
   }
 
   export type departmentUncheckedCreateInput = {
-    id?: bigint | number
+    id?: number
     created_at?: Date | string
     name?: string | null
     uuid?: string | null
     topic_topic_departmentTodepartment?: topicUncheckedCreateNestedManyWithoutDepartment_topic_departmentTodepartmentInput
+    question_log_question_department?: question_logUncheckedCreateNestedManyWithoutQuestion_departmentInput
   }
 
   export type departmentUpdateInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: NullableStringFieldUpdateOperationsInput | string | null
     topic_topic_departmentTodepartment?: topicUpdateManyWithoutDepartment_topic_departmentTodepartmentNestedInput
+    question_log_question_department?: question_logUpdateManyWithoutQuestion_departmentNestedInput
   }
 
   export type departmentUncheckedUpdateInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: NullableStringFieldUpdateOperationsInput | string | null
     topic_topic_departmentTodepartment?: topicUncheckedUpdateManyWithoutDepartment_topic_departmentTodepartmentNestedInput
+    question_log_question_department?: question_logUncheckedUpdateManyWithoutQuestion_departmentNestedInput
   }
 
   export type departmentCreateManyInput = {
-    id?: bigint | number
+    id?: number
     created_at?: Date | string
     name?: string | null
     uuid?: string | null
   }
 
   export type departmentUpdateManyMutationInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type departmentUncheckedUpdateManyInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: NullableStringFieldUpdateOperationsInput | string | null
@@ -4740,69 +8725,230 @@ export namespace Prisma {
   }
 
   export type topicCreateInput = {
-    id?: bigint | number
     created_at?: Date | string
     name?: string | null
     uuid?: string
     department_topic_departmentTodepartment?: departmentCreateNestedOneWithoutTopic_topic_departmentTodepartmentInput
+    question_logs?: question_log_topicCreateNestedManyWithoutTopicInput
   }
 
   export type topicUncheckedCreateInput = {
-    id?: bigint | number
+    id?: number
     created_at?: Date | string
     name?: string | null
-    department?: bigint | number | null
+    department?: number | null
     uuid?: string
+    question_logs?: question_log_topicUncheckedCreateNestedManyWithoutTopicInput
   }
 
   export type topicUpdateInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: StringFieldUpdateOperationsInput | string
     department_topic_departmentTodepartment?: departmentUpdateOneWithoutTopic_topic_departmentTodepartmentNestedInput
+    question_logs?: question_log_topicUpdateManyWithoutTopicNestedInput
   }
 
   export type topicUncheckedUpdateInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    department?: NullableIntFieldUpdateOperationsInput | number | null
     uuid?: StringFieldUpdateOperationsInput | string
+    question_logs?: question_log_topicUncheckedUpdateManyWithoutTopicNestedInput
   }
 
   export type topicCreateManyInput = {
-    id?: bigint | number
+    id?: number
     created_at?: Date | string
     name?: string | null
-    department?: bigint | number | null
+    department?: number | null
     uuid?: string
   }
 
   export type topicUpdateManyMutationInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
   export type topicUncheckedUpdateManyInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    department?: NullableIntFieldUpdateOperationsInput | number | null
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
-  export type BigIntFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  export type userCreateInput = {
+    created_at?: Date | string
+    email: string
+    name: string
+    uuid?: string
+    question_log?: question_logCreateNestedManyWithoutQuestion_generatorInput
+  }
+
+  export type userUncheckedCreateInput = {
+    id?: number
+    created_at?: Date | string
+    email: string
+    name: string
+    uuid?: string
+    question_log?: question_logUncheckedCreateNestedManyWithoutQuestion_generatorInput
+  }
+
+  export type userUpdateInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    question_log?: question_logUpdateManyWithoutQuestion_generatorNestedInput
+  }
+
+  export type userUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    question_log?: question_logUncheckedUpdateManyWithoutQuestion_generatorNestedInput
+  }
+
+  export type userCreateManyInput = {
+    id?: number
+    created_at?: Date | string
+    email: string
+    name: string
+    uuid?: string
+  }
+
+  export type userUpdateManyMutationInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type userUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type question_logCreateInput = {
+    created_at?: Date | string
+    uuid?: string
+    timer: number
+    difficulty: string
+    question_generator: userCreateNestedOneWithoutQuestion_logInput
+    question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
+    topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
+  }
+
+  export type question_logUncheckedCreateInput = {
+    id?: number
+    created_at?: Date | string
+    uuid?: string
+    department: number
+    user: number
+    timer: number
+    difficulty: string
+    topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
+  }
+
+  export type question_logUpdateInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+    question_generator?: userUpdateOneRequiredWithoutQuestion_logNestedInput
+    question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
+    topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
+  }
+
+  export type question_logUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    department?: IntFieldUpdateOperationsInput | number
+    user?: IntFieldUpdateOperationsInput | number
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+    topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
+  }
+
+  export type question_logCreateManyInput = {
+    id?: number
+    created_at?: Date | string
+    uuid?: string
+    department: number
+    user: number
+    timer: number
+    difficulty: string
+  }
+
+  export type question_logUpdateManyMutationInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type question_logUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    department?: IntFieldUpdateOperationsInput | number
+    user?: IntFieldUpdateOperationsInput | number
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type question_log_topicCreateInput = {
+    question_log: question_logCreateNestedOneWithoutTopicsInput
+    topic: topicCreateNestedOneWithoutQuestion_logsInput
+  }
+
+  export type question_log_topicUncheckedCreateInput = {
+    question_log_id: number
+    topic_id: number
+  }
+
+  export type question_log_topicUpdateInput = {
+    question_log?: question_logUpdateOneRequiredWithoutTopicsNestedInput
+    topic?: topicUpdateOneRequiredWithoutQuestion_logsNestedInput
+  }
+
+  export type question_log_topicUncheckedUpdateInput = {
+    question_log_id?: IntFieldUpdateOperationsInput | number
+    topic_id?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type question_log_topicCreateManyInput = {
+    question_log_id: number
+    topic_id: number
+  }
+
+  export type question_log_topicUpdateManyMutationInput = {
+
+  }
+
+  export type question_log_topicUncheckedUpdateManyInput = {
+    question_log_id?: IntFieldUpdateOperationsInput | number
+    topic_id?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -4849,12 +8995,22 @@ export namespace Prisma {
     none?: topicWhereInput
   }
 
+  export type Question_logListRelationFilter = {
+    every?: question_logWhereInput
+    some?: question_logWhereInput
+    none?: question_logWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
   export type topicOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type question_logOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -4887,20 +9043,20 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type BigIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
     _count?: NestedIntFilter<$PrismaModel>
     _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedBigIntFilter<$PrismaModel>
-    _min?: NestedBigIntFilter<$PrismaModel>
-    _max?: NestedBigIntFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -4948,6 +9104,17 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type BigIntFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -5009,6 +9176,22 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type BigIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedBigIntFilter<$PrismaModel>
+    _min?: NestedBigIntFilter<$PrismaModel>
+    _max?: NestedBigIntFilter<$PrismaModel>
+  }
+
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -5042,20 +9225,30 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type BigIntNullableFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntNullableFilter<$PrismaModel> | bigint | number | null
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type DepartmentNullableScalarRelationFilter = {
     is?: departmentWhereInput | null
     isNot?: departmentWhereInput | null
+  }
+
+  export type Question_log_topicListRelationFilter = {
+    every?: question_log_topicWhereInput
+    some?: question_log_topicWhereInput
+    none?: question_log_topicWhereInput
+  }
+
+  export type question_log_topicOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type topicCountOrderByAggregateInput = {
@@ -5092,20 +9285,146 @@ export namespace Prisma {
     department?: SortOrder
   }
 
-  export type BigIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntNullableWithAggregatesFilter<$PrismaModel> | bigint | number | null
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
     _count?: NestedIntNullableFilter<$PrismaModel>
     _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedBigIntNullableFilter<$PrismaModel>
-    _min?: NestedBigIntNullableFilter<$PrismaModel>
-    _max?: NestedBigIntNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type userCountOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    uuid?: SortOrder
+  }
+
+  export type userAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type userMaxOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    uuid?: SortOrder
+  }
+
+  export type userMinOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    uuid?: SortOrder
+  }
+
+  export type userSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type UserScalarRelationFilter = {
+    is?: userWhereInput
+    isNot?: userWhereInput
+  }
+
+  export type DepartmentScalarRelationFilter = {
+    is?: departmentWhereInput
+    isNot?: departmentWhereInput
+  }
+
+  export type question_logCountOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    uuid?: SortOrder
+    department?: SortOrder
+    user?: SortOrder
+    timer?: SortOrder
+    difficulty?: SortOrder
+  }
+
+  export type question_logAvgOrderByAggregateInput = {
+    id?: SortOrder
+    department?: SortOrder
+    user?: SortOrder
+    timer?: SortOrder
+  }
+
+  export type question_logMaxOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    uuid?: SortOrder
+    department?: SortOrder
+    user?: SortOrder
+    timer?: SortOrder
+    difficulty?: SortOrder
+  }
+
+  export type question_logMinOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    uuid?: SortOrder
+    department?: SortOrder
+    user?: SortOrder
+    timer?: SortOrder
+    difficulty?: SortOrder
+  }
+
+  export type question_logSumOrderByAggregateInput = {
+    id?: SortOrder
+    department?: SortOrder
+    user?: SortOrder
+    timer?: SortOrder
+  }
+
+  export type Question_logScalarRelationFilter = {
+    is?: question_logWhereInput
+    isNot?: question_logWhereInput
+  }
+
+  export type TopicScalarRelationFilter = {
+    is?: topicWhereInput
+    isNot?: topicWhereInput
+  }
+
+  export type question_log_topicQuestion_log_idTopic_idCompoundUniqueInput = {
+    question_log_id: number
+    topic_id: number
+  }
+
+  export type question_log_topicCountOrderByAggregateInput = {
+    question_log_id?: SortOrder
+    topic_id?: SortOrder
+  }
+
+  export type question_log_topicAvgOrderByAggregateInput = {
+    question_log_id?: SortOrder
+    topic_id?: SortOrder
+  }
+
+  export type question_log_topicMaxOrderByAggregateInput = {
+    question_log_id?: SortOrder
+    topic_id?: SortOrder
+  }
+
+  export type question_log_topicMinOrderByAggregateInput = {
+    question_log_id?: SortOrder
+    topic_id?: SortOrder
+  }
+
+  export type question_log_topicSumOrderByAggregateInput = {
+    question_log_id?: SortOrder
+    topic_id?: SortOrder
   }
 
   export type topicCreateNestedManyWithoutDepartment_topic_departmentTodepartmentInput = {
@@ -5115,6 +9434,13 @@ export namespace Prisma {
     connect?: topicWhereUniqueInput | topicWhereUniqueInput[]
   }
 
+  export type question_logCreateNestedManyWithoutQuestion_departmentInput = {
+    create?: XOR<question_logCreateWithoutQuestion_departmentInput, question_logUncheckedCreateWithoutQuestion_departmentInput> | question_logCreateWithoutQuestion_departmentInput[] | question_logUncheckedCreateWithoutQuestion_departmentInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_departmentInput | question_logCreateOrConnectWithoutQuestion_departmentInput[]
+    createMany?: question_logCreateManyQuestion_departmentInputEnvelope
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+  }
+
   export type topicUncheckedCreateNestedManyWithoutDepartment_topic_departmentTodepartmentInput = {
     create?: XOR<topicCreateWithoutDepartment_topic_departmentTodepartmentInput, topicUncheckedCreateWithoutDepartment_topic_departmentTodepartmentInput> | topicCreateWithoutDepartment_topic_departmentTodepartmentInput[] | topicUncheckedCreateWithoutDepartment_topic_departmentTodepartmentInput[]
     connectOrCreate?: topicCreateOrConnectWithoutDepartment_topic_departmentTodepartmentInput | topicCreateOrConnectWithoutDepartment_topic_departmentTodepartmentInput[]
@@ -5122,12 +9448,11 @@ export namespace Prisma {
     connect?: topicWhereUniqueInput | topicWhereUniqueInput[]
   }
 
-  export type BigIntFieldUpdateOperationsInput = {
-    set?: bigint | number
-    increment?: bigint | number
-    decrement?: bigint | number
-    multiply?: bigint | number
-    divide?: bigint | number
+  export type question_logUncheckedCreateNestedManyWithoutQuestion_departmentInput = {
+    create?: XOR<question_logCreateWithoutQuestion_departmentInput, question_logUncheckedCreateWithoutQuestion_departmentInput> | question_logCreateWithoutQuestion_departmentInput[] | question_logUncheckedCreateWithoutQuestion_departmentInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_departmentInput | question_logCreateOrConnectWithoutQuestion_departmentInput[]
+    createMany?: question_logCreateManyQuestion_departmentInputEnvelope
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -5152,6 +9477,28 @@ export namespace Prisma {
     deleteMany?: topicScalarWhereInput | topicScalarWhereInput[]
   }
 
+  export type question_logUpdateManyWithoutQuestion_departmentNestedInput = {
+    create?: XOR<question_logCreateWithoutQuestion_departmentInput, question_logUncheckedCreateWithoutQuestion_departmentInput> | question_logCreateWithoutQuestion_departmentInput[] | question_logUncheckedCreateWithoutQuestion_departmentInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_departmentInput | question_logCreateOrConnectWithoutQuestion_departmentInput[]
+    upsert?: question_logUpsertWithWhereUniqueWithoutQuestion_departmentInput | question_logUpsertWithWhereUniqueWithoutQuestion_departmentInput[]
+    createMany?: question_logCreateManyQuestion_departmentInputEnvelope
+    set?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    disconnect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    delete?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    update?: question_logUpdateWithWhereUniqueWithoutQuestion_departmentInput | question_logUpdateWithWhereUniqueWithoutQuestion_departmentInput[]
+    updateMany?: question_logUpdateManyWithWhereWithoutQuestion_departmentInput | question_logUpdateManyWithWhereWithoutQuestion_departmentInput[]
+    deleteMany?: question_logScalarWhereInput | question_logScalarWhereInput[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type topicUncheckedUpdateManyWithoutDepartment_topic_departmentTodepartmentNestedInput = {
     create?: XOR<topicCreateWithoutDepartment_topic_departmentTodepartmentInput, topicUncheckedCreateWithoutDepartment_topic_departmentTodepartmentInput> | topicCreateWithoutDepartment_topic_departmentTodepartmentInput[] | topicUncheckedCreateWithoutDepartment_topic_departmentTodepartmentInput[]
     connectOrCreate?: topicCreateOrConnectWithoutDepartment_topic_departmentTodepartmentInput | topicCreateOrConnectWithoutDepartment_topic_departmentTodepartmentInput[]
@@ -5166,6 +9513,28 @@ export namespace Prisma {
     deleteMany?: topicScalarWhereInput | topicScalarWhereInput[]
   }
 
+  export type question_logUncheckedUpdateManyWithoutQuestion_departmentNestedInput = {
+    create?: XOR<question_logCreateWithoutQuestion_departmentInput, question_logUncheckedCreateWithoutQuestion_departmentInput> | question_logCreateWithoutQuestion_departmentInput[] | question_logUncheckedCreateWithoutQuestion_departmentInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_departmentInput | question_logCreateOrConnectWithoutQuestion_departmentInput[]
+    upsert?: question_logUpsertWithWhereUniqueWithoutQuestion_departmentInput | question_logUpsertWithWhereUniqueWithoutQuestion_departmentInput[]
+    createMany?: question_logCreateManyQuestion_departmentInputEnvelope
+    set?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    disconnect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    delete?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    update?: question_logUpdateWithWhereUniqueWithoutQuestion_departmentInput | question_logUpdateWithWhereUniqueWithoutQuestion_departmentInput[]
+    updateMany?: question_logUpdateManyWithWhereWithoutQuestion_departmentInput | question_logUpdateManyWithWhereWithoutQuestion_departmentInput[]
+    deleteMany?: question_logScalarWhereInput | question_logScalarWhereInput[]
+  }
+
+  export type BigIntFieldUpdateOperationsInput = {
+    set?: bigint | number
+    increment?: bigint | number
+    decrement?: bigint | number
+    multiply?: bigint | number
+    divide?: bigint | number
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -5174,6 +9543,20 @@ export namespace Prisma {
     create?: XOR<departmentCreateWithoutTopic_topic_departmentTodepartmentInput, departmentUncheckedCreateWithoutTopic_topic_departmentTodepartmentInput>
     connectOrCreate?: departmentCreateOrConnectWithoutTopic_topic_departmentTodepartmentInput
     connect?: departmentWhereUniqueInput
+  }
+
+  export type question_log_topicCreateNestedManyWithoutTopicInput = {
+    create?: XOR<question_log_topicCreateWithoutTopicInput, question_log_topicUncheckedCreateWithoutTopicInput> | question_log_topicCreateWithoutTopicInput[] | question_log_topicUncheckedCreateWithoutTopicInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutTopicInput | question_log_topicCreateOrConnectWithoutTopicInput[]
+    createMany?: question_log_topicCreateManyTopicInputEnvelope
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+  }
+
+  export type question_log_topicUncheckedCreateNestedManyWithoutTopicInput = {
+    create?: XOR<question_log_topicCreateWithoutTopicInput, question_log_topicUncheckedCreateWithoutTopicInput> | question_log_topicCreateWithoutTopicInput[] | question_log_topicUncheckedCreateWithoutTopicInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutTopicInput | question_log_topicCreateOrConnectWithoutTopicInput[]
+    createMany?: question_log_topicCreateManyTopicInputEnvelope
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
   }
 
   export type departmentUpdateOneWithoutTopic_topic_departmentTodepartmentNestedInput = {
@@ -5186,23 +9569,191 @@ export namespace Prisma {
     update?: XOR<XOR<departmentUpdateToOneWithWhereWithoutTopic_topic_departmentTodepartmentInput, departmentUpdateWithoutTopic_topic_departmentTodepartmentInput>, departmentUncheckedUpdateWithoutTopic_topic_departmentTodepartmentInput>
   }
 
-  export type NullableBigIntFieldUpdateOperationsInput = {
-    set?: bigint | number | null
-    increment?: bigint | number
-    decrement?: bigint | number
-    multiply?: bigint | number
-    divide?: bigint | number
+  export type question_log_topicUpdateManyWithoutTopicNestedInput = {
+    create?: XOR<question_log_topicCreateWithoutTopicInput, question_log_topicUncheckedCreateWithoutTopicInput> | question_log_topicCreateWithoutTopicInput[] | question_log_topicUncheckedCreateWithoutTopicInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutTopicInput | question_log_topicCreateOrConnectWithoutTopicInput[]
+    upsert?: question_log_topicUpsertWithWhereUniqueWithoutTopicInput | question_log_topicUpsertWithWhereUniqueWithoutTopicInput[]
+    createMany?: question_log_topicCreateManyTopicInputEnvelope
+    set?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    disconnect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    delete?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    update?: question_log_topicUpdateWithWhereUniqueWithoutTopicInput | question_log_topicUpdateWithWhereUniqueWithoutTopicInput[]
+    updateMany?: question_log_topicUpdateManyWithWhereWithoutTopicInput | question_log_topicUpdateManyWithWhereWithoutTopicInput[]
+    deleteMany?: question_log_topicScalarWhereInput | question_log_topicScalarWhereInput[]
   }
 
-  export type NestedBigIntFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type question_log_topicUncheckedUpdateManyWithoutTopicNestedInput = {
+    create?: XOR<question_log_topicCreateWithoutTopicInput, question_log_topicUncheckedCreateWithoutTopicInput> | question_log_topicCreateWithoutTopicInput[] | question_log_topicUncheckedCreateWithoutTopicInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutTopicInput | question_log_topicCreateOrConnectWithoutTopicInput[]
+    upsert?: question_log_topicUpsertWithWhereUniqueWithoutTopicInput | question_log_topicUpsertWithWhereUniqueWithoutTopicInput[]
+    createMany?: question_log_topicCreateManyTopicInputEnvelope
+    set?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    disconnect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    delete?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    update?: question_log_topicUpdateWithWhereUniqueWithoutTopicInput | question_log_topicUpdateWithWhereUniqueWithoutTopicInput[]
+    updateMany?: question_log_topicUpdateManyWithWhereWithoutTopicInput | question_log_topicUpdateManyWithWhereWithoutTopicInput[]
+    deleteMany?: question_log_topicScalarWhereInput | question_log_topicScalarWhereInput[]
+  }
+
+  export type question_logCreateNestedManyWithoutQuestion_generatorInput = {
+    create?: XOR<question_logCreateWithoutQuestion_generatorInput, question_logUncheckedCreateWithoutQuestion_generatorInput> | question_logCreateWithoutQuestion_generatorInput[] | question_logUncheckedCreateWithoutQuestion_generatorInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_generatorInput | question_logCreateOrConnectWithoutQuestion_generatorInput[]
+    createMany?: question_logCreateManyQuestion_generatorInputEnvelope
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+  }
+
+  export type question_logUncheckedCreateNestedManyWithoutQuestion_generatorInput = {
+    create?: XOR<question_logCreateWithoutQuestion_generatorInput, question_logUncheckedCreateWithoutQuestion_generatorInput> | question_logCreateWithoutQuestion_generatorInput[] | question_logUncheckedCreateWithoutQuestion_generatorInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_generatorInput | question_logCreateOrConnectWithoutQuestion_generatorInput[]
+    createMany?: question_logCreateManyQuestion_generatorInputEnvelope
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+  }
+
+  export type question_logUpdateManyWithoutQuestion_generatorNestedInput = {
+    create?: XOR<question_logCreateWithoutQuestion_generatorInput, question_logUncheckedCreateWithoutQuestion_generatorInput> | question_logCreateWithoutQuestion_generatorInput[] | question_logUncheckedCreateWithoutQuestion_generatorInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_generatorInput | question_logCreateOrConnectWithoutQuestion_generatorInput[]
+    upsert?: question_logUpsertWithWhereUniqueWithoutQuestion_generatorInput | question_logUpsertWithWhereUniqueWithoutQuestion_generatorInput[]
+    createMany?: question_logCreateManyQuestion_generatorInputEnvelope
+    set?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    disconnect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    delete?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    update?: question_logUpdateWithWhereUniqueWithoutQuestion_generatorInput | question_logUpdateWithWhereUniqueWithoutQuestion_generatorInput[]
+    updateMany?: question_logUpdateManyWithWhereWithoutQuestion_generatorInput | question_logUpdateManyWithWhereWithoutQuestion_generatorInput[]
+    deleteMany?: question_logScalarWhereInput | question_logScalarWhereInput[]
+  }
+
+  export type question_logUncheckedUpdateManyWithoutQuestion_generatorNestedInput = {
+    create?: XOR<question_logCreateWithoutQuestion_generatorInput, question_logUncheckedCreateWithoutQuestion_generatorInput> | question_logCreateWithoutQuestion_generatorInput[] | question_logUncheckedCreateWithoutQuestion_generatorInput[]
+    connectOrCreate?: question_logCreateOrConnectWithoutQuestion_generatorInput | question_logCreateOrConnectWithoutQuestion_generatorInput[]
+    upsert?: question_logUpsertWithWhereUniqueWithoutQuestion_generatorInput | question_logUpsertWithWhereUniqueWithoutQuestion_generatorInput[]
+    createMany?: question_logCreateManyQuestion_generatorInputEnvelope
+    set?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    disconnect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    delete?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    connect?: question_logWhereUniqueInput | question_logWhereUniqueInput[]
+    update?: question_logUpdateWithWhereUniqueWithoutQuestion_generatorInput | question_logUpdateWithWhereUniqueWithoutQuestion_generatorInput[]
+    updateMany?: question_logUpdateManyWithWhereWithoutQuestion_generatorInput | question_logUpdateManyWithWhereWithoutQuestion_generatorInput[]
+    deleteMany?: question_logScalarWhereInput | question_logScalarWhereInput[]
+  }
+
+  export type userCreateNestedOneWithoutQuestion_logInput = {
+    create?: XOR<userCreateWithoutQuestion_logInput, userUncheckedCreateWithoutQuestion_logInput>
+    connectOrCreate?: userCreateOrConnectWithoutQuestion_logInput
+    connect?: userWhereUniqueInput
+  }
+
+  export type departmentCreateNestedOneWithoutQuestion_log_question_departmentInput = {
+    create?: XOR<departmentCreateWithoutQuestion_log_question_departmentInput, departmentUncheckedCreateWithoutQuestion_log_question_departmentInput>
+    connectOrCreate?: departmentCreateOrConnectWithoutQuestion_log_question_departmentInput
+    connect?: departmentWhereUniqueInput
+  }
+
+  export type question_log_topicCreateNestedManyWithoutQuestion_logInput = {
+    create?: XOR<question_log_topicCreateWithoutQuestion_logInput, question_log_topicUncheckedCreateWithoutQuestion_logInput> | question_log_topicCreateWithoutQuestion_logInput[] | question_log_topicUncheckedCreateWithoutQuestion_logInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutQuestion_logInput | question_log_topicCreateOrConnectWithoutQuestion_logInput[]
+    createMany?: question_log_topicCreateManyQuestion_logInputEnvelope
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+  }
+
+  export type question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput = {
+    create?: XOR<question_log_topicCreateWithoutQuestion_logInput, question_log_topicUncheckedCreateWithoutQuestion_logInput> | question_log_topicCreateWithoutQuestion_logInput[] | question_log_topicUncheckedCreateWithoutQuestion_logInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutQuestion_logInput | question_log_topicCreateOrConnectWithoutQuestion_logInput[]
+    createMany?: question_log_topicCreateManyQuestion_logInputEnvelope
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+  }
+
+  export type userUpdateOneRequiredWithoutQuestion_logNestedInput = {
+    create?: XOR<userCreateWithoutQuestion_logInput, userUncheckedCreateWithoutQuestion_logInput>
+    connectOrCreate?: userCreateOrConnectWithoutQuestion_logInput
+    upsert?: userUpsertWithoutQuestion_logInput
+    connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutQuestion_logInput, userUpdateWithoutQuestion_logInput>, userUncheckedUpdateWithoutQuestion_logInput>
+  }
+
+  export type departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput = {
+    create?: XOR<departmentCreateWithoutQuestion_log_question_departmentInput, departmentUncheckedCreateWithoutQuestion_log_question_departmentInput>
+    connectOrCreate?: departmentCreateOrConnectWithoutQuestion_log_question_departmentInput
+    upsert?: departmentUpsertWithoutQuestion_log_question_departmentInput
+    connect?: departmentWhereUniqueInput
+    update?: XOR<XOR<departmentUpdateToOneWithWhereWithoutQuestion_log_question_departmentInput, departmentUpdateWithoutQuestion_log_question_departmentInput>, departmentUncheckedUpdateWithoutQuestion_log_question_departmentInput>
+  }
+
+  export type question_log_topicUpdateManyWithoutQuestion_logNestedInput = {
+    create?: XOR<question_log_topicCreateWithoutQuestion_logInput, question_log_topicUncheckedCreateWithoutQuestion_logInput> | question_log_topicCreateWithoutQuestion_logInput[] | question_log_topicUncheckedCreateWithoutQuestion_logInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutQuestion_logInput | question_log_topicCreateOrConnectWithoutQuestion_logInput[]
+    upsert?: question_log_topicUpsertWithWhereUniqueWithoutQuestion_logInput | question_log_topicUpsertWithWhereUniqueWithoutQuestion_logInput[]
+    createMany?: question_log_topicCreateManyQuestion_logInputEnvelope
+    set?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    disconnect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    delete?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    update?: question_log_topicUpdateWithWhereUniqueWithoutQuestion_logInput | question_log_topicUpdateWithWhereUniqueWithoutQuestion_logInput[]
+    updateMany?: question_log_topicUpdateManyWithWhereWithoutQuestion_logInput | question_log_topicUpdateManyWithWhereWithoutQuestion_logInput[]
+    deleteMany?: question_log_topicScalarWhereInput | question_log_topicScalarWhereInput[]
+  }
+
+  export type question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput = {
+    create?: XOR<question_log_topicCreateWithoutQuestion_logInput, question_log_topicUncheckedCreateWithoutQuestion_logInput> | question_log_topicCreateWithoutQuestion_logInput[] | question_log_topicUncheckedCreateWithoutQuestion_logInput[]
+    connectOrCreate?: question_log_topicCreateOrConnectWithoutQuestion_logInput | question_log_topicCreateOrConnectWithoutQuestion_logInput[]
+    upsert?: question_log_topicUpsertWithWhereUniqueWithoutQuestion_logInput | question_log_topicUpsertWithWhereUniqueWithoutQuestion_logInput[]
+    createMany?: question_log_topicCreateManyQuestion_logInputEnvelope
+    set?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    disconnect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    delete?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    connect?: question_log_topicWhereUniqueInput | question_log_topicWhereUniqueInput[]
+    update?: question_log_topicUpdateWithWhereUniqueWithoutQuestion_logInput | question_log_topicUpdateWithWhereUniqueWithoutQuestion_logInput[]
+    updateMany?: question_log_topicUpdateManyWithWhereWithoutQuestion_logInput | question_log_topicUpdateManyWithWhereWithoutQuestion_logInput[]
+    deleteMany?: question_log_topicScalarWhereInput | question_log_topicScalarWhereInput[]
+  }
+
+  export type question_logCreateNestedOneWithoutTopicsInput = {
+    create?: XOR<question_logCreateWithoutTopicsInput, question_logUncheckedCreateWithoutTopicsInput>
+    connectOrCreate?: question_logCreateOrConnectWithoutTopicsInput
+    connect?: question_logWhereUniqueInput
+  }
+
+  export type topicCreateNestedOneWithoutQuestion_logsInput = {
+    create?: XOR<topicCreateWithoutQuestion_logsInput, topicUncheckedCreateWithoutQuestion_logsInput>
+    connectOrCreate?: topicCreateOrConnectWithoutQuestion_logsInput
+    connect?: topicWhereUniqueInput
+  }
+
+  export type question_logUpdateOneRequiredWithoutTopicsNestedInput = {
+    create?: XOR<question_logCreateWithoutTopicsInput, question_logUncheckedCreateWithoutTopicsInput>
+    connectOrCreate?: question_logCreateOrConnectWithoutTopicsInput
+    upsert?: question_logUpsertWithoutTopicsInput
+    connect?: question_logWhereUniqueInput
+    update?: XOR<XOR<question_logUpdateToOneWithWhereWithoutTopicsInput, question_logUpdateWithoutTopicsInput>, question_logUncheckedUpdateWithoutTopicsInput>
+  }
+
+  export type topicUpdateOneRequiredWithoutQuestion_logsNestedInput = {
+    create?: XOR<topicCreateWithoutQuestion_logsInput, topicUncheckedCreateWithoutQuestion_logsInput>
+    connectOrCreate?: topicCreateOrConnectWithoutQuestion_logsInput
+    upsert?: topicUpsertWithoutQuestion_logsInput
+    connect?: topicWhereUniqueInput
+    update?: XOR<XOR<topicUpdateToOneWithWhereWithoutQuestion_logsInput, topicUpdateWithoutQuestion_logsInput>, topicUncheckedUpdateWithoutQuestion_logsInput>
+  }
+
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -5241,23 +9792,7 @@ export namespace Prisma {
     not?: NestedUuidNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedBigIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedBigIntFilter<$PrismaModel>
-    _min?: NestedBigIntFilter<$PrismaModel>
-    _max?: NestedBigIntFilter<$PrismaModel>
-  }
-
-  export type NestedIntFilter<$PrismaModel = never> = {
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
     notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -5265,7 +9800,12 @@ export namespace Prisma {
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type NestedFloatFilter<$PrismaModel = never> = {
@@ -5335,6 +9875,17 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type NestedBigIntFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -5358,6 +9909,22 @@ export namespace Prisma {
     gt?: string | StringFieldRefInput<$PrismaModel>
     gte?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedUuidFilter<$PrismaModel> | string
+  }
+
+  export type NestedBigIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedBigIntFilter<$PrismaModel>
+    _min?: NestedBigIntFilter<$PrismaModel>
+    _max?: NestedBigIntFilter<$PrismaModel>
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -5391,31 +9958,20 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type NestedBigIntNullableFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntNullableFilter<$PrismaModel> | bigint | number | null
-  }
-
-  export type NestedBigIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntNullableWithAggregatesFilter<$PrismaModel> | bigint | number | null
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
     _count?: NestedIntNullableFilter<$PrismaModel>
     _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedBigIntNullableFilter<$PrismaModel>
-    _min?: NestedBigIntNullableFilter<$PrismaModel>
-    _max?: NestedBigIntNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
@@ -5430,17 +9986,18 @@ export namespace Prisma {
   }
 
   export type topicCreateWithoutDepartment_topic_departmentTodepartmentInput = {
-    id?: bigint | number
     created_at?: Date | string
     name?: string | null
     uuid?: string
+    question_logs?: question_log_topicCreateNestedManyWithoutTopicInput
   }
 
   export type topicUncheckedCreateWithoutDepartment_topic_departmentTodepartmentInput = {
-    id?: bigint | number
+    id?: number
     created_at?: Date | string
     name?: string | null
     uuid?: string
+    question_logs?: question_log_topicUncheckedCreateNestedManyWithoutTopicInput
   }
 
   export type topicCreateOrConnectWithoutDepartment_topic_departmentTodepartmentInput = {
@@ -5450,6 +10007,35 @@ export namespace Prisma {
 
   export type topicCreateManyDepartment_topic_departmentTodepartmentInputEnvelope = {
     data: topicCreateManyDepartment_topic_departmentTodepartmentInput | topicCreateManyDepartment_topic_departmentTodepartmentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type question_logCreateWithoutQuestion_departmentInput = {
+    created_at?: Date | string
+    uuid?: string
+    timer: number
+    difficulty: string
+    question_generator: userCreateNestedOneWithoutQuestion_logInput
+    topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
+  }
+
+  export type question_logUncheckedCreateWithoutQuestion_departmentInput = {
+    id?: number
+    created_at?: Date | string
+    uuid?: string
+    user: number
+    timer: number
+    difficulty: string
+    topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
+  }
+
+  export type question_logCreateOrConnectWithoutQuestion_departmentInput = {
+    where: question_logWhereUniqueInput
+    create: XOR<question_logCreateWithoutQuestion_departmentInput, question_logUncheckedCreateWithoutQuestion_departmentInput>
+  }
+
+  export type question_logCreateManyQuestion_departmentInputEnvelope = {
+    data: question_logCreateManyQuestion_departmentInput | question_logCreateManyQuestion_departmentInput[]
     skipDuplicates?: boolean
   }
 
@@ -5473,30 +10059,78 @@ export namespace Prisma {
     AND?: topicScalarWhereInput | topicScalarWhereInput[]
     OR?: topicScalarWhereInput[]
     NOT?: topicScalarWhereInput | topicScalarWhereInput[]
-    id?: BigIntFilter<"topic"> | bigint | number
+    id?: IntFilter<"topic"> | number
     created_at?: DateTimeFilter<"topic"> | Date | string
     name?: StringNullableFilter<"topic"> | string | null
-    department?: BigIntNullableFilter<"topic"> | bigint | number | null
+    department?: IntNullableFilter<"topic"> | number | null
     uuid?: UuidFilter<"topic"> | string
   }
 
+  export type question_logUpsertWithWhereUniqueWithoutQuestion_departmentInput = {
+    where: question_logWhereUniqueInput
+    update: XOR<question_logUpdateWithoutQuestion_departmentInput, question_logUncheckedUpdateWithoutQuestion_departmentInput>
+    create: XOR<question_logCreateWithoutQuestion_departmentInput, question_logUncheckedCreateWithoutQuestion_departmentInput>
+  }
+
+  export type question_logUpdateWithWhereUniqueWithoutQuestion_departmentInput = {
+    where: question_logWhereUniqueInput
+    data: XOR<question_logUpdateWithoutQuestion_departmentInput, question_logUncheckedUpdateWithoutQuestion_departmentInput>
+  }
+
+  export type question_logUpdateManyWithWhereWithoutQuestion_departmentInput = {
+    where: question_logScalarWhereInput
+    data: XOR<question_logUpdateManyMutationInput, question_logUncheckedUpdateManyWithoutQuestion_departmentInput>
+  }
+
+  export type question_logScalarWhereInput = {
+    AND?: question_logScalarWhereInput | question_logScalarWhereInput[]
+    OR?: question_logScalarWhereInput[]
+    NOT?: question_logScalarWhereInput | question_logScalarWhereInput[]
+    id?: IntFilter<"question_log"> | number
+    created_at?: DateTimeFilter<"question_log"> | Date | string
+    uuid?: UuidFilter<"question_log"> | string
+    department?: IntFilter<"question_log"> | number
+    user?: IntFilter<"question_log"> | number
+    timer?: IntFilter<"question_log"> | number
+    difficulty?: StringFilter<"question_log"> | string
+  }
+
   export type departmentCreateWithoutTopic_topic_departmentTodepartmentInput = {
-    id?: bigint | number
     created_at?: Date | string
     name?: string | null
     uuid?: string | null
+    question_log_question_department?: question_logCreateNestedManyWithoutQuestion_departmentInput
   }
 
   export type departmentUncheckedCreateWithoutTopic_topic_departmentTodepartmentInput = {
-    id?: bigint | number
+    id?: number
     created_at?: Date | string
     name?: string | null
     uuid?: string | null
+    question_log_question_department?: question_logUncheckedCreateNestedManyWithoutQuestion_departmentInput
   }
 
   export type departmentCreateOrConnectWithoutTopic_topic_departmentTodepartmentInput = {
     where: departmentWhereUniqueInput
     create: XOR<departmentCreateWithoutTopic_topic_departmentTodepartmentInput, departmentUncheckedCreateWithoutTopic_topic_departmentTodepartmentInput>
+  }
+
+  export type question_log_topicCreateWithoutTopicInput = {
+    question_log: question_logCreateNestedOneWithoutTopicsInput
+  }
+
+  export type question_log_topicUncheckedCreateWithoutTopicInput = {
+    question_log_id: number
+  }
+
+  export type question_log_topicCreateOrConnectWithoutTopicInput = {
+    where: question_log_topicWhereUniqueInput
+    create: XOR<question_log_topicCreateWithoutTopicInput, question_log_topicUncheckedCreateWithoutTopicInput>
+  }
+
+  export type question_log_topicCreateManyTopicInputEnvelope = {
+    data: question_log_topicCreateManyTopicInput | question_log_topicCreateManyTopicInput[]
+    skipDuplicates?: boolean
   }
 
   export type departmentUpsertWithoutTopic_topic_departmentTodepartmentInput = {
@@ -5511,45 +10145,448 @@ export namespace Prisma {
   }
 
   export type departmentUpdateWithoutTopic_topic_departmentTodepartmentInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: NullableStringFieldUpdateOperationsInput | string | null
+    question_log_question_department?: question_logUpdateManyWithoutQuestion_departmentNestedInput
   }
 
   export type departmentUncheckedUpdateWithoutTopic_topic_departmentTodepartmentInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: NullableStringFieldUpdateOperationsInput | string | null
+    question_log_question_department?: question_logUncheckedUpdateManyWithoutQuestion_departmentNestedInput
+  }
+
+  export type question_log_topicUpsertWithWhereUniqueWithoutTopicInput = {
+    where: question_log_topicWhereUniqueInput
+    update: XOR<question_log_topicUpdateWithoutTopicInput, question_log_topicUncheckedUpdateWithoutTopicInput>
+    create: XOR<question_log_topicCreateWithoutTopicInput, question_log_topicUncheckedCreateWithoutTopicInput>
+  }
+
+  export type question_log_topicUpdateWithWhereUniqueWithoutTopicInput = {
+    where: question_log_topicWhereUniqueInput
+    data: XOR<question_log_topicUpdateWithoutTopicInput, question_log_topicUncheckedUpdateWithoutTopicInput>
+  }
+
+  export type question_log_topicUpdateManyWithWhereWithoutTopicInput = {
+    where: question_log_topicScalarWhereInput
+    data: XOR<question_log_topicUpdateManyMutationInput, question_log_topicUncheckedUpdateManyWithoutTopicInput>
+  }
+
+  export type question_log_topicScalarWhereInput = {
+    AND?: question_log_topicScalarWhereInput | question_log_topicScalarWhereInput[]
+    OR?: question_log_topicScalarWhereInput[]
+    NOT?: question_log_topicScalarWhereInput | question_log_topicScalarWhereInput[]
+    question_log_id?: IntFilter<"question_log_topic"> | number
+    topic_id?: IntFilter<"question_log_topic"> | number
+  }
+
+  export type question_logCreateWithoutQuestion_generatorInput = {
+    created_at?: Date | string
+    uuid?: string
+    timer: number
+    difficulty: string
+    question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
+    topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
+  }
+
+  export type question_logUncheckedCreateWithoutQuestion_generatorInput = {
+    id?: number
+    created_at?: Date | string
+    uuid?: string
+    department: number
+    timer: number
+    difficulty: string
+    topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
+  }
+
+  export type question_logCreateOrConnectWithoutQuestion_generatorInput = {
+    where: question_logWhereUniqueInput
+    create: XOR<question_logCreateWithoutQuestion_generatorInput, question_logUncheckedCreateWithoutQuestion_generatorInput>
+  }
+
+  export type question_logCreateManyQuestion_generatorInputEnvelope = {
+    data: question_logCreateManyQuestion_generatorInput | question_logCreateManyQuestion_generatorInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type question_logUpsertWithWhereUniqueWithoutQuestion_generatorInput = {
+    where: question_logWhereUniqueInput
+    update: XOR<question_logUpdateWithoutQuestion_generatorInput, question_logUncheckedUpdateWithoutQuestion_generatorInput>
+    create: XOR<question_logCreateWithoutQuestion_generatorInput, question_logUncheckedCreateWithoutQuestion_generatorInput>
+  }
+
+  export type question_logUpdateWithWhereUniqueWithoutQuestion_generatorInput = {
+    where: question_logWhereUniqueInput
+    data: XOR<question_logUpdateWithoutQuestion_generatorInput, question_logUncheckedUpdateWithoutQuestion_generatorInput>
+  }
+
+  export type question_logUpdateManyWithWhereWithoutQuestion_generatorInput = {
+    where: question_logScalarWhereInput
+    data: XOR<question_logUpdateManyMutationInput, question_logUncheckedUpdateManyWithoutQuestion_generatorInput>
+  }
+
+  export type userCreateWithoutQuestion_logInput = {
+    created_at?: Date | string
+    email: string
+    name: string
+    uuid?: string
+  }
+
+  export type userUncheckedCreateWithoutQuestion_logInput = {
+    id?: number
+    created_at?: Date | string
+    email: string
+    name: string
+    uuid?: string
+  }
+
+  export type userCreateOrConnectWithoutQuestion_logInput = {
+    where: userWhereUniqueInput
+    create: XOR<userCreateWithoutQuestion_logInput, userUncheckedCreateWithoutQuestion_logInput>
+  }
+
+  export type departmentCreateWithoutQuestion_log_question_departmentInput = {
+    created_at?: Date | string
+    name?: string | null
+    uuid?: string | null
+    topic_topic_departmentTodepartment?: topicCreateNestedManyWithoutDepartment_topic_departmentTodepartmentInput
+  }
+
+  export type departmentUncheckedCreateWithoutQuestion_log_question_departmentInput = {
+    id?: number
+    created_at?: Date | string
+    name?: string | null
+    uuid?: string | null
+    topic_topic_departmentTodepartment?: topicUncheckedCreateNestedManyWithoutDepartment_topic_departmentTodepartmentInput
+  }
+
+  export type departmentCreateOrConnectWithoutQuestion_log_question_departmentInput = {
+    where: departmentWhereUniqueInput
+    create: XOR<departmentCreateWithoutQuestion_log_question_departmentInput, departmentUncheckedCreateWithoutQuestion_log_question_departmentInput>
+  }
+
+  export type question_log_topicCreateWithoutQuestion_logInput = {
+    topic: topicCreateNestedOneWithoutQuestion_logsInput
+  }
+
+  export type question_log_topicUncheckedCreateWithoutQuestion_logInput = {
+    topic_id: number
+  }
+
+  export type question_log_topicCreateOrConnectWithoutQuestion_logInput = {
+    where: question_log_topicWhereUniqueInput
+    create: XOR<question_log_topicCreateWithoutQuestion_logInput, question_log_topicUncheckedCreateWithoutQuestion_logInput>
+  }
+
+  export type question_log_topicCreateManyQuestion_logInputEnvelope = {
+    data: question_log_topicCreateManyQuestion_logInput | question_log_topicCreateManyQuestion_logInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type userUpsertWithoutQuestion_logInput = {
+    update: XOR<userUpdateWithoutQuestion_logInput, userUncheckedUpdateWithoutQuestion_logInput>
+    create: XOR<userCreateWithoutQuestion_logInput, userUncheckedCreateWithoutQuestion_logInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutQuestion_logInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutQuestion_logInput, userUncheckedUpdateWithoutQuestion_logInput>
+  }
+
+  export type userUpdateWithoutQuestion_logInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type userUncheckedUpdateWithoutQuestion_logInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type departmentUpsertWithoutQuestion_log_question_departmentInput = {
+    update: XOR<departmentUpdateWithoutQuestion_log_question_departmentInput, departmentUncheckedUpdateWithoutQuestion_log_question_departmentInput>
+    create: XOR<departmentCreateWithoutQuestion_log_question_departmentInput, departmentUncheckedCreateWithoutQuestion_log_question_departmentInput>
+    where?: departmentWhereInput
+  }
+
+  export type departmentUpdateToOneWithWhereWithoutQuestion_log_question_departmentInput = {
+    where?: departmentWhereInput
+    data: XOR<departmentUpdateWithoutQuestion_log_question_departmentInput, departmentUncheckedUpdateWithoutQuestion_log_question_departmentInput>
+  }
+
+  export type departmentUpdateWithoutQuestion_log_question_departmentInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uuid?: NullableStringFieldUpdateOperationsInput | string | null
+    topic_topic_departmentTodepartment?: topicUpdateManyWithoutDepartment_topic_departmentTodepartmentNestedInput
+  }
+
+  export type departmentUncheckedUpdateWithoutQuestion_log_question_departmentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uuid?: NullableStringFieldUpdateOperationsInput | string | null
+    topic_topic_departmentTodepartment?: topicUncheckedUpdateManyWithoutDepartment_topic_departmentTodepartmentNestedInput
+  }
+
+  export type question_log_topicUpsertWithWhereUniqueWithoutQuestion_logInput = {
+    where: question_log_topicWhereUniqueInput
+    update: XOR<question_log_topicUpdateWithoutQuestion_logInput, question_log_topicUncheckedUpdateWithoutQuestion_logInput>
+    create: XOR<question_log_topicCreateWithoutQuestion_logInput, question_log_topicUncheckedCreateWithoutQuestion_logInput>
+  }
+
+  export type question_log_topicUpdateWithWhereUniqueWithoutQuestion_logInput = {
+    where: question_log_topicWhereUniqueInput
+    data: XOR<question_log_topicUpdateWithoutQuestion_logInput, question_log_topicUncheckedUpdateWithoutQuestion_logInput>
+  }
+
+  export type question_log_topicUpdateManyWithWhereWithoutQuestion_logInput = {
+    where: question_log_topicScalarWhereInput
+    data: XOR<question_log_topicUpdateManyMutationInput, question_log_topicUncheckedUpdateManyWithoutQuestion_logInput>
+  }
+
+  export type question_logCreateWithoutTopicsInput = {
+    created_at?: Date | string
+    uuid?: string
+    timer: number
+    difficulty: string
+    question_generator: userCreateNestedOneWithoutQuestion_logInput
+    question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
+  }
+
+  export type question_logUncheckedCreateWithoutTopicsInput = {
+    id?: number
+    created_at?: Date | string
+    uuid?: string
+    department: number
+    user: number
+    timer: number
+    difficulty: string
+  }
+
+  export type question_logCreateOrConnectWithoutTopicsInput = {
+    where: question_logWhereUniqueInput
+    create: XOR<question_logCreateWithoutTopicsInput, question_logUncheckedCreateWithoutTopicsInput>
+  }
+
+  export type topicCreateWithoutQuestion_logsInput = {
+    created_at?: Date | string
+    name?: string | null
+    uuid?: string
+    department_topic_departmentTodepartment?: departmentCreateNestedOneWithoutTopic_topic_departmentTodepartmentInput
+  }
+
+  export type topicUncheckedCreateWithoutQuestion_logsInput = {
+    id?: number
+    created_at?: Date | string
+    name?: string | null
+    department?: number | null
+    uuid?: string
+  }
+
+  export type topicCreateOrConnectWithoutQuestion_logsInput = {
+    where: topicWhereUniqueInput
+    create: XOR<topicCreateWithoutQuestion_logsInput, topicUncheckedCreateWithoutQuestion_logsInput>
+  }
+
+  export type question_logUpsertWithoutTopicsInput = {
+    update: XOR<question_logUpdateWithoutTopicsInput, question_logUncheckedUpdateWithoutTopicsInput>
+    create: XOR<question_logCreateWithoutTopicsInput, question_logUncheckedCreateWithoutTopicsInput>
+    where?: question_logWhereInput
+  }
+
+  export type question_logUpdateToOneWithWhereWithoutTopicsInput = {
+    where?: question_logWhereInput
+    data: XOR<question_logUpdateWithoutTopicsInput, question_logUncheckedUpdateWithoutTopicsInput>
+  }
+
+  export type question_logUpdateWithoutTopicsInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+    question_generator?: userUpdateOneRequiredWithoutQuestion_logNestedInput
+    question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
+  }
+
+  export type question_logUncheckedUpdateWithoutTopicsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    department?: IntFieldUpdateOperationsInput | number
+    user?: IntFieldUpdateOperationsInput | number
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type topicUpsertWithoutQuestion_logsInput = {
+    update: XOR<topicUpdateWithoutQuestion_logsInput, topicUncheckedUpdateWithoutQuestion_logsInput>
+    create: XOR<topicCreateWithoutQuestion_logsInput, topicUncheckedCreateWithoutQuestion_logsInput>
+    where?: topicWhereInput
+  }
+
+  export type topicUpdateToOneWithWhereWithoutQuestion_logsInput = {
+    where?: topicWhereInput
+    data: XOR<topicUpdateWithoutQuestion_logsInput, topicUncheckedUpdateWithoutQuestion_logsInput>
+  }
+
+  export type topicUpdateWithoutQuestion_logsInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uuid?: StringFieldUpdateOperationsInput | string
+    department_topic_departmentTodepartment?: departmentUpdateOneWithoutTopic_topic_departmentTodepartmentNestedInput
+  }
+
+  export type topicUncheckedUpdateWithoutQuestion_logsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableIntFieldUpdateOperationsInput | number | null
+    uuid?: StringFieldUpdateOperationsInput | string
   }
 
   export type topicCreateManyDepartment_topic_departmentTodepartmentInput = {
-    id?: bigint | number
+    id?: number
     created_at?: Date | string
     name?: string | null
     uuid?: string
   }
 
+  export type question_logCreateManyQuestion_departmentInput = {
+    id?: number
+    created_at?: Date | string
+    uuid?: string
+    user: number
+    timer: number
+    difficulty: string
+  }
+
   export type topicUpdateWithoutDepartment_topic_departmentTodepartmentInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: StringFieldUpdateOperationsInput | string
+    question_logs?: question_log_topicUpdateManyWithoutTopicNestedInput
   }
 
   export type topicUncheckedUpdateWithoutDepartment_topic_departmentTodepartmentInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uuid?: StringFieldUpdateOperationsInput | string
+    question_logs?: question_log_topicUncheckedUpdateManyWithoutTopicNestedInput
+  }
+
+  export type topicUncheckedUpdateManyWithoutDepartment_topic_departmentTodepartmentInput = {
+    id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
-  export type topicUncheckedUpdateManyWithoutDepartment_topic_departmentTodepartmentInput = {
-    id?: BigIntFieldUpdateOperationsInput | bigint | number
+  export type question_logUpdateWithoutQuestion_departmentInput = {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: StringFieldUpdateOperationsInput | string
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+    question_generator?: userUpdateOneRequiredWithoutQuestion_logNestedInput
+    topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
+  }
+
+  export type question_logUncheckedUpdateWithoutQuestion_departmentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    user?: IntFieldUpdateOperationsInput | number
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+    topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
+  }
+
+  export type question_logUncheckedUpdateManyWithoutQuestion_departmentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    user?: IntFieldUpdateOperationsInput | number
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type question_log_topicCreateManyTopicInput = {
+    question_log_id: number
+  }
+
+  export type question_log_topicUpdateWithoutTopicInput = {
+    question_log?: question_logUpdateOneRequiredWithoutTopicsNestedInput
+  }
+
+  export type question_log_topicUncheckedUpdateWithoutTopicInput = {
+    question_log_id?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type question_log_topicUncheckedUpdateManyWithoutTopicInput = {
+    question_log_id?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type question_logCreateManyQuestion_generatorInput = {
+    id?: number
+    created_at?: Date | string
+    uuid?: string
+    department: number
+    timer: number
+    difficulty: string
+  }
+
+  export type question_logUpdateWithoutQuestion_generatorInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+    question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
+    topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
+  }
+
+  export type question_logUncheckedUpdateWithoutQuestion_generatorInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    department?: IntFieldUpdateOperationsInput | number
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+    topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
+  }
+
+  export type question_logUncheckedUpdateManyWithoutQuestion_generatorInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    department?: IntFieldUpdateOperationsInput | number
+    timer?: IntFieldUpdateOperationsInput | number
+    difficulty?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type question_log_topicCreateManyQuestion_logInput = {
+    topic_id: number
+  }
+
+  export type question_log_topicUpdateWithoutQuestion_logInput = {
+    topic?: topicUpdateOneRequiredWithoutQuestion_logsNestedInput
+  }
+
+  export type question_log_topicUncheckedUpdateWithoutQuestion_logInput = {
+    topic_id?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type question_log_topicUncheckedUpdateManyWithoutQuestion_logInput = {
+    topic_id?: IntFieldUpdateOperationsInput | number
   }
 
 

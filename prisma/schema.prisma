@@ -12,17 +12,18 @@ datasource db {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model department {
-  id                                 Int      @id @default(autoincrement())
-  created_at                         DateTime @default(now()) @db.Timestamptz(6)
-  name                               String?  @unique @db.VarChar
-  uuid                               String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  topic_topic_departmentTodepartment topic[]  @relation("topic_departmentTodepartment")
+  id                                 Int            @id @default(autoincrement()) @db.SmallInt
+  created_at                         DateTime       @default(now()) @db.Timestamptz(6)
+  name                               String?        @unique @db.VarChar
+  uuid                               String?        @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  topic_topic_departmentTodepartment topic[]        @relation("topic_departmentTodepartment")
+  question_log_question_department   question_log[] @relation("question_department")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model participant {
-  id         Int      @id @default(autoincrement())
+  id         BigInt   @id @default(autoincrement())
   created_at DateTime @default(now()) @db.Timestamptz(6)
   email      String   @db.VarChar
   name       String   @db.VarChar
@@ -32,10 +33,45 @@ model participant {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model topic {
-  id                                      Int         @id @default(autoincrement())
-  created_at                              DateTime    @default(now()) @db.Timestamptz(6)
-  name                                    String?     @db.VarChar
-  department                              Int?
-  uuid                                    String      @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  department_topic_departmentTodepartment department? @relation("topic_departmentTodepartment", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  id                                      Int                  @id @default(autoincrement()) @db.SmallInt
+  created_at                              DateTime             @default(now()) @db.Timestamptz(6)
+  name                                    String?              @db.VarChar
+  department                              Int?                 @db.SmallInt
+  uuid                                    String               @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  department_topic_departmentTodepartment department?          @relation("topic_departmentTodepartment", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  question_logs                           question_log_topic[]
+}
+
+model user {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  email      String   @db.VarChar
+  name       String   @db.VarChar
+  uuid       String   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  question_log question_log[] @relation("question_generator")
+}
+
+model question_log {
+  id                  Int        @id @default(autoincrement())
+  created_at          DateTime   @default(now()) @db.Timestamptz(6)
+  uuid                String     @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  department          Int
+  user                Int
+  timer               Int
+  difficulty          String
+  question_generator  user       @relation("question_generator", fields: [user], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  question_department department @relation("question_department", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  topics question_log_topic[]
+}
+
+model question_log_topic {
+  question_log_id Int
+  topic_id        Int
+
+  question_log question_log @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
+  topic        topic        @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+
+  @@id([question_log_id, topic_id])
 }
