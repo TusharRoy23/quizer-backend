@@ -18,6 +18,7 @@
     "express": "^4.21.2",
     "inversify": "^6.2.2",
     "inversify-express-utils": "^6.4.6",
+    "openai": "^4.98.0",
     "reflect-metadata": "^0.2.2",
     "zod": "^3.24.3"
   },

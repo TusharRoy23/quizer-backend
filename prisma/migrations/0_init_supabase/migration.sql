@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "department" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SMALLSERIAL NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" VARCHAR,
     "uuid" UUID DEFAULT gen_random_uuid(),
@@ -14,16 +14,18 @@ CREATE TABLE "participant" (
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "email" VARCHAR NOT NULL,
     "name" VARCHAR NOT NULL,
+    "uuid" UUID NOT NULL DEFAULT gen_random_uuid(),
 
     CONSTRAINT "participant_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "topic" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SMALLSERIAL NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" VARCHAR,
-    "department" BIGINT,
+    "department" SMALLINT,
+    "uuid" UUID NOT NULL DEFAULT gen_random_uuid(),
 
     CONSTRAINT "topic_pkey" PRIMARY KEY ("id")
 );

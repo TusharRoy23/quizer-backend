@@ -23,10 +23,16 @@ export class DatabaseService implements IDatabaseService {
                     $allModels: {
                         findMany: async ({ model, operation, args, query }) => {
                             const results = await query(args);
-                            console.log('results: ', results);
                             results.map(result => delete result.id);
 
                             return results;
+                        },
+                        findFirst: async ({ model, operation, args, query }) => {
+                            const result = await query(args);
+                            if (result) {
+                                delete result.id;
+                            }
+                            return result;
                         }
                     }
                 }

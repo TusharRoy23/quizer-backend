@@ -140,6 +140,29 @@ exports.Prisma.TopicScalarFieldEnum = {
   uuid: 'uuid'
 };
 
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  created_at: 'created_at',
+  email: 'email',
+  name: 'name',
+  uuid: 'uuid'
+};
+
+exports.Prisma.Question_logScalarFieldEnum = {
+  id: 'id',
+  created_at: 'created_at',
+  uuid: 'uuid',
+  department: 'department',
+  user: 'user',
+  timer: 'timer',
+  difficulty: 'difficulty'
+};
+
+exports.Prisma.Question_log_topicScalarFieldEnum = {
+  question_log_id: 'question_log_id',
+  topic_id: 'topic_id'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -159,7 +182,10 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   department: 'department',
   participant: 'participant',
-  topic: 'topic'
+  topic: 'topic',
+  user: 'user',
+  question_log: 'question_log',
+  question_log_topic: 'question_log_topic'
 };
 
 /**
