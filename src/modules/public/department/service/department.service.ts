@@ -14,8 +14,8 @@ export class DepartmentService implements IDepartmentService {
         return await this.departmentRepository.getDepartmentList();
     }
 
-    async getTopicList(): Promise<Topic[]> {
-        return await this.departmentRepository.getTopicList();
+    async getTopicsByDepartment(departmentUuid: string): Promise<Topic[]> {
+        return await this.departmentRepository.getTopicsByDepartment(departmentUuid);
     }
 
     async getDepartmentByUUID(uuid: string): Promise<Department | null> {

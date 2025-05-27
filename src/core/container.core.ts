@@ -15,6 +15,10 @@ import { DeepSeekService } from './openai/deepseek/service/deepseek.service';
 import { DepartmentService } from '../modules/public/department/service/department.service';
 import { IOpenAIRepository } from './openai/interface/IOpenAI.repository';
 import { DeepSeekRepository } from './openai/deepseek/repository/deepseek.repository';
+import { IUserRepository } from '../modules/public/user/interface/IUser.repository';
+import { IUserService } from '../modules/public/user/interface/IUser.service';
+import { UserRepository } from '../modules/public/user/repository/user.repository';
+import { UserService } from '../modules/public/user/service/user.service';
 
 const container = new Container();
 
@@ -31,5 +35,9 @@ container.bind<IDepartmentService>(TYPES.IDepartmentService).to(DepartmentServic
 //? Question Module
 container.bind<IQuestionRepository>(TYPES.IQuestionRepository).to(QuestionRepository);
 container.bind<IQuestionService>(TYPES.IQuestionService).to(QuestionService);
+
+//? User Module
+container.bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository);
+container.bind<IUserService>(TYPES.IUserService).to(UserService);
 
 export default container;

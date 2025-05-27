@@ -14,16 +14,15 @@ export class DepartmentController {
     public async getDepartmentList(req: Request, res: Response) {
         const results = await this.departmentService.getDepartmentList();
         return res.status(200).json({
-            status: 200,
             data: results,
         });
     }
 
-    @httpGet("/topic")
-    public async getTopicList(req: Request, res: Response) {
-        const results = await this.departmentService.getTopicList();
+    @httpGet("/topic/:departmentUUID")
+    public async getTopicsByDepartment(req: Request, res: Response) {
+        const departmentUUID = req.params.departmentUUID;
+        const results = await this.departmentService.getTopicsByDepartment(departmentUUID);
         return res.status(200).json({
-            status: 200,
             data: results,
         });
     }
