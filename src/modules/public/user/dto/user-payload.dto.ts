@@ -1,0 +1,13 @@
+import { z, string } from "zod";
+export const UserPayloadDto = z.object({
+    name: string({
+        required_error: 'Name is required',
+        invalid_type_error: 'Name must be a string',
+    }).nonempty({ message: 'Name is required' }),
+    email: string({
+        required_error: 'Email is required',
+        invalid_type_error: 'Email must be a string',
+    }).email({ message: 'Email is invalid' }),
+});
+
+export type UserPayloadType = z.infer<typeof UserPayloadDto>;

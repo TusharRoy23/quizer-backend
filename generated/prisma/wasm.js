@@ -153,14 +153,28 @@ exports.Prisma.Question_logScalarFieldEnum = {
   created_at: 'created_at',
   uuid: 'uuid',
   department: 'department',
-  user: 'user',
+  participant: 'participant',
   timer: 'timer',
-  difficulty: 'difficulty'
+  question_count: 'question_count',
+  difficulty: 'difficulty',
+  completed: 'completed'
 };
 
 exports.Prisma.Question_log_topicScalarFieldEnum = {
   question_log_id: 'question_log_id',
   topic_id: 'topic_id'
+};
+
+exports.Prisma.Question_log_questionScalarFieldEnum = {
+  id: 'id',
+  question_log_id: 'question_log_id',
+  question: 'question',
+  options: 'options',
+  answer: 'answer',
+  selected_answer: 'selected_answer',
+  question_type: 'question_type',
+  created_at: 'created_at',
+  uuid: 'uuid'
 };
 
 exports.Prisma.SortOrder = {
@@ -177,7 +191,10 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
+exports.QuestionType = exports.$Enums.QuestionType = {
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+  CHOICE: 'CHOICE'
+};
 
 exports.Prisma.ModelName = {
   department: 'department',
@@ -185,7 +202,8 @@ exports.Prisma.ModelName = {
   topic: 'topic',
   user: 'user',
   question_log: 'question_log',
-  question_log_topic: 'question_log_topic'
+  question_log_topic: 'question_log_topic',
+  question_log_question: 'question_log_question'
 };
 
 /**

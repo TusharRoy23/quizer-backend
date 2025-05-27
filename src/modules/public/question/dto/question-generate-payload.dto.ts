@@ -1,5 +1,5 @@
 import { z, string, number, enum as enum_, array } from 'zod';
-export const QuestionPayloadDto = z.object({
+export const QuestionGeneratePayloadDto = z.object({
     name: string({
         required_error: 'Name is required',
         invalid_type_error: 'Name must be a string',
@@ -27,4 +27,4 @@ export const QuestionPayloadDto = z.object({
     }).min(1, { message: 'Timer must be at least 1 second' }),
 });
 
-export type QuestionPayloadType = z.infer<typeof QuestionPayloadDto>;
+export type QuestionGeneratePayloadType = z.infer<typeof QuestionGeneratePayloadDto>;

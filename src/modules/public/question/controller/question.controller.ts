@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { inject } from "inversify";
-import { controller, httpPost, requestBody } from "inversify-express-utils";
+import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils";
 import { DtoValidationMiddleware } from "../../../../middlewares/dto-validation.middleware";
-import { QuestionPayloadDto, QuestionPayloadType } from "../dto/question-payload.dto";
+import { QuestionGeneratePayloadDto, QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { TYPES } from "../../../../core/type.core";
 import { IQuestionService } from "../interface/IQuestion.service";
+import { QuestionSavePayloadDto, QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
 @controller("/question")
 export class QuestionController {
@@ -12,11 +13,29 @@ export class QuestionController {
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service
     ) { }
 
-    @httpPost("/generate", DtoValidationMiddleware(QuestionPayloadDto))
-    public async getGeneratedQuestion(
-        @requestBody() payload: QuestionPayloadType, req: Request, res: Response
+    @httpGet("/:questionLogUUID")
+    public async getGeneratedQuestions(
+        req: Request, res: Response
     ) {
-        const data = await this.questionService.generatedQuestions(payload);
-        return res.status(201).json({ 'message': 'created' })
+        const questionLogUUID = req.params.questionLogUUID;
+        const data = await this.questionService.getGeneratedQuestions(questionLogUUID);
+        return res.status(200).json(data);
+    }
+
+    @httpPost("/:questionLogUUID/save", DtoValidationMiddleware(QuestionSavePayloadDto))
+    public async saveAnswerForQuestion(
+        @requestBody() payload: QuestionSavePayloadType, req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const result = await this.questionService.saveAnswerForQuestion(questionLogUUID, payload);
+        return res.status(200).json({ data: result });
+    }
+
+    @httpPost("/generate", DtoValidationMiddleware(QuestionGeneratePayloadDto))
+    public async getGeneratedQuestion(
+        @requestBody() payload: QuestionGeneratePayloadType, req: Request, res: Response
+    ) {
+        const result = await this.questionService.generatedQuestions(payload);
+        return res.status(201).json({ data: result });
     }
 }

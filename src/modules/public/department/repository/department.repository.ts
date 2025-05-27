@@ -23,16 +23,13 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
         }
     }
 
-    async getTopicList(): Promise<Topic[]> {
+    async getTopicsByDepartment(departmentUuid: string): Promise<Topic[]> {
         try {
             const prisma = await this.prisma$();
             const topic = await prisma.topic.findMany({
-                include: {
+                where: {
                     department_topic_departmentTodepartment: {
-                        select: {
-                            uuid: true,
-                            name: true,
-                        }
+                        uuid: departmentUuid
                     }
                 },
                 omit: {
