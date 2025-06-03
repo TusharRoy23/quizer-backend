@@ -4,6 +4,7 @@ import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BaseRepository } from "../../../../core/repository/base.repository";
 import { Department, Topic } from "../../types/public.type";
+import { throwException } from "../../../../shared/errors/all.exception";
 
 @injectable()
 export class DepartmentRepository extends BaseRepository implements IDepartmentRepository {
@@ -19,7 +20,7 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
             const department = await prisma.department.findMany();
             return department as Department[];
         } catch (error) {
-            throw new Error('Failed to fetch departments');
+            return throwException(error);
         }
     }
 
@@ -38,7 +39,7 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
             });
             return topic as Topic[];
         } catch (error) {
-            throw new Error('Failed to fetch topics');
+            return throwException(error);
         }
     }
 
@@ -53,7 +54,7 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
 
             return department as Department;
         } catch (error) {
-            throw new Error('Failed to fetch department');
+            return throwException(error);
         }
     }
 
@@ -73,7 +74,7 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
 
             return topics as Topic[];
         } catch (error) {
-            throw new Error('Failed to fetch topic');
+            return throwException(error);
         }
     }
 }

@@ -61,6 +61,9 @@ model question_log {
   question_count      Int
   difficulty          String
   completed           Boolean     @default(false)
+  total_answers       Int         @default(0)
+  total_correct       Int         @default(0)
+  score               Int         @default(0)
   question_generator  participant @relation("question_generator", fields: [participant], references: [id], onDelete: Restrict, onUpdate: NoAction)
   question_department department  @relation("question_department", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
 

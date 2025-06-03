@@ -6,6 +6,7 @@ import { QuestionGeneratePayloadDto, QuestionGeneratePayloadType } from "../dto/
 import { TYPES } from "../../../../core/type.core";
 import { IQuestionService } from "../interface/IQuestion.service";
 import { QuestionSavePayloadDto, QuestionSavePayloadType } from "../dto/question-save-payload.dto";
+import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middleware";
 
 @controller("/question")
 export class QuestionController {
@@ -13,7 +14,7 @@ export class QuestionController {
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service
     ) { }
 
-    @httpGet("/:questionLogUUID")
+    @httpGet("/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
     public async getGeneratedQuestions(
         req: Request, res: Response
     ) {
@@ -22,12 +23,30 @@ export class QuestionController {
         return res.status(200).json(data);
     }
 
-    @httpPost("/:questionLogUUID/save", DtoValidationMiddleware(QuestionSavePayloadDto))
+    @httpPost("/:questionLogUUID/save", ValidateUUIDParam("questionLogUUID"), DtoValidationMiddleware(QuestionSavePayloadDto))
     public async saveAnswerForQuestion(
         @requestBody() payload: QuestionSavePayloadType, req: Request, res: Response
     ) {
         const questionLogUUID = req.params.questionLogUUID;
         const result = await this.questionService.saveAnswerForQuestion(questionLogUUID, payload);
+        return res.status(200).json({ data: result });
+    }
+
+    @httpPost("/:questionLogUUID/submit", ValidateUUIDParam("questionLogUUID"))
+    public async submitQuestionLog(
+        req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const result = await this.questionService.submitQuestionLog(questionLogUUID);
+        return res.status(200).json({ data: result });
+    }
+
+    @httpGet("/:questionLogUUID/result", ValidateUUIDParam("questionLogUUID"))
+    public async getQuestionLogResult(
+        req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const result = await this.questionService.getQuizResult(questionLogUUID);
         return res.status(200).json({ data: result });
     }
 

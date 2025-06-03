@@ -157,7 +157,10 @@ exports.Prisma.Question_logScalarFieldEnum = {
   timer: 'timer',
   question_count: 'question_count',
   difficulty: 'difficulty',
-  completed: 'completed'
+  completed: 'completed',
+  total_answers: 'total_answers',
+  total_correct: 'total_correct',
+  score: 'score'
 };
 
 exports.Prisma.Question_log_topicScalarFieldEnum = {

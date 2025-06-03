@@ -5991,6 +5991,9 @@ export namespace Prisma {
     participant: number | null
     timer: number | null
     question_count: number | null
+    total_answers: number | null
+    total_correct: number | null
+    score: number | null
   }
 
   export type Question_logSumAggregateOutputType = {
@@ -5999,6 +6002,9 @@ export namespace Prisma {
     participant: number | null
     timer: number | null
     question_count: number | null
+    total_answers: number | null
+    total_correct: number | null
+    score: number | null
   }
 
   export type Question_logMinAggregateOutputType = {
@@ -6011,6 +6017,9 @@ export namespace Prisma {
     question_count: number | null
     difficulty: string | null
     completed: boolean | null
+    total_answers: number | null
+    total_correct: number | null
+    score: number | null
   }
 
   export type Question_logMaxAggregateOutputType = {
@@ -6023,6 +6032,9 @@ export namespace Prisma {
     question_count: number | null
     difficulty: string | null
     completed: boolean | null
+    total_answers: number | null
+    total_correct: number | null
+    score: number | null
   }
 
   export type Question_logCountAggregateOutputType = {
@@ -6035,6 +6047,9 @@ export namespace Prisma {
     question_count: number
     difficulty: number
     completed: number
+    total_answers: number
+    total_correct: number
+    score: number
     _all: number
   }
 
@@ -6045,6 +6060,9 @@ export namespace Prisma {
     participant?: true
     timer?: true
     question_count?: true
+    total_answers?: true
+    total_correct?: true
+    score?: true
   }
 
   export type Question_logSumAggregateInputType = {
@@ -6053,6 +6071,9 @@ export namespace Prisma {
     participant?: true
     timer?: true
     question_count?: true
+    total_answers?: true
+    total_correct?: true
+    score?: true
   }
 
   export type Question_logMinAggregateInputType = {
@@ -6065,6 +6086,9 @@ export namespace Prisma {
     question_count?: true
     difficulty?: true
     completed?: true
+    total_answers?: true
+    total_correct?: true
+    score?: true
   }
 
   export type Question_logMaxAggregateInputType = {
@@ -6077,6 +6101,9 @@ export namespace Prisma {
     question_count?: true
     difficulty?: true
     completed?: true
+    total_answers?: true
+    total_correct?: true
+    score?: true
   }
 
   export type Question_logCountAggregateInputType = {
@@ -6089,6 +6116,9 @@ export namespace Prisma {
     question_count?: true
     difficulty?: true
     completed?: true
+    total_answers?: true
+    total_correct?: true
+    score?: true
     _all?: true
   }
 
@@ -6188,6 +6218,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed: boolean
+    total_answers: number
+    total_correct: number
+    score: number
     _count: Question_logCountAggregateOutputType | null
     _avg: Question_logAvgAggregateOutputType | null
     _sum: Question_logSumAggregateOutputType | null
@@ -6219,6 +6252,9 @@ export namespace Prisma {
     question_count?: boolean
     difficulty?: boolean
     completed?: boolean
+    total_answers?: boolean
+    total_correct?: boolean
+    score?: boolean
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
     topics?: boolean | question_log$topicsArgs<ExtArgs>
@@ -6236,6 +6272,9 @@ export namespace Prisma {
     question_count?: boolean
     difficulty?: boolean
     completed?: boolean
+    total_answers?: boolean
+    total_correct?: boolean
+    score?: boolean
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["question_log"]>
@@ -6250,6 +6289,9 @@ export namespace Prisma {
     question_count?: boolean
     difficulty?: boolean
     completed?: boolean
+    total_answers?: boolean
+    total_correct?: boolean
+    score?: boolean
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["question_log"]>
@@ -6264,9 +6306,12 @@ export namespace Prisma {
     question_count?: boolean
     difficulty?: boolean
     completed?: boolean
+    total_answers?: boolean
+    total_correct?: boolean
+    score?: boolean
   }
 
-  export type question_logOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "uuid" | "department" | "participant" | "timer" | "question_count" | "difficulty" | "completed", ExtArgs["result"]["question_log"]>
+  export type question_logOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "uuid" | "department" | "participant" | "timer" | "question_count" | "difficulty" | "completed" | "total_answers" | "total_correct" | "score", ExtArgs["result"]["question_log"]>
   export type question_logInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
@@ -6301,6 +6346,9 @@ export namespace Prisma {
       question_count: number
       difficulty: string
       completed: boolean
+      total_answers: number
+      total_correct: number
+      score: number
     }, ExtArgs["result"]["question_log"]>
     composites: {}
   }
@@ -6737,6 +6785,9 @@ export namespace Prisma {
     readonly question_count: FieldRef<"question_log", 'Int'>
     readonly difficulty: FieldRef<"question_log", 'String'>
     readonly completed: FieldRef<"question_log", 'Boolean'>
+    readonly total_answers: FieldRef<"question_log", 'Int'>
+    readonly total_correct: FieldRef<"question_log", 'Int'>
+    readonly score: FieldRef<"question_log", 'Int'>
   }
     
 
@@ -9474,7 +9525,10 @@ export namespace Prisma {
     timer: 'timer',
     question_count: 'question_count',
     difficulty: 'difficulty',
-    completed: 'completed'
+    completed: 'completed',
+    total_answers: 'total_answers',
+    total_correct: 'total_correct',
+    score: 'score'
   };
 
   export type Question_logScalarFieldEnum = (typeof Question_logScalarFieldEnum)[keyof typeof Question_logScalarFieldEnum]
@@ -9851,6 +9905,9 @@ export namespace Prisma {
     question_count?: IntFilter<"question_log"> | number
     difficulty?: StringFilter<"question_log"> | string
     completed?: BoolFilter<"question_log"> | boolean
+    total_answers?: IntFilter<"question_log"> | number
+    total_correct?: IntFilter<"question_log"> | number
+    score?: IntFilter<"question_log"> | number
     question_generator?: XOR<ParticipantScalarRelationFilter, participantWhereInput>
     question_department?: XOR<DepartmentScalarRelationFilter, departmentWhereInput>
     topics?: Question_log_topicListRelationFilter
@@ -9867,6 +9924,9 @@ export namespace Prisma {
     question_count?: SortOrder
     difficulty?: SortOrder
     completed?: SortOrder
+    total_answers?: SortOrder
+    total_correct?: SortOrder
+    score?: SortOrder
     question_generator?: participantOrderByWithRelationInput
     question_department?: departmentOrderByWithRelationInput
     topics?: question_log_topicOrderByRelationAggregateInput
@@ -9886,6 +9946,9 @@ export namespace Prisma {
     question_count?: IntFilter<"question_log"> | number
     difficulty?: StringFilter<"question_log"> | string
     completed?: BoolFilter<"question_log"> | boolean
+    total_answers?: IntFilter<"question_log"> | number
+    total_correct?: IntFilter<"question_log"> | number
+    score?: IntFilter<"question_log"> | number
     question_generator?: XOR<ParticipantScalarRelationFilter, participantWhereInput>
     question_department?: XOR<DepartmentScalarRelationFilter, departmentWhereInput>
     topics?: Question_log_topicListRelationFilter
@@ -9902,6 +9965,9 @@ export namespace Prisma {
     question_count?: SortOrder
     difficulty?: SortOrder
     completed?: SortOrder
+    total_answers?: SortOrder
+    total_correct?: SortOrder
+    score?: SortOrder
     _count?: question_logCountOrderByAggregateInput
     _avg?: question_logAvgOrderByAggregateInput
     _max?: question_logMaxOrderByAggregateInput
@@ -9922,6 +9988,9 @@ export namespace Prisma {
     question_count?: IntWithAggregatesFilter<"question_log"> | number
     difficulty?: StringWithAggregatesFilter<"question_log"> | string
     completed?: BoolWithAggregatesFilter<"question_log"> | boolean
+    total_answers?: IntWithAggregatesFilter<"question_log"> | number
+    total_correct?: IntWithAggregatesFilter<"question_log"> | number
+    score?: IntWithAggregatesFilter<"question_log"> | number
   }
 
   export type question_log_topicWhereInput = {
@@ -10274,6 +10343,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
@@ -10290,6 +10362,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
@@ -10301,6 +10376,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
@@ -10317,6 +10395,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
@@ -10331,6 +10412,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
   }
 
   export type question_logUpdateManyMutationInput = {
@@ -10340,6 +10424,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
   }
 
   export type question_logUncheckedUpdateManyInput = {
@@ -10352,6 +10439,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
   }
 
   export type question_log_topicCreateInput = {
@@ -10869,6 +10959,9 @@ export namespace Prisma {
     question_count?: SortOrder
     difficulty?: SortOrder
     completed?: SortOrder
+    total_answers?: SortOrder
+    total_correct?: SortOrder
+    score?: SortOrder
   }
 
   export type question_logAvgOrderByAggregateInput = {
@@ -10877,6 +10970,9 @@ export namespace Prisma {
     participant?: SortOrder
     timer?: SortOrder
     question_count?: SortOrder
+    total_answers?: SortOrder
+    total_correct?: SortOrder
+    score?: SortOrder
   }
 
   export type question_logMaxOrderByAggregateInput = {
@@ -10889,6 +10985,9 @@ export namespace Prisma {
     question_count?: SortOrder
     difficulty?: SortOrder
     completed?: SortOrder
+    total_answers?: SortOrder
+    total_correct?: SortOrder
+    score?: SortOrder
   }
 
   export type question_logMinOrderByAggregateInput = {
@@ -10901,6 +11000,9 @@ export namespace Prisma {
     question_count?: SortOrder
     difficulty?: SortOrder
     completed?: SortOrder
+    total_answers?: SortOrder
+    total_correct?: SortOrder
+    score?: SortOrder
   }
 
   export type question_logSumOrderByAggregateInput = {
@@ -10909,6 +11011,9 @@ export namespace Prisma {
     participant?: SortOrder
     timer?: SortOrder
     question_count?: SortOrder
+    total_answers?: SortOrder
+    total_correct?: SortOrder
+    score?: SortOrder
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -11712,6 +11817,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionCreateNestedManyWithoutQuestion_logInput
@@ -11726,6 +11834,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
@@ -11796,6 +11907,9 @@ export namespace Prisma {
     question_count?: IntFilter<"question_log"> | number
     difficulty?: StringFilter<"question_log"> | string
     completed?: BoolFilter<"question_log"> | boolean
+    total_answers?: IntFilter<"question_log"> | number
+    total_correct?: IntFilter<"question_log"> | number
+    score?: IntFilter<"question_log"> | number
   }
 
   export type question_logCreateWithoutQuestion_generatorInput = {
@@ -11805,6 +11919,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionCreateNestedManyWithoutQuestion_logInput
@@ -11819,6 +11936,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
@@ -12132,6 +12252,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     question_log_question?: question_log_questionCreateNestedManyWithoutQuestion_logInput
@@ -12147,6 +12270,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
 
@@ -12193,6 +12319,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     question_log_question?: question_log_questionUpdateManyWithoutQuestion_logNestedInput
@@ -12208,6 +12337,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
 
@@ -12244,6 +12376,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
@@ -12259,6 +12394,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
   }
 
@@ -12285,6 +12423,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
@@ -12300,6 +12441,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
 
@@ -12319,6 +12463,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
   }
 
   export type topicUpdateWithoutDepartment_topic_departmentTodepartmentInput = {
@@ -12350,6 +12497,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUpdateManyWithoutQuestion_logNestedInput
@@ -12364,6 +12514,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
@@ -12377,6 +12530,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
   }
 
   export type question_logCreateManyQuestion_generatorInput = {
@@ -12388,6 +12544,9 @@ export namespace Prisma {
     question_count: number
     difficulty: string
     completed?: boolean
+    total_answers?: number
+    total_correct?: number
+    score?: number
   }
 
   export type question_logUpdateWithoutQuestion_generatorInput = {
@@ -12397,6 +12556,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUpdateManyWithoutQuestion_logNestedInput
@@ -12411,6 +12573,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
@@ -12424,6 +12589,9 @@ export namespace Prisma {
     question_count?: IntFieldUpdateOperationsInput | number
     difficulty?: StringFieldUpdateOperationsInput | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    total_answers?: IntFieldUpdateOperationsInput | number
+    total_correct?: IntFieldUpdateOperationsInput | number
+    score?: IntFieldUpdateOperationsInput | number
   }
 
   export type question_log_topicCreateManyTopicInput = {
