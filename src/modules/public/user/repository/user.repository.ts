@@ -6,6 +6,7 @@ import { UserPayloadType } from "../dto/user-payload.dto";
 import { IUserRepository } from "../interface/IUser.repository";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { ParticipantPayloadType } from "../dto/participant-payload.dto";
+import { throwException } from "../../../../shared/errors/all.exception";
 
 export class UserRepository extends BaseRepository implements IUserRepository {
     constructor(
@@ -26,7 +27,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
             });
             return user as User;
         } catch (error) {
-            throw new Error('Failed to create user');
+            return throwException(error);
         }
     }
 
@@ -44,7 +45,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
             }
             return user as User;
         } catch (error) {
-            throw new Error('Failed to fetch user');
+            return throwException(error);
         }
     }
 
@@ -60,7 +61,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
             });
             return participant as Participant;
         } catch (error) {
-            throw new Error('Failed to create Participant');
+            return throwException(error);
         }
     }
 
@@ -78,8 +79,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
             }
             return participant as Participant;
         } catch (error) {
-            console.log('error: ', error);
-            throw new Error('Failed to fetch Participant');
+            return throwException(error);
         }
     }
 }

@@ -3,7 +3,7 @@ import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { IQuestionService } from "../interface/IQuestion.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { TYPES } from "../../../../core/type.core";
-import { Question } from "../../types/public.type";
+import { Question, QuestionLog } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
 @injectable()
@@ -22,5 +22,13 @@ export class QuestionService implements IQuestionService {
 
     public saveAnswerForQuestion(questionLogUUID: string, payload: QuestionSavePayloadType): Promise<Question> {
         return this.questionRepository.saveAnswerForQuestion(questionLogUUID, payload);
+    }
+
+    public submitQuestionLog(questionLogUUID: string): Promise<string> {
+        return this.questionRepository.submitQuestionLog(questionLogUUID);
+    }
+
+    public getQuizResult(questionLogUUID: string): Promise<QuestionLog> {
+        return this.questionRepository.getQuizResult(questionLogUUID);
     }
 }

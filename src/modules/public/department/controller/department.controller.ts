@@ -3,6 +3,7 @@ import { inject } from "inversify";
 import { controller, httpGet } from "inversify-express-utils";
 import { IDepartmentService } from "../interface/IDepartment.service";
 import { TYPES } from "../../../../core/type.core";
+import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middleware";
 
 @controller("/department")
 export class DepartmentController {
@@ -18,7 +19,7 @@ export class DepartmentController {
         });
     }
 
-    @httpGet("/topic/:departmentUUID")
+    @httpGet("/topic/:departmentUUID", ValidateUUIDParam("departmentUUID"))
     public async getTopicsByDepartment(req: Request, res: Response) {
         const departmentUUID = req.params.departmentUUID;
         const results = await this.departmentService.getTopicsByDepartment(departmentUUID);

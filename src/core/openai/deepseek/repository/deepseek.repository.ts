@@ -10,7 +10,8 @@ export class DeepSeekRepository implements IOpenAIRepository {
             ],
             response_format: {
                 type: "json_object"
-            }
+            },
+            temperature: 0.0
         });
         return completion.choices[0]?.message?.content;
     }

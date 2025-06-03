@@ -41,3 +41,17 @@ export type Question = {
     selected_answer: number[];
     question_type: QuestionType;
 }
+
+export type QuestionLog = {
+    id: number;
+    uuid: string;
+    department: Department;
+    timer: number;
+    difficulty: string;
+    question_count: number;
+    participant: Participant;
+    completed: boolean;
+    score: boolean;
+    total_answers: number;
+    total_correct: number;
+}
