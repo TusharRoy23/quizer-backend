@@ -8,6 +8,7 @@ export const ParticipantPayloadDto = z.object({
         required_error: 'Email is required',
         invalid_type_error: 'Email must be a string',
     }).email({ message: 'Email is invalid' }),
+    googleId: string()
 });
 
 export type ParticipantPayloadType = z.infer<typeof ParticipantPayloadDto>;

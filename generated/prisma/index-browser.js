@@ -129,6 +129,7 @@ exports.Prisma.ParticipantScalarFieldEnum = {
   created_at: 'created_at',
   email: 'email',
   name: 'name',
+  google_id: 'google_id',
   uuid: 'uuid'
 };
 

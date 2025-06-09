@@ -1,6 +1,9 @@
 import passport from 'passport';
 import { Profile, Strategy as GoogleStrategy, VerifyCallback } from 'passport-google-oauth20';
-import { Request } from 'express';
+import { UserService } from '../../modules/public/user/service/user.service';
+import container from '../../core/container.core';
+
+const userService = container.resolve(UserService);
 
 // Use the correct types for serializeUser/deserializeUser
 passport.use(
@@ -17,12 +20,24 @@ passport.use(
             profile: Profile,
             done: VerifyCallback
         ) => {
-            // Here you can find or create the user in your database
-            // Example:
-            // const user = await User.findOrCreate({ googleId: profile.id, ... });
-            // return done(null, user);
+            // Yes, you can import and use your createParticipent function here.
+            // Example (adjust the import path as needed):
 
-            // For now, just return the profile
+            try {
+                const { id, displayName, emails } = profile;
+                if (!(id && displayName && emails)) return done(null, false);
+
+                // Call your createParticipent function with relevant data from the Google profile
+                const user = await userService.createParticipant({
+                    googleId: id,
+                    name: displayName,
+                    email: emails?.[0]?.value,
+                    // Add other fields as needed
+                });
+                return done(null, user || false);
+            } catch (error) {
+                return done(error);
+            }
             return done(null, profile);
         }
     )

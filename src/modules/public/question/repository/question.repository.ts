@@ -37,6 +37,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 participant = await this.userService.createParticipant({
                     name: payload.name,
                     email: payload.email,
+                    googleId: "", // Provide a default or actual googleId if available
                 });
             }
             const department = await this.departmentService.getDepartmentByUUID(payload.department);
