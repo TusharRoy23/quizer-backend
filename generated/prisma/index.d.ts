@@ -2720,6 +2720,7 @@ export namespace Prisma {
     created_at: Date | null
     email: string | null
     name: string | null
+    google_id: string | null
     uuid: string | null
   }
 
@@ -2728,6 +2729,7 @@ export namespace Prisma {
     created_at: Date | null
     email: string | null
     name: string | null
+    google_id: string | null
     uuid: string | null
   }
 
@@ -2736,6 +2738,7 @@ export namespace Prisma {
     created_at: number
     email: number
     name: number
+    google_id: number
     uuid: number
     _all: number
   }
@@ -2754,6 +2757,7 @@ export namespace Prisma {
     created_at?: true
     email?: true
     name?: true
+    google_id?: true
     uuid?: true
   }
 
@@ -2762,6 +2766,7 @@ export namespace Prisma {
     created_at?: true
     email?: true
     name?: true
+    google_id?: true
     uuid?: true
   }
 
@@ -2770,6 +2775,7 @@ export namespace Prisma {
     created_at?: true
     email?: true
     name?: true
+    google_id?: true
     uuid?: true
     _all?: true
   }
@@ -2865,6 +2871,7 @@ export namespace Prisma {
     created_at: Date
     email: string
     name: string
+    google_id: string
     uuid: string
     _count: ParticipantCountAggregateOutputType | null
     _avg: ParticipantAvgAggregateOutputType | null
@@ -2892,6 +2899,7 @@ export namespace Prisma {
     created_at?: boolean
     email?: boolean
     name?: boolean
+    google_id?: boolean
     uuid?: boolean
     question_log?: boolean | participant$question_logArgs<ExtArgs>
     _count?: boolean | ParticipantCountOutputTypeDefaultArgs<ExtArgs>
@@ -2902,6 +2910,7 @@ export namespace Prisma {
     created_at?: boolean
     email?: boolean
     name?: boolean
+    google_id?: boolean
     uuid?: boolean
   }, ExtArgs["result"]["participant"]>
 
@@ -2910,6 +2919,7 @@ export namespace Prisma {
     created_at?: boolean
     email?: boolean
     name?: boolean
+    google_id?: boolean
     uuid?: boolean
   }, ExtArgs["result"]["participant"]>
 
@@ -2918,10 +2928,11 @@ export namespace Prisma {
     created_at?: boolean
     email?: boolean
     name?: boolean
+    google_id?: boolean
     uuid?: boolean
   }
 
-  export type participantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "email" | "name" | "uuid", ExtArgs["result"]["participant"]>
+  export type participantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "email" | "name" | "google_id" | "uuid", ExtArgs["result"]["participant"]>
   export type participantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     question_log?: boolean | participant$question_logArgs<ExtArgs>
     _count?: boolean | ParticipantCountOutputTypeDefaultArgs<ExtArgs>
@@ -2939,6 +2950,7 @@ export namespace Prisma {
       created_at: Date
       email: string
       name: string
+      google_id: string
       uuid: string
     }, ExtArgs["result"]["participant"]>
     composites: {}
@@ -3368,6 +3380,7 @@ export namespace Prisma {
     readonly created_at: FieldRef<"participant", 'DateTime'>
     readonly email: FieldRef<"participant", 'String'>
     readonly name: FieldRef<"participant", 'String'>
+    readonly google_id: FieldRef<"participant", 'String'>
     readonly uuid: FieldRef<"participant", 'String'>
   }
     
@@ -9488,6 +9501,7 @@ export namespace Prisma {
     created_at: 'created_at',
     email: 'email',
     name: 'name',
+    google_id: 'google_id',
     uuid: 'uuid'
   };
 
@@ -9729,6 +9743,7 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"participant"> | Date | string
     email?: StringFilter<"participant"> | string
     name?: StringFilter<"participant"> | string
+    google_id?: StringFilter<"participant"> | string
     uuid?: UuidFilter<"participant"> | string
     question_log?: Question_logListRelationFilter
   }
@@ -9738,6 +9753,7 @@ export namespace Prisma {
     created_at?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    google_id?: SortOrder
     uuid?: SortOrder
     question_log?: question_logOrderByRelationAggregateInput
   }
@@ -9751,6 +9767,7 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"participant"> | Date | string
     email?: StringFilter<"participant"> | string
     name?: StringFilter<"participant"> | string
+    google_id?: StringFilter<"participant"> | string
     question_log?: Question_logListRelationFilter
   }, "id" | "uuid">
 
@@ -9759,6 +9776,7 @@ export namespace Prisma {
     created_at?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    google_id?: SortOrder
     uuid?: SortOrder
     _count?: participantCountOrderByAggregateInput
     _avg?: participantAvgOrderByAggregateInput
@@ -9775,6 +9793,7 @@ export namespace Prisma {
     created_at?: DateTimeWithAggregatesFilter<"participant"> | Date | string
     email?: StringWithAggregatesFilter<"participant"> | string
     name?: StringWithAggregatesFilter<"participant"> | string
+    google_id?: StringWithAggregatesFilter<"participant"> | string
     uuid?: UuidWithAggregatesFilter<"participant"> | string
   }
 
@@ -10174,6 +10193,7 @@ export namespace Prisma {
     created_at?: Date | string
     email: string
     name: string
+    google_id?: string
     uuid?: string
     question_log?: question_logCreateNestedManyWithoutQuestion_generatorInput
   }
@@ -10183,6 +10203,7 @@ export namespace Prisma {
     created_at?: Date | string
     email: string
     name: string
+    google_id?: string
     uuid?: string
     question_log?: question_logUncheckedCreateNestedManyWithoutQuestion_generatorInput
   }
@@ -10191,6 +10212,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
     question_log?: question_logUpdateManyWithoutQuestion_generatorNestedInput
   }
@@ -10200,6 +10222,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
     question_log?: question_logUncheckedUpdateManyWithoutQuestion_generatorNestedInput
   }
@@ -10209,6 +10232,7 @@ export namespace Prisma {
     created_at?: Date | string
     email: string
     name: string
+    google_id?: string
     uuid?: string
   }
 
@@ -10216,6 +10240,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
@@ -10224,6 +10249,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
@@ -10756,6 +10782,7 @@ export namespace Prisma {
     created_at?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    google_id?: SortOrder
     uuid?: SortOrder
   }
 
@@ -10768,6 +10795,7 @@ export namespace Prisma {
     created_at?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    google_id?: SortOrder
     uuid?: SortOrder
   }
 
@@ -10776,6 +10804,7 @@ export namespace Prisma {
     created_at?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    google_id?: SortOrder
     uuid?: SortOrder
   }
 
@@ -12061,6 +12090,7 @@ export namespace Prisma {
     created_at?: Date | string
     email: string
     name: string
+    google_id?: string
     uuid?: string
   }
 
@@ -12069,6 +12099,7 @@ export namespace Prisma {
     created_at?: Date | string
     email: string
     name: string
+    google_id?: string
     uuid?: string
   }
 
@@ -12161,6 +12192,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
@@ -12169,6 +12201,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
