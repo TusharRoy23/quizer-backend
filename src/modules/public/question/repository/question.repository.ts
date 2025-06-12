@@ -10,7 +10,6 @@ import { IUserService } from "../../user/interface/IUser.service";
 import { Department, Question, QuestionLog, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { NotFoundException, throwException } from "../../../../shared/errors/all.exception";
-import { time } from "console";
 
 type QuestionLogPayloadType = {
     department: number;

@@ -27,7 +27,7 @@ model participant {
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
   email        String         @db.VarChar
   name         String         @db.VarChar
-  google_id    String         @default("0") @db.VarChar
+  google_id    String         @default("0") @db.Text
   uuid         String         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   question_log question_log[] @relation("question_generator")
 }
