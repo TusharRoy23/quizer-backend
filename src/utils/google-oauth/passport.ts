@@ -1,9 +1,9 @@
 import passport from 'passport';
 import { Profile, Strategy as GoogleStrategy, VerifyCallback } from 'passport-google-oauth20';
-import { UserService } from '../../modules/public/user/service/user.service';
+// import { UserService } from '../../modules/public/user/service/user.service';
 import container from '../../core/container.core';
-
-const userService = container.resolve(UserService);
+import { TYPES } from '../../core/type.core';
+import { IUserService } from '../../modules/public/user/interface/IUser.service';
 
 // Use the correct types for serializeUser/deserializeUser
 passport.use(
@@ -11,7 +11,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID || '',
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-            callbackURL: '/auth/google/callback',
+            callbackURL: 'http://localhost:8000/user/google/callback',
             passReqToCallback: false,
         },
         async (
@@ -24,21 +24,23 @@ passport.use(
             // Example (adjust the import path as needed):
 
             try {
+                const userService = container.get<IUserService>(TYPES.IUserService);
                 const { id, displayName, emails } = profile;
-                if (!(id && displayName && emails)) return done(null, false);
+                if (!(id && displayName && emails)) done(null, false);
 
                 // Call your createParticipent function with relevant data from the Google profile
                 const user = await userService.createParticipant({
                     googleId: id,
                     name: displayName,
-                    email: emails?.[0]?.value,
+                    email: emails?.[0]?.value || '',
                     // Add other fields as needed
                 });
-                return done(null, user || false);
+                done(null, user || false);
             } catch (error) {
-                return done(error);
+                console.log('error: ', error);
+                done(error, false);
             }
-            return done(null, profile);
+            // return done(null, profile);
         }
     )
 );

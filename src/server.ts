@@ -5,6 +5,8 @@ import container from "./core/container.core";
 import { responseWrapper } from "./middlewares/response-wrapper";
 import { NotFoundException, BadRequestException, InternalServerErrorException, UnauthorizedException, ConflictException, ForbiddenException, MethodNotAllowedException, RequestTimeoutException } from "./shared/errors/all.exception";
 import { HttpStatusCode } from "./shared/utils/enum";
+import passport from "./utils/google-oauth/passport";
+import session from "express-session";
 
 export const server = new InversifyExpressServer(container);
 const corsOptions: cors.CorsOptions = {
@@ -28,6 +30,10 @@ server.setConfig((app) => {
     app.use(express.urlencoded({ extended: true }));
     app.use(responseWrapper);
     app.use(cors(corsOptions));
+    //? passport for google oauth
+    app.use(session({ secret: process.env.PASSPORT_SECRET || '', resave: true, saveUninitialized: true }));
+    app.use(passport.initialize());
+    app.use(passport.session());
 });
 
 const errorResponse = (req: Request, res: Response, message: string, statusCode: any, error?: any) => {
