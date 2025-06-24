@@ -7,8 +7,10 @@ import { TYPES } from "../../../../core/type.core";
 import { IQuestionService } from "../interface/IQuestion.service";
 import { QuestionSavePayloadDto, QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middleware";
+import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
+import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
 
-@controller("/question")
+@controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware)
 export class QuestionController {
     constructor(
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service

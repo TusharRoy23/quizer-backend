@@ -1,4 +1,4 @@
-import { Question, QuestionLog } from "../../types/public.type";
+import { Participant, Question, QuestionLog } from "../../types/public.type";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 

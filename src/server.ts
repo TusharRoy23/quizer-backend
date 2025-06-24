@@ -7,6 +7,8 @@ import { NotFoundException, BadRequestException, InternalServerErrorException, U
 import { HttpStatusCode } from "./shared/utils/enum";
 import passport from "./utils/google-oauth/passport";
 import session from "express-session";
+import cookieParser from "cookie-parser";
+import { setRequestContext } from "./middlewares/participant.middleware";
 
 export const server = new InversifyExpressServer(container);
 const corsOptions: cors.CorsOptions = {
@@ -30,8 +32,9 @@ server.setConfig((app) => {
     app.use(express.urlencoded({ extended: true }));
     app.use(responseWrapper);
     app.use(cors(corsOptions));
-    //? passport for google oauth
+    app.use(cookieParser());
     app.use(session({ secret: process.env.PASSPORT_SECRET || '', resave: true, saveUninitialized: true }));
+    //? passport for google oauth
     app.use(passport.initialize());
     app.use(passport.session());
 });
