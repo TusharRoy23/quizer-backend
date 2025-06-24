@@ -22,6 +22,7 @@ export type User = {
 
 export type Participant = {
     id: number;
+    google_id: string;
     uuid: string;
     name: string;
     email: string;

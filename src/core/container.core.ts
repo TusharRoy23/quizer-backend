@@ -19,6 +19,7 @@ import { IUserRepository } from '../modules/public/user/interface/IUser.reposito
 import { IUserService } from '../modules/public/user/interface/IUser.service';
 import { UserRepository } from '../modules/public/user/repository/user.repository';
 import { UserService } from '../modules/public/user/service/user.service';
+import { RequestContextMiddleware } from '../middlewares/request-context.middleware';
 
 const container = new Container();
 
@@ -27,6 +28,8 @@ container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService);
 //? OpenAI Module
 container.bind<IOpenAIService>(TYPES.IOpenAIService).to(DeepSeekService);
 container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(DeepSeekRepository);
+
+container.bind<RequestContextMiddleware>(RequestContextMiddleware).toSelf();
 
 //? Department Module
 container.bind<IDepartmentRepository>(TYPES.IDepartmentRepository).to(DepartmentRepository);

@@ -7,9 +7,10 @@ import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.servic
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
 import { IUserService } from "../../user/interface/IUser.service";
-import { Department, Question, QuestionLog, Topic } from "../../types/public.type";
+import { Department, Participant, Question, QuestionLog, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { NotFoundException, throwException } from "../../../../shared/errors/all.exception";
+import { RequestContext } from "../../../../shared/context/request-context";
 
 type QuestionLogPayloadType = {
     department: number;
@@ -31,13 +32,9 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
         try {
-            let participant = await this.userService.getParticipantByEmail(payload.email);
+            const participant = RequestContext.getParticipant();
             if (!participant) {
-                participant = await this.userService.createParticipant({
-                    name: payload.name,
-                    email: payload.email,
-                    googleId: "", // Provide a default or actual googleId if available
-                });
+                throw new NotFoundException('Participant not found');
             }
             const department = await this.departmentService.getDepartmentByUUID(payload.department);
             if (!department) {
@@ -70,6 +67,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     public async getGeneratedQuestions(questionLogUUID: string): Promise<Question[]> {
         // This method is not implemented in the original code.
         // Implement the logic to retrieve generated questions from the database.
+        const participant = RequestContext.getParticipant();
         try {
             const prisma = await this.prisma$();
             const questions = await prisma.question_log_question.findMany({
@@ -199,11 +197,17 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     private async getQuestionLogByUUID(questionLogUUID: string, isCompleted: boolean = true): Promise<QuestionLog> {
         // This method is not implemented in the original code. 
         try {
+            const participant = RequestContext.getParticipant();
+            if (!participant) {
+                throw new NotFoundException('Participant not found');
+            }
+
             const prisma = await this.prisma$();
             const questionLog = await prisma.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: isCompleted, // Ensure the question log is not completed
+                    participant: participant?.id
                 },
                 include: {
                     question_department: true,
@@ -291,39 +295,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             `;
             const response = await this.openAIService.getChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
-            console.dir(parsedJSON, { depth: null, colors: true });
-            // {
-            //     questions: [
-            //         {
-            //             question: 'Which of the following is NOT a JavaScript data type?',
-            //             options: ['String', 'Boolean', 'Number', 'Array'],
-            //             correctAnswer: [3],
-            //             questionType: 'choice'
-            //         },
-            //         {
-            //             question: 'What is TypeScript primarily used for?',
-            //             options: [
-            //                 'To replace JavaScript',
-            //                 'To add static typing to JavaScript',
-            //                 'To create server-side applications',
-            //                 'To design databases'
-            //             ],
-            //             correctAnswer: [1],
-            //             questionType: 'choice'
-            //         },
-            //         {
-            //             question: 'Which Angular decorator is used to define a component?',
-            //             options: [
-            //                 '@Injectable()',
-            //                 '@NgModule()',
-            //                 '@Component()',
-            //                 '@Directive()'
-            //             ],
-            //             correctAnswer: [2],
-            //             questionType: 'choice'
-            //         }
-            //     ]
-            // }
             return parsedJSON['questions'];
         } catch (error) {
             return throwException(error);
