@@ -59,4 +59,10 @@ export class QuestionController {
         const result = await this.questionService.generatedQuestions(payload);
         return res.status(201).json({ data: result });
     }
+
+    @httpGet("/log")
+    public async getQuestionLogs(req: Request, res: Response) {
+        const data = await this.questionService.getQuestionLogs();
+        return res.status(200).json({ data });
+    }
 }

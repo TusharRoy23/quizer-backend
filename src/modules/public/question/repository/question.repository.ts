@@ -32,10 +32,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
         try {
-            const participant = RequestContext.getParticipant();
-            if (!participant) {
-                throw new NotFoundException('Participant not found');
-            }
+            const participant = this.getParticipant();
             const department = await this.departmentService.getDepartmentByUUID(payload.department);
             if (!department) {
                 throw new NotFoundException('Department not found');
@@ -67,16 +64,21 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     public async getGeneratedQuestions(questionLogUUID: string): Promise<Question[]> {
         // This method is not implemented in the original code.
         // Implement the logic to retrieve generated questions from the database.
-        const participant = RequestContext.getParticipant();
+        const participant = this.getParticipant();
         try {
             const prisma = await this.prisma$();
             const questions = await prisma.question_log_question.findMany({
                 where: {
                     question_log: {
-                        uuid: questionLogUUID
+                        uuid: questionLogUUID,
+                        completed: false,
+                        participant: participant?.id // Ensure the question log belongs to the participant
                     }
                 }
             });
+            if (!questions || questions.length === 0) {
+                throw new NotFoundException('No questions found. Please generate questions first.');
+            }
             return questions.map((question: Question) => ({
                 uuid: question.uuid,
                 question: question.question,
@@ -159,6 +161,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             });
 
             result.score = (result.correct_answers / result.total_questions) * 100;
+            //! PROBLEM: An operation failed because it depends on one or more records 
+            //! that were required but not found. Record to update not found.
             const questionLogUpdate = await prisma.question_log.update({
                 where: {
                     uuid: questionLogUUID,
@@ -186,7 +190,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         // This method is not implemented in the original code.
         // Implement the logic to retrieve the quiz result based on the question log UUID.
         try {
-            const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true); // Ensure the question log is not completed
+            const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true);
+            console.log('questionLog: ', questionLog);
 
             return questionLog;
         } catch (error: any) {
@@ -194,13 +199,38 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
+    public async getQuestionLogs(): Promise<QuestionLog[]> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+            const questionLogs = await prisma.question_log.findMany({
+                where: {
+                    participant: participant?.id,
+                    completed: true, // Only retrieve completed question logs
+                },
+            });
+            return questionLogs.map((questionLog: any) => ({
+                uuid: questionLog.uuid,
+                department: questionLog.question_department,
+                timer: questionLog.timer,
+                difficulty: questionLog.difficulty,
+                question_count: questionLog.question_count,
+                completed: questionLog.completed,
+                score: questionLog.score,
+                total_answers: questionLog.total_answers,
+                total_correct: questionLog.total_correct,
+            })) as QuestionLog[];
+        } catch (error) {
+            return throwException(error);
+        }
+
+        return []
+    }
+
     private async getQuestionLogByUUID(questionLogUUID: string, isCompleted: boolean = true): Promise<QuestionLog> {
         // This method is not implemented in the original code. 
         try {
-            const participant = RequestContext.getParticipant();
-            if (!participant) {
-                throw new NotFoundException('Participant not found');
-            }
+            const participant = this.getParticipant();
 
             const prisma = await this.prisma$();
             const questionLog = await prisma.question_log.findUnique({
@@ -255,44 +285,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         // Get the prompt questions from the DeepSeek
         // This is a placeholder function. Implement the actual logic to get the prompt questions.
         try {
-            const topicNames = topics.map(topic => topic.name).join(', ');
-            const prompt = `
-                Generate ${payload.question_count} ${payload.difficulty}-level multiple choice quiz questions about ${topicNames} for ${department.name} department.
-                Each question should:
-                1. Be clear and concise
-                2. Have 4 plausible options (labeled a, b, c, d)
-                3. Mark the correct answer(s)
-                4. Cover different aspects of ${topicNames}
-                5. Vary in style (some conceptual, some applied)
-    
-                Format the response as a JSON array where each question has:
-                {
-                    "question": "The actual question text",
-                    "options": ["Option a", "Option b", "Option c", "Option d"],
-                    "answer": [1], // index number or 1,2 indices for multiple correct answers
-                    "question_type": "CHOICE" // or "MULTIPLE_CHOICE",
-                }
-    
-                Example:
-                {
-                    questions: [
-                        {
-                            "question": "What is the capital of France?",
-                            "options": ["London", "Berlin", "Paris", "Madrid"],
-                            "answer": [2]
-                            "question_type": "CHOICE"
-                        },
-                        {
-                            "question: "Which are the Frontend frameworkes or libraries?",
-                            "options": ["React", "Angular", "Vue", "Django"],
-                            "answer": [0, 1, 2],
-                            "question_type": "MULTIPLE_CHOICE"
-                        }
-                    ]
-                }
-    
-                Now generate the requested questions about ${topicNames}:
-            `;
+            const prompt = this.getPromptForQuiz(department, topics, payload);
             const response = await this.openAIService.getChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
             return parsedJSON['questions'];
@@ -312,6 +305,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 options: question.options, // Ensure options are trimmed
                 answer: question.answer.sort((a, b) => a - b), // Sort the answer indices
                 question_type: question.question_type,
+                explanation: question.explanation, // Ensure explanation is trimmed
             }));
             const count = await prisma.question_log_question.createMany({
                 data: questionData,
@@ -344,5 +338,68 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         } catch (error: any) {
             return throwException(error);
         }
+    }
+
+    private getPromptForQuiz(department: Department, topics: Topic[], payload: QuestionGeneratePayloadType): string {
+        const topicNames = topics.map(topic => topic.name).join(', ');
+        const prompt = `
+            Generate ${payload.question_count} UNIQUE ${payload.difficulty}-level multiple choice quiz 
+            questions about ${topicNames} for ${department.name} department.
+            
+            **Requirements:**
+            1. Each question must be **completely unique** (avoid repeating common quiz questions).
+            2. Cover **different aspects and subtopics** of ${topicNames}.
+            3. Include **some less common but still relevant concepts**.
+            4. Vary question formats (**definition, scenario-based, comparison, etc.**).
+            5. Provide a **clear and concise explanation** for why the correct answer is right.
+            6. Ensure explanations are **instructive** (not just repeating the answer).
+
+            **Response Format (JSON):**
+            {
+                "questions": [
+                    {
+                        "question": "The question text",
+                        "options": ["Option A", "Option B", "Option C", "Option D"],
+                        "answer": [1], // Index of correct option(s)
+                        "question_type": "CHOICE" | "MULTIPLE_CHOICE",
+                        "explanation": "A clear explanation of why the answer is correct."
+                    },
+                    // More questions...
+                ]
+            }
+
+            **Example:**
+            {
+                "questions": [
+                    {
+                        "question": "What is the capital of France?",
+                        "options": ["London", "Berlin", "Paris", "Madrid"],
+                        "answer": [2],
+                        "question_type": "CHOICE",
+                        "explanation": "Paris is the capital of France, a well-known fact in geography. London is the capital of the UK, Berlin is Germany's capital, and Madrid is Spain's capital."
+                    },
+                    {
+                        "question": "Which of these are frontend frameworks?",
+                        "options": ["React", "Angular", "Vue", "Django"],
+                        "answer": [0, 1, 2],
+                        "question_type": "MULTIPLE_CHOICE",
+                        "explanation": "React, Angular, and Vue are all JavaScript frontend frameworks. Django, however, is a Python backend framework and does not belong in this list."
+                    }
+                ]
+            }
+
+            **Now generate the requested questions about ${topicNames}:**
+        `;
+        return prompt;
+    }
+
+    private getParticipant() {
+        // This method is not implemented in the original code.
+        // Implement the logic to retrieve the participant from the request context.
+        const participant = RequestContext.getParticipant();
+        if (!participant) {
+            throw new NotFoundException('Participant not found');
+        }
+        return participant;
     }
 }

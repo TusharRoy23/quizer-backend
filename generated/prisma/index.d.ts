@@ -8358,6 +8358,7 @@ export namespace Prisma {
     id: number | null
     question_log_id: number | null
     question: string | null
+    explanation: string | null
     question_type: $Enums.QuestionType | null
     created_at: Date | null
     uuid: string | null
@@ -8367,6 +8368,7 @@ export namespace Prisma {
     id: number | null
     question_log_id: number | null
     question: string | null
+    explanation: string | null
     question_type: $Enums.QuestionType | null
     created_at: Date | null
     uuid: string | null
@@ -8378,6 +8380,7 @@ export namespace Prisma {
     question: number
     options: number
     answer: number
+    explanation: number
     selected_answer: number
     question_type: number
     created_at: number
@@ -8404,6 +8407,7 @@ export namespace Prisma {
     id?: true
     question_log_id?: true
     question?: true
+    explanation?: true
     question_type?: true
     created_at?: true
     uuid?: true
@@ -8413,6 +8417,7 @@ export namespace Prisma {
     id?: true
     question_log_id?: true
     question?: true
+    explanation?: true
     question_type?: true
     created_at?: true
     uuid?: true
@@ -8424,6 +8429,7 @@ export namespace Prisma {
     question?: true
     options?: true
     answer?: true
+    explanation?: true
     selected_answer?: true
     question_type?: true
     created_at?: true
@@ -8523,6 +8529,7 @@ export namespace Prisma {
     question: string
     options: string[]
     answer: number[]
+    explanation: string | null
     selected_answer: number[]
     question_type: $Enums.QuestionType
     created_at: Date
@@ -8554,6 +8561,7 @@ export namespace Prisma {
     question?: boolean
     options?: boolean
     answer?: boolean
+    explanation?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
@@ -8567,6 +8575,7 @@ export namespace Prisma {
     question?: boolean
     options?: boolean
     answer?: boolean
+    explanation?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
@@ -8580,6 +8589,7 @@ export namespace Prisma {
     question?: boolean
     options?: boolean
     answer?: boolean
+    explanation?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
@@ -8593,13 +8603,14 @@ export namespace Prisma {
     question?: boolean
     options?: boolean
     answer?: boolean
+    explanation?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
     uuid?: boolean
   }
 
-  export type question_log_questionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question_log_id" | "question" | "options" | "answer" | "selected_answer" | "question_type" | "created_at" | "uuid", ExtArgs["result"]["question_log_question"]>
+  export type question_log_questionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question_log_id" | "question" | "options" | "answer" | "explanation" | "selected_answer" | "question_type" | "created_at" | "uuid", ExtArgs["result"]["question_log_question"]>
   export type question_log_questionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     question_log?: boolean | question_logDefaultArgs<ExtArgs>
   }
@@ -8621,6 +8632,7 @@ export namespace Prisma {
       question: string
       options: string[]
       answer: number[]
+      explanation: string | null
       selected_answer: number[]
       question_type: $Enums.QuestionType
       created_at: Date
@@ -9054,6 +9066,7 @@ export namespace Prisma {
     readonly question: FieldRef<"question_log_question", 'String'>
     readonly options: FieldRef<"question_log_question", 'String[]'>
     readonly answer: FieldRef<"question_log_question", 'Int[]'>
+    readonly explanation: FieldRef<"question_log_question", 'String'>
     readonly selected_answer: FieldRef<"question_log_question", 'Int[]'>
     readonly question_type: FieldRef<"question_log_question", 'QuestionType'>
     readonly created_at: FieldRef<"question_log_question", 'DateTime'>
@@ -9562,6 +9575,7 @@ export namespace Prisma {
     question: 'question',
     options: 'options',
     answer: 'answer',
+    explanation: 'explanation',
     selected_answer: 'selected_answer',
     question_type: 'question_type',
     created_at: 'created_at',
@@ -10067,6 +10081,7 @@ export namespace Prisma {
     question?: StringFilter<"question_log_question"> | string
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
+    explanation?: StringNullableFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeFilter<"question_log_question"> | Date | string
@@ -10080,6 +10095,7 @@ export namespace Prisma {
     question?: SortOrder
     options?: SortOrder
     answer?: SortOrder
+    explanation?: SortOrderInput | SortOrder
     selected_answer?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
@@ -10097,6 +10113,7 @@ export namespace Prisma {
     question?: StringFilter<"question_log_question"> | string
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
+    explanation?: StringNullableFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeFilter<"question_log_question"> | Date | string
@@ -10109,6 +10126,7 @@ export namespace Prisma {
     question?: SortOrder
     options?: SortOrder
     answer?: SortOrder
+    explanation?: SortOrderInput | SortOrder
     selected_answer?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
@@ -10129,6 +10147,7 @@ export namespace Prisma {
     question?: StringWithAggregatesFilter<"question_log_question"> | string
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
+    explanation?: StringNullableWithAggregatesFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeWithAggregatesFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeWithAggregatesFilter<"question_log_question"> | Date | string
@@ -10508,6 +10527,7 @@ export namespace Prisma {
     question: string
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -10521,6 +10541,7 @@ export namespace Prisma {
     question: string
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -10531,6 +10552,7 @@ export namespace Prisma {
     question?: StringFieldUpdateOperationsInput | string
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10544,6 +10566,7 @@ export namespace Prisma {
     question?: StringFieldUpdateOperationsInput | string
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10556,6 +10579,7 @@ export namespace Prisma {
     question: string
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -10566,6 +10590,7 @@ export namespace Prisma {
     question?: StringFieldUpdateOperationsInput | string
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10578,6 +10603,7 @@ export namespace Prisma {
     question?: StringFieldUpdateOperationsInput | string
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11122,6 +11148,7 @@ export namespace Prisma {
     question?: SortOrder
     options?: SortOrder
     answer?: SortOrder
+    explanation?: SortOrder
     selected_answer?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
@@ -11139,6 +11166,7 @@ export namespace Prisma {
     id?: SortOrder
     question_log_id?: SortOrder
     question?: SortOrder
+    explanation?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
     uuid?: SortOrder
@@ -11148,6 +11176,7 @@ export namespace Prisma {
     id?: SortOrder
     question_log_id?: SortOrder
     question?: SortOrder
+    explanation?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
     uuid?: SortOrder
@@ -12150,6 +12179,7 @@ export namespace Prisma {
     question: string
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -12161,6 +12191,7 @@ export namespace Prisma {
     question: string
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -12272,6 +12303,7 @@ export namespace Prisma {
     question?: StringFilter<"question_log_question"> | string
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
+    explanation?: StringNullableFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeFilter<"question_log_question"> | Date | string
@@ -12652,6 +12684,7 @@ export namespace Prisma {
     question: string
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -12674,6 +12707,7 @@ export namespace Prisma {
     question?: StringFieldUpdateOperationsInput | string
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12685,6 +12719,7 @@ export namespace Prisma {
     question?: StringFieldUpdateOperationsInput | string
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12696,6 +12731,7 @@ export namespace Prisma {
     question?: StringFieldUpdateOperationsInput | string
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string

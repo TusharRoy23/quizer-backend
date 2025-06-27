@@ -8,4 +8,5 @@ export interface IQuestionRepository {
     saveAnswerForQuestion: (questionLogUUID: string, payload: QuestionSavePayloadType) => Promise<Question>;
     submitQuestionLog: (questionLogUUID: string) => Promise<string>;
     getQuizResult: (questionLogUUID: string) => Promise<QuestionLog>;
+    getQuestionLogs: () => Promise<QuestionLog[]>;
 }
