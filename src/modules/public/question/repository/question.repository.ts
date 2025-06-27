@@ -191,7 +191,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         // Implement the logic to retrieve the quiz result based on the question log UUID.
         try {
             const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true);
-            console.log('questionLog: ', questionLog);
 
             return questionLog;
         } catch (error: any) {
