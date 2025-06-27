@@ -31,4 +31,8 @@ export class QuestionService implements IQuestionService {
     public getQuizResult(questionLogUUID: string): Promise<QuestionLog> {
         return this.questionRepository.getQuizResult(questionLogUUID);
     }
+
+    public getQuestionLogs(): Promise<QuestionLog[]> {
+        return this.questionRepository.getQuestionLogs();
+    }
 }

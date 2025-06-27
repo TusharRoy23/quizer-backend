@@ -175,6 +175,7 @@ exports.Prisma.Question_log_questionScalarFieldEnum = {
   question: 'question',
   options: 'options',
   answer: 'answer',
+  explanation: 'explanation',
   selected_answer: 'selected_answer',
   question_type: 'question_type',
   created_at: 'created_at',

@@ -39,6 +39,7 @@ export type Question = {
     question: string;
     options: string[];
     answer: number[];
+    explanation: string;
     selected_answer: number[];
     question_type: QuestionType;
 }
