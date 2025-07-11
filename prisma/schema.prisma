@@ -65,6 +65,9 @@ model question_log {
   total_answers       Int         @default(0)
   total_correct       Int         @default(0)
   score               Int         @default(0)
+  end_time            DateTime?   @db.Timestamptz(6)
+  timezone_offset     Int?        @default(0)
+  timezone_name       String?
   question_generator  participant @relation("question_generator", fields: [participant], references: [id], onDelete: Restrict, onUpdate: NoAction)
   question_department department  @relation("question_department", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
 

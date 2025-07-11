@@ -38,9 +38,9 @@ export type Question = {
     uuid: string;
     question: string;
     options: string[];
-    answer: number[];
-    explanation: string;
-    selected_answer: number[];
+    answer?: number[];
+    explanation?: string;
+    selected_answer?: number[];
     question_type: QuestionType;
 }
 

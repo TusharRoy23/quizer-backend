@@ -35,4 +35,17 @@ export class QuestionService implements IQuestionService {
     public getQuestionLogs(): Promise<QuestionLog[]> {
         return this.questionRepository.getQuestionLogs();
     }
+
+    public getQuestionDetailsLogByUUID(questionLogUUID: string): Promise<Question[]> {
+        return this.questionRepository.getQuestionDetailsLogByUUID(questionLogUUID);
+    }
+
+    public getQuizTimer(questionLogUUID: string): Promise<{
+        remainingSeconds: number;
+        expiresAt: string;
+        timezoneOffset?: number;
+        timezoneName?: string;
+    }> {
+        return this.questionRepository.getQuizTimer(questionLogUUID);
+    }
 }

@@ -6007,6 +6007,7 @@ export namespace Prisma {
     total_answers: number | null
     total_correct: number | null
     score: number | null
+    timezone_offset: number | null
   }
 
   export type Question_logSumAggregateOutputType = {
@@ -6018,6 +6019,7 @@ export namespace Prisma {
     total_answers: number | null
     total_correct: number | null
     score: number | null
+    timezone_offset: number | null
   }
 
   export type Question_logMinAggregateOutputType = {
@@ -6033,6 +6035,9 @@ export namespace Prisma {
     total_answers: number | null
     total_correct: number | null
     score: number | null
+    end_time: Date | null
+    timezone_offset: number | null
+    timezone_name: string | null
   }
 
   export type Question_logMaxAggregateOutputType = {
@@ -6048,6 +6053,9 @@ export namespace Prisma {
     total_answers: number | null
     total_correct: number | null
     score: number | null
+    end_time: Date | null
+    timezone_offset: number | null
+    timezone_name: string | null
   }
 
   export type Question_logCountAggregateOutputType = {
@@ -6063,6 +6071,9 @@ export namespace Prisma {
     total_answers: number
     total_correct: number
     score: number
+    end_time: number
+    timezone_offset: number
+    timezone_name: number
     _all: number
   }
 
@@ -6076,6 +6087,7 @@ export namespace Prisma {
     total_answers?: true
     total_correct?: true
     score?: true
+    timezone_offset?: true
   }
 
   export type Question_logSumAggregateInputType = {
@@ -6087,6 +6099,7 @@ export namespace Prisma {
     total_answers?: true
     total_correct?: true
     score?: true
+    timezone_offset?: true
   }
 
   export type Question_logMinAggregateInputType = {
@@ -6102,6 +6115,9 @@ export namespace Prisma {
     total_answers?: true
     total_correct?: true
     score?: true
+    end_time?: true
+    timezone_offset?: true
+    timezone_name?: true
   }
 
   export type Question_logMaxAggregateInputType = {
@@ -6117,6 +6133,9 @@ export namespace Prisma {
     total_answers?: true
     total_correct?: true
     score?: true
+    end_time?: true
+    timezone_offset?: true
+    timezone_name?: true
   }
 
   export type Question_logCountAggregateInputType = {
@@ -6132,6 +6151,9 @@ export namespace Prisma {
     total_answers?: true
     total_correct?: true
     score?: true
+    end_time?: true
+    timezone_offset?: true
+    timezone_name?: true
     _all?: true
   }
 
@@ -6234,6 +6256,9 @@ export namespace Prisma {
     total_answers: number
     total_correct: number
     score: number
+    end_time: Date | null
+    timezone_offset: number | null
+    timezone_name: string | null
     _count: Question_logCountAggregateOutputType | null
     _avg: Question_logAvgAggregateOutputType | null
     _sum: Question_logSumAggregateOutputType | null
@@ -6268,6 +6293,9 @@ export namespace Prisma {
     total_answers?: boolean
     total_correct?: boolean
     score?: boolean
+    end_time?: boolean
+    timezone_offset?: boolean
+    timezone_name?: boolean
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
     topics?: boolean | question_log$topicsArgs<ExtArgs>
@@ -6288,6 +6316,9 @@ export namespace Prisma {
     total_answers?: boolean
     total_correct?: boolean
     score?: boolean
+    end_time?: boolean
+    timezone_offset?: boolean
+    timezone_name?: boolean
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["question_log"]>
@@ -6305,6 +6336,9 @@ export namespace Prisma {
     total_answers?: boolean
     total_correct?: boolean
     score?: boolean
+    end_time?: boolean
+    timezone_offset?: boolean
+    timezone_name?: boolean
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["question_log"]>
@@ -6322,9 +6356,12 @@ export namespace Prisma {
     total_answers?: boolean
     total_correct?: boolean
     score?: boolean
+    end_time?: boolean
+    timezone_offset?: boolean
+    timezone_name?: boolean
   }
 
-  export type question_logOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "uuid" | "department" | "participant" | "timer" | "question_count" | "difficulty" | "completed" | "total_answers" | "total_correct" | "score", ExtArgs["result"]["question_log"]>
+  export type question_logOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "uuid" | "department" | "participant" | "timer" | "question_count" | "difficulty" | "completed" | "total_answers" | "total_correct" | "score" | "end_time" | "timezone_offset" | "timezone_name", ExtArgs["result"]["question_log"]>
   export type question_logInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     question_generator?: boolean | participantDefaultArgs<ExtArgs>
     question_department?: boolean | departmentDefaultArgs<ExtArgs>
@@ -6362,6 +6399,9 @@ export namespace Prisma {
       total_answers: number
       total_correct: number
       score: number
+      end_time: Date | null
+      timezone_offset: number | null
+      timezone_name: string | null
     }, ExtArgs["result"]["question_log"]>
     composites: {}
   }
@@ -6801,6 +6841,9 @@ export namespace Prisma {
     readonly total_answers: FieldRef<"question_log", 'Int'>
     readonly total_correct: FieldRef<"question_log", 'Int'>
     readonly score: FieldRef<"question_log", 'Int'>
+    readonly end_time: FieldRef<"question_log", 'DateTime'>
+    readonly timezone_offset: FieldRef<"question_log", 'Int'>
+    readonly timezone_name: FieldRef<"question_log", 'String'>
   }
     
 
@@ -9555,7 +9598,10 @@ export namespace Prisma {
     completed: 'completed',
     total_answers: 'total_answers',
     total_correct: 'total_correct',
-    score: 'score'
+    score: 'score',
+    end_time: 'end_time',
+    timezone_offset: 'timezone_offset',
+    timezone_name: 'timezone_name'
   };
 
   export type Question_logScalarFieldEnum = (typeof Question_logScalarFieldEnum)[keyof typeof Question_logScalarFieldEnum]
@@ -9941,6 +9987,9 @@ export namespace Prisma {
     total_answers?: IntFilter<"question_log"> | number
     total_correct?: IntFilter<"question_log"> | number
     score?: IntFilter<"question_log"> | number
+    end_time?: DateTimeNullableFilter<"question_log"> | Date | string | null
+    timezone_offset?: IntNullableFilter<"question_log"> | number | null
+    timezone_name?: StringNullableFilter<"question_log"> | string | null
     question_generator?: XOR<ParticipantScalarRelationFilter, participantWhereInput>
     question_department?: XOR<DepartmentScalarRelationFilter, departmentWhereInput>
     topics?: Question_log_topicListRelationFilter
@@ -9960,6 +10009,9 @@ export namespace Prisma {
     total_answers?: SortOrder
     total_correct?: SortOrder
     score?: SortOrder
+    end_time?: SortOrderInput | SortOrder
+    timezone_offset?: SortOrderInput | SortOrder
+    timezone_name?: SortOrderInput | SortOrder
     question_generator?: participantOrderByWithRelationInput
     question_department?: departmentOrderByWithRelationInput
     topics?: question_log_topicOrderByRelationAggregateInput
@@ -9982,6 +10034,9 @@ export namespace Prisma {
     total_answers?: IntFilter<"question_log"> | number
     total_correct?: IntFilter<"question_log"> | number
     score?: IntFilter<"question_log"> | number
+    end_time?: DateTimeNullableFilter<"question_log"> | Date | string | null
+    timezone_offset?: IntNullableFilter<"question_log"> | number | null
+    timezone_name?: StringNullableFilter<"question_log"> | string | null
     question_generator?: XOR<ParticipantScalarRelationFilter, participantWhereInput>
     question_department?: XOR<DepartmentScalarRelationFilter, departmentWhereInput>
     topics?: Question_log_topicListRelationFilter
@@ -10001,6 +10056,9 @@ export namespace Prisma {
     total_answers?: SortOrder
     total_correct?: SortOrder
     score?: SortOrder
+    end_time?: SortOrderInput | SortOrder
+    timezone_offset?: SortOrderInput | SortOrder
+    timezone_name?: SortOrderInput | SortOrder
     _count?: question_logCountOrderByAggregateInput
     _avg?: question_logAvgOrderByAggregateInput
     _max?: question_logMaxOrderByAggregateInput
@@ -10024,6 +10082,9 @@ export namespace Prisma {
     total_answers?: IntWithAggregatesFilter<"question_log"> | number
     total_correct?: IntWithAggregatesFilter<"question_log"> | number
     score?: IntWithAggregatesFilter<"question_log"> | number
+    end_time?: DateTimeNullableWithAggregatesFilter<"question_log"> | Date | string | null
+    timezone_offset?: IntNullableWithAggregatesFilter<"question_log"> | number | null
+    timezone_name?: StringNullableWithAggregatesFilter<"question_log"> | string | null
   }
 
   export type question_log_topicWhereInput = {
@@ -10391,6 +10452,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
@@ -10410,6 +10474,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
@@ -10424,6 +10491,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
@@ -10443,6 +10513,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
@@ -10460,6 +10533,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
   }
 
   export type question_logUpdateManyMutationInput = {
@@ -10472,6 +10548,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type question_logUncheckedUpdateManyInput = {
@@ -10487,6 +10566,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type question_log_topicCreateInput = {
@@ -10984,6 +11066,17 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type ParticipantScalarRelationFilter = {
     is?: participantWhereInput
     isNot?: participantWhereInput
@@ -11017,6 +11110,9 @@ export namespace Prisma {
     total_answers?: SortOrder
     total_correct?: SortOrder
     score?: SortOrder
+    end_time?: SortOrder
+    timezone_offset?: SortOrder
+    timezone_name?: SortOrder
   }
 
   export type question_logAvgOrderByAggregateInput = {
@@ -11028,6 +11124,7 @@ export namespace Prisma {
     total_answers?: SortOrder
     total_correct?: SortOrder
     score?: SortOrder
+    timezone_offset?: SortOrder
   }
 
   export type question_logMaxOrderByAggregateInput = {
@@ -11043,6 +11140,9 @@ export namespace Prisma {
     total_answers?: SortOrder
     total_correct?: SortOrder
     score?: SortOrder
+    end_time?: SortOrder
+    timezone_offset?: SortOrder
+    timezone_name?: SortOrder
   }
 
   export type question_logMinOrderByAggregateInput = {
@@ -11058,6 +11158,9 @@ export namespace Prisma {
     total_answers?: SortOrder
     total_correct?: SortOrder
     score?: SortOrder
+    end_time?: SortOrder
+    timezone_offset?: SortOrder
+    timezone_name?: SortOrder
   }
 
   export type question_logSumOrderByAggregateInput = {
@@ -11069,6 +11172,7 @@ export namespace Prisma {
     total_answers?: SortOrder
     total_correct?: SortOrder
     score?: SortOrder
+    timezone_offset?: SortOrder
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -11077,6 +11181,20 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type Question_logScalarRelationFilter = {
@@ -11455,6 +11573,10 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type participantUpdateOneRequiredWithoutQuestion_logNestedInput = {
     create?: XOR<participantCreateWithoutQuestion_logInput, participantUncheckedCreateWithoutQuestion_logInput>
     connectOrCreate?: participantCreateOrConnectWithoutQuestion_logInput
@@ -11818,12 +11940,37 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumQuestionTypeFilter<$PrismaModel = never> = {
@@ -11878,6 +12025,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionCreateNestedManyWithoutQuestion_logInput
@@ -11895,6 +12045,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
@@ -11968,6 +12121,9 @@ export namespace Prisma {
     total_answers?: IntFilter<"question_log"> | number
     total_correct?: IntFilter<"question_log"> | number
     score?: IntFilter<"question_log"> | number
+    end_time?: DateTimeNullableFilter<"question_log"> | Date | string | null
+    timezone_offset?: IntNullableFilter<"question_log"> | number | null
+    timezone_name?: StringNullableFilter<"question_log"> | string | null
   }
 
   export type question_logCreateWithoutQuestion_generatorInput = {
@@ -11980,6 +12136,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionCreateNestedManyWithoutQuestion_logInput
@@ -11997,6 +12156,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
@@ -12320,6 +12482,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     question_log_question?: question_log_questionCreateNestedManyWithoutQuestion_logInput
@@ -12338,6 +12503,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     question_log_question?: question_log_questionUncheckedCreateNestedManyWithoutQuestion_logInput
   }
 
@@ -12387,6 +12555,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     question_log_question?: question_log_questionUpdateManyWithoutQuestion_logNestedInput
@@ -12405,6 +12576,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
 
@@ -12444,6 +12618,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     question_generator: participantCreateNestedOneWithoutQuestion_logInput
     question_department: departmentCreateNestedOneWithoutQuestion_log_question_departmentInput
     topics?: question_log_topicCreateNestedManyWithoutQuestion_logInput
@@ -12462,6 +12639,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
     topics?: question_log_topicUncheckedCreateNestedManyWithoutQuestion_logInput
   }
 
@@ -12491,6 +12671,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
@@ -12509,6 +12692,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
 
@@ -12531,6 +12717,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
   }
 
   export type topicUpdateWithoutDepartment_topic_departmentTodepartmentInput = {
@@ -12565,6 +12754,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     question_generator?: participantUpdateOneRequiredWithoutQuestion_logNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUpdateManyWithoutQuestion_logNestedInput
@@ -12582,6 +12774,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
@@ -12598,6 +12793,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type question_logCreateManyQuestion_generatorInput = {
@@ -12612,6 +12810,9 @@ export namespace Prisma {
     total_answers?: number
     total_correct?: number
     score?: number
+    end_time?: Date | string | null
+    timezone_offset?: number | null
+    timezone_name?: string | null
   }
 
   export type question_logUpdateWithoutQuestion_generatorInput = {
@@ -12624,6 +12825,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     question_department?: departmentUpdateOneRequiredWithoutQuestion_log_question_departmentNestedInput
     topics?: question_log_topicUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUpdateManyWithoutQuestion_logNestedInput
@@ -12641,6 +12845,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
     question_log_question?: question_log_questionUncheckedUpdateManyWithoutQuestion_logNestedInput
   }
@@ -12657,6 +12864,9 @@ export namespace Prisma {
     total_answers?: IntFieldUpdateOperationsInput | number
     total_correct?: IntFieldUpdateOperationsInput | number
     score?: IntFieldUpdateOperationsInput | number
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
+    timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type question_log_topicCreateManyTopicInput = {
