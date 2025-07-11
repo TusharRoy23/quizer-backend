@@ -10,7 +10,7 @@ WORKDIR /app
 RUN apk update && \
     apk add --no-cache openntpd tzdata && \
     cp /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \
-    echo "UTC" > /etc/timezone
+    echo "EU" > /etc/timezone
 
 # 2. Copy package files first for optimal caching
 COPY package.json package-lock.json ./

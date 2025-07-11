@@ -9,4 +9,11 @@ export interface IQuestionService {
     submitQuestionLog: (questionLogUUID: string) => Promise<string>;
     getQuizResult: (questionLogUUID: string) => Promise<QuestionLog>;
     getQuestionLogs: () => Promise<QuestionLog[]>;
+    getQuestionDetailsLogByUUID: (questionLogUUID: string) => Promise<Question[]>;
+    getQuizTimer: (questionLogUUID: string) => Promise<{
+        remainingSeconds: number;
+        expiresAt: string;
+        timezoneOffset?: number;
+        timezoneName?: string;
+    }>;
 }

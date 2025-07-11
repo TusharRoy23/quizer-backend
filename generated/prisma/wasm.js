@@ -161,7 +161,10 @@ exports.Prisma.Question_logScalarFieldEnum = {
   completed: 'completed',
   total_answers: 'total_answers',
   total_correct: 'total_correct',
-  score: 'score'
+  score: 'score',
+  end_time: 'end_time',
+  timezone_offset: 'timezone_offset',
+  timezone_name: 'timezone_name'
 };
 
 exports.Prisma.Question_log_topicScalarFieldEnum = {
