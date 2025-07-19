@@ -7,10 +7,11 @@ import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.servic
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
 import { IUserService } from "../../user/interface/IUser.service";
-import { Department, Question, QuestionLog, Topic } from "../../types/public.type";
+import { Department, Question, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { RequestContext } from "../../../../shared/context/request-context";
+import CronJob from "node-cron";
 
 type QuestionLogPayloadType = {
     department: number;
@@ -28,6 +29,11 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         @inject(TYPES.IUserService) readonly userService: IUserService,
     ) {
         super(databaseService);
+        this.cronJob(); // Schedule the cron job to update quiz timers
+    }
+
+    private cronJob() {
+        CronJob.schedule('*/5 * * * *', async () => this.updateQuizesTimer());
     }
 
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
@@ -228,12 +234,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    public async getQuizTimer(questionLogUUID: string): Promise<{
-        remainingSeconds: number;
-        expiresAt: string;
-        timezoneOffset?: number;
-        timezoneName?: string;
-    }> {
+    public async getQuizTimer(questionLogUUID: string): Promise<QuizTimer> {
         try {
             const prisma = await this.prisma$();
             const participant = this.getParticipant();
@@ -363,6 +364,13 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         try {
             const prisma = await this.prisma$();
             const participant = this.getParticipant();
+            if (!isCompleted) {
+                const quizTimer = await this.getQuizTimer(questionLogUUID);
+                if (quizTimer.remainingSeconds <= 0) {
+                    throw new BadRequestException('Quiz timer has expired. Please start a new quiz.');
+                }
+            }
+
             const questions = await prisma.question_log_question.findMany({
                 where: {
                     question_log: {
@@ -526,5 +534,46 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             throw new NotFoundException('Participant not found');
         }
         return participant;
+    }
+
+    private async updateQuizesTimer() {
+        try {
+            const prisma = await this.prisma$();
+            const logs = await prisma.question_log.findMany({
+                where: {
+                    completed: false, // Only update incomplete logs
+                },
+                select: {
+                    uuid: true,
+                    end_time: true,
+                    timezone_offset: true,
+                    timezone_name: true,
+                }
+            });
+            logs.forEach(async (questionLog: QuestionLog) => {
+                if (questionLog.timezone_offset !== null && questionLog.end_time) {
+                    const now = new Date();
+                    const endTime = new Date(questionLog.end_time);
+
+                    // Calculate remaining time in seconds
+                    const remainingMs = endTime.getTime() - now.getTime();
+                    if (remainingMs <= 0) {
+                        // If the timer has expired, mark the question log as completed
+                        await prisma.question_log.update({
+                            where: {
+                                uuid: questionLog.uuid,
+                                completed: false
+                            },
+                            data: {
+                                completed: true
+                            }
+                        });
+                    }
+                }
+            })
+        } catch (error: any) {
+            return throwException(error);
+
+        }
     }
 }

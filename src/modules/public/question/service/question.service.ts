@@ -3,7 +3,7 @@ import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { IQuestionService } from "../interface/IQuestion.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { TYPES } from "../../../../core/type.core";
-import { Question, QuestionLog } from "../../types/public.type";
+import { Question, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
 @injectable()
@@ -40,12 +40,7 @@ export class QuestionService implements IQuestionService {
         return this.questionRepository.getQuestionDetailsLogByUUID(questionLogUUID);
     }
 
-    public getQuizTimer(questionLogUUID: string): Promise<{
-        remainingSeconds: number;
-        expiresAt: string;
-        timezoneOffset?: number;
-        timezoneName?: string;
-    }> {
+    public getQuizTimer(questionLogUUID: string): Promise<QuizTimer> {
         return this.questionRepository.getQuizTimer(questionLogUUID);
     }
 }

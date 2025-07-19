@@ -1,4 +1,4 @@
-import { Participant, Question, QuestionLog } from "../../types/public.type";
+import { Participant, Question, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
@@ -10,10 +10,5 @@ export interface IQuestionRepository {
     getQuizResult: (questionLogUUID: string) => Promise<QuestionLog>;
     getQuestionLogs: () => Promise<QuestionLog[]>;
     getQuestionDetailsLogByUUID: (questionLogUUID: string) => Promise<Question[]>;
-    getQuizTimer: (questionLogUUID: string) => Promise<{
-        remainingSeconds: number;
-        expiresAt: string;
-        timezoneOffset?: number;
-        timezoneName?: string;
-    }>;
+    getQuizTimer: (questionLogUUID: string) => Promise<QuizTimer>;
 }

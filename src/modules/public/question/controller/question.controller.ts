@@ -15,13 +15,7 @@ export class QuestionController {
     constructor(
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service
     ) { }
-    /*
-        To check the timer-
-        1. on each request of generated questions it will check if the timer is still valid or not
-        2. On save the each answer it will check if the timer is still valid or not
-        3. On submit the question log it will check if the timer is still valid or not
-        4. Implement some periodic job to close the quiz if the timer is expired
-    */
+
     @httpGet("/quiz/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
     public async getGeneratedQuestions(
         req: Request, res: Response

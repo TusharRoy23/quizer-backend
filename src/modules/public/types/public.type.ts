@@ -56,4 +56,14 @@ export type QuestionLog = {
     score: boolean;
     total_answers: number;
     total_correct: number;
+    end_time: Date;
+    timezone_offset: number;
+    timezone_name: string;
+}
+
+export type QuizTimer = {
+    remainingSeconds: number;
+    expiresAt: string;
+    timezoneOffset?: number;
+    timezoneName?: string;
 }
