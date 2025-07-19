@@ -13,20 +13,64 @@ export class UserController {
         passport.authenticate("google", { scope: ['profile', 'email'] })(req, res, next);
     }
 
-    @httpGet("/auth/check", AccessTokenStrategy.authenticate("jwt", { session: false }))
-    public cookieAuth(req: Request, res: Response, next: NextFunction) {
+    @httpGet("/auth/check")
+    public async cookieAuth(req: Request, res: Response, next: NextFunction) {
         const token = req.cookies['accessToken'];
-        if (!token) return res.status(401).json({ authenticated: false });
 
-        const part = token.split('.')[1];
-        if (!part) return res.status(400).json({ error: 'Invalid token' });
-        const payload = JSON.parse(Buffer.from(part, 'base64').toString('utf-8'));
-        const expTimeInMilliseconds = payload.exp * 1000;
+        // If no token exists
+        if (!token) {
+            return res.status(200).json({
+                authenticated: false,
+                user: null,
+                expiredAt: 0
+            });
+        }
 
-        return res.status(200).json({
-            authenticated: true,
-            user: req.user,
-            expiredAt: expTimeInMilliseconds
+        // Verify the token manually using Promise wrapper
+        return new Promise((resolve, reject) => {
+            passport.authenticate("jwt", { session: false }, (err: any, user: any, info: any) => {
+                if (err) {
+                    return resolve(res.status(200).json({
+                        authenticated: false,
+                        user: null,
+                        expiredAt: 0
+                    }));
+                }
+
+                if (!user) {
+                    return resolve(res.status(200).json({
+                        authenticated: false,
+                        user: null,
+                        expiredAt: 0
+                    }));
+                }
+
+                try {
+                    const part = token.split('.')[1];
+                    if (!part) {
+                        return resolve(res.status(200).json({
+                            authenticated: false,
+                            user: null,
+                            expiredAt: 0
+                        }));
+                    }
+
+                    const payload = JSON.parse(Buffer.from(part, 'base64').toString('utf-8'));
+                    const expTimeInMilliseconds = payload.exp * 1000;
+
+                    return resolve(res.status(200).json({
+                        authenticated: true,
+                        user: user,
+                        expiredAt: expTimeInMilliseconds
+                    }));
+                } catch (error) {
+                    return resolve(res.status(200).json({
+                        authenticated: false,
+                        user: null,
+                        expiredAt: 0
+                    }));
+                }
+            })(req, res, next);
         });
     }
 
@@ -47,6 +91,16 @@ export class UserController {
             authenticated: true,
             user: req.user,
             expiredAt: Date.now() + Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME),
+        });
+    }
+
+    @httpGet("/auth/logout", AccessTokenStrategy.authenticate("jwt", { session: false }))
+    public async logout(req: Request, res: Response) {
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+        return res.status(200).json({
+            message: "Logged out successfully",
+            authenticated: false
         });
     }
 
@@ -72,5 +126,4 @@ export class UserController {
 
         return res;
     }
-
 }
