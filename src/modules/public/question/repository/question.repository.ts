@@ -238,7 +238,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         try {
             const prisma = await this.prisma$();
             const participant = this.getParticipant();
-            const questionLog = await prisma.question_log.findUnique({
+            let questionLog = await prisma.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
@@ -255,7 +255,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             }
 
             if (!questionLog.end_time) {
-                throw new BadRequestException('Quiz timer not initialized');
+                questionLog = await this.updateQuizTimer(questionLogUUID); // Update the timer if not set
             }
 
             // Get current server time
@@ -282,39 +282,39 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async updateQuizTimer(questionLogUUID: string): Promise<void> {
+    private async updateQuizTimer(questionLogUUID: string): Promise<QuestionLog | undefined> {
         try {
             const prisma = await this.prisma$();
-            const participant = this.getParticipant();
             const questionLog: QuestionLog = await prisma.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
-                    participant: participant?.id,
                     end_time: null,
                 }
             });
 
-            if (questionLog) {
-                // Calculate end time in UTC
-                const now = new Date();
-                const timezoneOffset = now.getTimezoneOffset(); // Minutes from UTC
-                const timezoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-                // Calculate end time in pure UTC (without local timezone conversion)
-                const expiresAt = new Date(Date.now() + questionLog.timer * 60 * 1000);
-                const expiresAtUTC = new Date(expiresAt.toISOString());
-
-                await prisma.question_log.update({
-                    where: { uuid: questionLogUUID },
-                    data: {
-                        end_time: expiresAtUTC, // Store as UTC
-                        timezone_offset: timezoneOffset,
-                        timezone_name: timezoneName
-                    }
-                });
+            if (!questionLog) {
+                return;
             }
 
+            // Calculate end time in UTC
+            const now = new Date();
+            const timezoneOffset = now.getTimezoneOffset(); // Minutes from UTC
+            const timezoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            // Calculate end time in pure UTC (without local timezone conversion)
+            const expiresAt = new Date(Date.now() + questionLog.timer * 60 * 1000);
+            const expiresAtUTC = new Date(expiresAt.toISOString());
+
+            const questionUpdatedLog = await prisma.question_log.update({
+                where: { uuid: questionLogUUID },
+                data: {
+                    end_time: expiresAtUTC, // Store as UTC
+                    timezone_offset: timezoneOffset,
+                    timezone_name: timezoneName
+                }
+            });
+            return questionUpdatedLog;
         } catch (error: any) {
             return throwException(error);
         }
@@ -546,31 +546,31 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 select: {
                     uuid: true,
                     end_time: true,
-                    timezone_offset: true,
-                    timezone_name: true,
+                    timezone_offset: true
                 }
             });
-            logs.forEach(async (questionLog: QuestionLog) => {
-                if (questionLog.timezone_offset !== null && questionLog.end_time) {
-                    const now = new Date();
-                    const endTime = new Date(questionLog.end_time);
 
-                    // Calculate remaining time in seconds
-                    const remainingMs = endTime.getTime() - now.getTime();
-                    if (remainingMs <= 0) {
-                        // If the timer has expired, mark the question log as completed
-                        await prisma.question_log.update({
-                            where: {
-                                uuid: questionLog.uuid,
-                                completed: false
-                            },
-                            data: {
-                                completed: true
-                            }
-                        });
-                    }
+            for (const questionLog of logs) {
+                if (!questionLog.end_time && questionLog.timezone_offset == null) continue;
+
+                const now = new Date();
+                const endTime = new Date(questionLog.end_time);
+
+                // Calculate remaining time in seconds
+                const remainingMs = endTime.getTime() - now.getTime();
+                if (remainingMs <= 0) {
+                    // If the timer has expired, mark the question log as completed
+                    await prisma.question_log.updateMany({
+                        where: {
+                            uuid: questionLog.uuid,
+                            completed: false
+                        },
+                        data: {
+                            completed: true
+                        }
+                    });
                 }
-            })
+            }
         } catch (error: any) {
             return throwException(error);
 
