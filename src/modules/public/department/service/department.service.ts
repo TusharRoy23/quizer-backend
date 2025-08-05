@@ -1,16 +1,28 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { IDepartmentRepository } from "../interface/IDepartment.repository";
 import { IDepartmentService } from "../interface/IDepartment.service";
+import { Department, Topic } from "../../types/public.type";
+import { TYPES } from "../../../../core/type.core";
 
 @injectable()
 export class DepartmentService implements IDepartmentService {
-    constructor(private readonly departmentRepository: IDepartmentRepository) { }
+    constructor(
+        @inject(TYPES.IDepartmentRepository) private readonly departmentRepository: IDepartmentRepository
+    ) { }
 
     async getDepartmentList(): Promise<Department[]> {
-        return this.departmentRepository.getDepartmentList();
+        return await this.departmentRepository.getDepartmentList();
     }
 
-    async getTopicList(): Promise<Topic[]> {
-        return this.departmentRepository.getTopicList();
+    async getTopicsByDepartment(departmentUuid: string): Promise<Topic[]> {
+        return await this.departmentRepository.getTopicsByDepartment(departmentUuid);
+    }
+
+    async getDepartmentByUUID(uuid: string): Promise<Department | null> {
+        return await this.departmentRepository.getDepartmentByUUID(uuid);
+    }
+
+    async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string): Promise<Topic[] | null> {
+        return await this.departmentRepository.getTopicsByUUIDsAndDepartmentUUID(uuids, departmentUuid);
     }
 }

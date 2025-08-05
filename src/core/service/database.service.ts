@@ -22,11 +22,14 @@ export class DatabaseService implements IDatabaseService {
                 query: {
                     $allModels: {
                         findMany: async ({ model, operation, args, query }) => {
+                            /* Can Be used for modify the response */
                             const results = await query(args);
-                            console.log('results: ', results);
-                            results.map(result => delete result.id);
-
                             return results;
+                        },
+                        findFirst: async ({ model, operation, args, query }) => {
+                            /* Can Be used for modify the response */
+                            const result = await query(args);
+                            return result;
                         }
                     }
                 }
@@ -66,5 +69,13 @@ export class DatabaseService implements IDatabaseService {
         } catch {
             return false;
         }
+    }
+
+    //? Can be used to remove fields from the response
+    private async deleteFieldFromResult(result: any, field: string): Promise<any[]> {
+        if (result && Object.prototype.hasOwnProperty.call(result, field)) {
+            delete result[field];
+        }
+        return result;
     }
 }

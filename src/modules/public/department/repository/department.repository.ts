@@ -3,6 +3,8 @@ import { IDepartmentRepository } from "../interface/IDepartment.repository";
 import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BaseRepository } from "../../../../core/repository/base.repository";
+import { Department, Topic } from "../../types/public.type";
+import { throwException } from "../../../../shared/errors/all.exception";
 
 @injectable()
 export class DepartmentRepository extends BaseRepository implements IDepartmentRepository {
@@ -18,20 +20,17 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
             const department = await prisma.department.findMany();
             return department as Department[];
         } catch (error) {
-            throw new Error('Failed to fetch departments');
+            return throwException(error);
         }
     }
 
-    async getTopicList(): Promise<Topic[]> {
+    async getTopicsByDepartment(departmentUuid: string): Promise<Topic[]> {
         try {
             const prisma = await this.prisma$();
             const topic = await prisma.topic.findMany({
-                include: {
+                where: {
                     department_topic_departmentTodepartment: {
-                        select: {
-                            uuid: true,
-                            name: true,
-                        }
+                        uuid: departmentUuid
                     }
                 },
                 omit: {
@@ -40,7 +39,42 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
             });
             return topic as Topic[];
         } catch (error) {
-            throw new Error('Failed to fetch topics');
+            return throwException(error);
+        }
+    }
+
+    async getDepartmentByUUID(uuid: string): Promise<Department | null> {
+        try {
+            const prisma = await this.prisma$();
+            const department = await prisma.department.findFirst({
+                where: {
+                    uuid: uuid
+                }
+            });
+
+            return department as Department;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string): Promise<Topic[] | null> {
+        try {
+            const prisma = await this.prisma$();
+            const topics = await prisma.topic.findMany({
+                where: {
+                    uuid: {
+                        in: uuids
+                    },
+                    department_topic_departmentTodepartment: {
+                        uuid: departmentUuid
+                    }
+                },
+            });
+
+            return topics as Topic[];
+        } catch (error) {
+            return throwException(error);
         }
     }
 }

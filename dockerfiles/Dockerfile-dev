@@ -6,23 +6,32 @@ ENV PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=true
 
 WORKDIR /app
 
-# 1. Copy package files first for optimal caching
+# 1. Install system packages, including NTP (openntpd)
+RUN apk update && \
+    apk add --no-cache openntpd tzdata && \
+    cp /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \
+    echo "EU" > /etc/timezone
+
+# 2. Copy package files first for optimal caching
 COPY package.json package-lock.json ./
 
-# 2. Install all dependencies
+# 3. Install all dependencies
 RUN npm install
 
-# 3. Copy Prisma schema
+# 4. Install globally
+RUN npm install -g ts-node nodemon typescript
+
+# 5. Copy Prisma schema
 COPY prisma/schema.prisma ./prisma/
 
-# 4. Generate Prisma client (must happen before app code)
+# 6. Generate Prisma client (must happen before app code)
 RUN npx prisma generate
 
-# 5. Copy environment variables (for Supabase connection)
+# 7. Copy environment variables (for Supabase connection)
 COPY .envs/.local/.env ./.env
 
-# 6. Copy the rest of the application
+# 8. Copy the rest of the application
 COPY . .
 
-EXPOSE 8000
+EXPOSE 9229 8000
 CMD ["npm", "run", "start:watch"]
