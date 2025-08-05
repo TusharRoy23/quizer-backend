@@ -7,9 +7,11 @@ import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.servic
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
 import { IUserService } from "../../user/interface/IUser.service";
-import { Department, Question, QuestionLog, Topic } from "../../types/public.type";
+import { Department, Question, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
-import { NotFoundException, throwException } from "../../../../shared/errors/all.exception";
+import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
+import { RequestContext } from "../../../../shared/context/request-context";
+import CronJob from "node-cron";
 
 type QuestionLogPayloadType = {
     department: number;
@@ -27,18 +29,16 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         @inject(TYPES.IUserService) readonly userService: IUserService,
     ) {
         super(databaseService);
+        this.cronJob(); // Schedule the cron job to update quiz timers
+    }
+
+    private cronJob() {
+        CronJob.schedule('*/5 * * * *', async () => this.updateQuizesTimer());
     }
 
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
         try {
-            let participant = await this.userService.getParticipantByEmail(payload.email);
-            if (!participant) {
-                participant = await this.userService.createParticipant({
-                    name: payload.name,
-                    email: payload.email,
-                    googleId: "", // Provide a default or actual googleId if available
-                });
-            }
+            const participant = this.getParticipant();
             const department = await this.departmentService.getDepartmentByUUID(payload.department);
             if (!department) {
                 throw new NotFoundException('Department not found');
@@ -71,20 +71,17 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         // This method is not implemented in the original code.
         // Implement the logic to retrieve generated questions from the database.
         try {
-            const prisma = await this.prisma$();
-            const questions = await prisma.question_log_question.findMany({
-                where: {
-                    question_log: {
-                        uuid: questionLogUUID
-                    }
-                }
-            });
-            return questions.map((question: Question) => ({
+            const questions = await this.getQuestionsBylogUUID(questionLogUUID);
+            if (!questions || questions.length === 0) {
+                throw new NotFoundException('No questions found. Please generate questions first.');
+            }
+            const data = questions.map((question: Question) => ({
                 uuid: question.uuid,
                 question: question.question,
                 options: question.options,
                 question_type: question.question_type,
             }));
+            return data;
         } catch (error: any) {
             return throwException(error);
         }
@@ -151,16 +148,18 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             };
 
             questions.forEach((question: Question) => {
-                if (question.selected_answer.length > 0) {
+                if (question?.selected_answer && question?.selected_answer?.length > 0) {
                     result.total_answers += 1
                 }
 
-                if (question.answer.join(',') === question.selected_answer.join(',')) {
+                if (question.answer && question.answer.join(',') === question?.selected_answer?.join(',')) {
                     result.correct_answers += 1;
                 }
             });
 
             result.score = (result.correct_answers / result.total_questions) * 100;
+            //! PROBLEM: An operation failed because it depends on one or more records 
+            //! that were required but not found. Record to update not found.
             const questionLogUpdate = await prisma.question_log.update({
                 where: {
                     uuid: questionLogUUID,
@@ -185,10 +184,16 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     public async getQuizResult(questionLogUUID: string): Promise<QuestionLog> {
-        // This method is not implemented in the original code.
-        // Implement the logic to retrieve the quiz result based on the question log UUID.
         try {
-            const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true); // Ensure the question log is not completed
+            const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true);
+            if (questionLog.created_at) {
+                const createdTime = questionLog.created_at.getTime();
+                const fiveMinLater = new Date(createdTime + 5 * 60 * 1000);
+                const now = Date.now();
+                if (now > fiveMinLater.getTime()) {
+                    throw new BadRequestException('Quiz result can only be retrieved within 5 minutes of completion.');
+                }
+            }
 
             return questionLog;
         } catch (error: any) {
@@ -196,14 +201,129 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async getQuestionLogByUUID(questionLogUUID: string, isCompleted: boolean = true): Promise<QuestionLog> {
-        // This method is not implemented in the original code. 
+    public async getQuestionLogs(): Promise<QuestionLog[]> {
         try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+            const questionLogs = await prisma.question_log.findMany({
+                where: {
+                    participant: participant?.id,
+                    completed: true, // Only retrieve completed question logs
+                },
+                orderBy: {
+                    id: 'desc' // Order by ID in descending order
+                }
+            });
+            return questionLogs.map((questionLog: any) => this.formatQuestionLog(questionLog)) as QuestionLog[];
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getQuestionDetailsLogByUUID(questionLogUUID: string): Promise<Question[]> {
+        try {
+            const logs = this.getQuestionsBylogUUID(questionLogUUID, true);
+            return logs;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    public async getQuizTimer(questionLogUUID: string): Promise<QuizTimer> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            let questionLog = await prisma.question_log.findUnique({
+                where: {
+                    uuid: questionLogUUID,
+                    completed: false, // Ensure the question log is not completed
+                    participant: participant?.id,
+                },
+                select: {
+                    end_time: true,
+                    timezone_offset: true,
+                    timezone_name: true,
+                }
+            });
+            if (!questionLog) {
+                throw new NotFoundException('Quiz session not found');
+            }
+
+            if (!questionLog?.end_time) {
+                questionLog = await this.updateQuizTimer(questionLogUUID); // Update the timer if not set
+            }
+
+            // Get current server time
+            const now = new Date();
+            const endTime = new Date(questionLog.end_time);
+
+            // Calculate remaining time in seconds
+            const remainingMs = endTime.getTime() - now.getTime();
+
+            let localExpiresAt: string | undefined;
+            if (questionLog.timezone_offset !== null) {
+                const localTime = new Date(endTime.getTime() - (questionLog.timezone_offset * 60000));
+                localExpiresAt = localTime.toISOString();
+            }
+
+            return {
+                remainingSeconds: Math.max(0, Math.floor(remainingMs / 1000)),
+                expiresAt: localExpiresAt || endTime.toISOString(), // Use local time if available, otherwise UTC
+                timezoneOffset: questionLog.timezone_offset, // Offset in minutes from UTC
+                timezoneName: questionLog.timezone_name // Timezone name
+            };
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    private async updateQuizTimer(questionLogUUID: string): Promise<QuestionLog | undefined> {
+        try {
+            const prisma = await this.prisma$();
+            const questionLog: QuestionLog = await prisma.question_log.findUnique({
+                where: {
+                    uuid: questionLogUUID,
+                    completed: false, // Ensure the question log is not completed
+                }
+            });
+
+            if (!questionLog) {
+                return;
+            }
+
+            // Calculate end time in UTC
+            const now = new Date();
+            const timezoneOffset = now.getTimezoneOffset(); // Minutes from UTC
+            const timezoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            // Calculate end time in pure UTC (without local timezone conversion)
+            const expiresAt = new Date(Date.now() + questionLog.timer * 60 * 1000);
+            const expiresAtUTC = new Date(expiresAt.toISOString());
+
+            const questionUpdatedLog = await prisma.question_log.update({
+                where: { uuid: questionLogUUID },
+                data: {
+                    end_time: expiresAtUTC, // Store as UTC
+                    timezone_offset: timezoneOffset,
+                    timezone_name: timezoneName
+                }
+            });
+            return questionUpdatedLog;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    private async getQuestionLogByUUID(questionLogUUID: string, isCompleted: boolean = true): Promise<QuestionLog> {
+        try {
+            const participant = this.getParticipant();
+
             const prisma = await this.prisma$();
             const questionLog = await prisma.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: isCompleted, // Ensure the question log is not completed
+                    participant: participant?.id
                 },
                 include: {
                     question_department: true,
@@ -213,21 +333,63 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             if (!questionLog) {
                 throw new NotFoundException('Question log not found or not completed');
             }
+            return this.formatQuestionLog(questionLog) as QuestionLog;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
 
-            const result = {
-                id: questionLog.id,
-                uuid: questionLog.uuid,
-                department: questionLog.question_department,
-                timer: questionLog.timer,
-                difficulty: questionLog.difficulty,
-                question_count: questionLog.question_count,
-                completed: questionLog.completed,
-                score: questionLog.score,
-                total_answers: questionLog.total_answers,
-                total_correct: questionLog.total_correct,
+    private formatQuestionLog(questionLog: any): QuestionLog {
+        return {
+            id: questionLog.id,
+            uuid: questionLog.uuid,
+            department: questionLog.question_department,
+            timer: questionLog.timer,
+            difficulty: questionLog.difficulty,
+            question_count: questionLog.question_count,
+            completed: questionLog.completed,
+            score: questionLog.score,
+            total_answers: questionLog.total_answers,
+            total_correct: questionLog.total_correct,
+            created_at: new Date(questionLog.created_at - questionLog.timezone_offset * 60000), // Adjust for timezone offset
+        };
+    }
+
+    private async getQuestionsBylogUUID(questionLogUUID: string, isCompleted: boolean = false): Promise<Question[]> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            if (!isCompleted) {
+                const quizTimer = await this.getQuizTimer(questionLogUUID);
+                if (quizTimer.remainingSeconds <= 0) {
+                    throw new BadRequestException('Quiz timer has expired. Please start a new quiz.');
+                }
             }
 
-            return result as QuestionLog;
+            const questions = await prisma.question_log_question.findMany({
+                where: {
+                    question_log: {
+                        uuid: questionLogUUID,
+                        completed: isCompleted,
+                        participant: participant?.id // Ensure the question log belongs to the participant
+                    }
+                },
+                orderBy: {
+                    id: 'desc'
+                }
+            });
+            if (!questions || questions.length === 0) {
+                throw new NotFoundException('No questions found. Please generate questions first.');
+            }
+            return questions.map((question: Question) => ({
+                uuid: question.uuid,
+                question: question.question,
+                options: question.options,
+                answer: question.answer?.sort((a: number, b: number) => a - b), // Sort the answer indices
+                selected_answer: question.selected_answer || [],
+                question_type: question.question_type,
+                explanation: question.explanation || '', // Ensure explanation is trimmed
+            })) as Question[];
         } catch (error: any) {
             return throwException(error);
         }
@@ -251,79 +413,9 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         // Get the prompt questions from the DeepSeek
         // This is a placeholder function. Implement the actual logic to get the prompt questions.
         try {
-            const topicNames = topics.map(topic => topic.name).join(', ');
-            const prompt = `
-                Generate ${payload.question_count} ${payload.difficulty}-level multiple choice quiz questions about ${topicNames} for ${department.name} department.
-                Each question should:
-                1. Be clear and concise
-                2. Have 4 plausible options (labeled a, b, c, d)
-                3. Mark the correct answer(s)
-                4. Cover different aspects of ${topicNames}
-                5. Vary in style (some conceptual, some applied)
-    
-                Format the response as a JSON array where each question has:
-                {
-                    "question": "The actual question text",
-                    "options": ["Option a", "Option b", "Option c", "Option d"],
-                    "answer": [1], // index number or 1,2 indices for multiple correct answers
-                    "question_type": "CHOICE" // or "MULTIPLE_CHOICE",
-                }
-    
-                Example:
-                {
-                    questions: [
-                        {
-                            "question": "What is the capital of France?",
-                            "options": ["London", "Berlin", "Paris", "Madrid"],
-                            "answer": [2]
-                            "question_type": "CHOICE"
-                        },
-                        {
-                            "question: "Which are the Frontend frameworkes or libraries?",
-                            "options": ["React", "Angular", "Vue", "Django"],
-                            "answer": [0, 1, 2],
-                            "question_type": "MULTIPLE_CHOICE"
-                        }
-                    ]
-                }
-    
-                Now generate the requested questions about ${topicNames}:
-            `;
+            const prompt = this.getPromptForQuiz(department, topics, payload);
             const response = await this.openAIService.getChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
-            console.dir(parsedJSON, { depth: null, colors: true });
-            // {
-            //     questions: [
-            //         {
-            //             question: 'Which of the following is NOT a JavaScript data type?',
-            //             options: ['String', 'Boolean', 'Number', 'Array'],
-            //             correctAnswer: [3],
-            //             questionType: 'choice'
-            //         },
-            //         {
-            //             question: 'What is TypeScript primarily used for?',
-            //             options: [
-            //                 'To replace JavaScript',
-            //                 'To add static typing to JavaScript',
-            //                 'To create server-side applications',
-            //                 'To design databases'
-            //             ],
-            //             correctAnswer: [1],
-            //             questionType: 'choice'
-            //         },
-            //         {
-            //             question: 'Which Angular decorator is used to define a component?',
-            //             options: [
-            //                 '@Injectable()',
-            //                 '@NgModule()',
-            //                 '@Component()',
-            //                 '@Directive()'
-            //             ],
-            //             correctAnswer: [2],
-            //             questionType: 'choice'
-            //         }
-            //     ]
-            // }
             return parsedJSON['questions'];
         } catch (error) {
             return throwException(error);
@@ -339,8 +431,9 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 question_log_id: questionLogId,
                 question: question.question,
                 options: question.options, // Ensure options are trimmed
-                answer: question.answer.sort((a, b) => a - b), // Sort the answer indices
+                answer: question?.answer?.sort((a, b) => a - b), // Sort the answer indices
                 question_type: question.question_type,
+                explanation: question.explanation, // Ensure explanation is trimmed
             }));
             const count = await prisma.question_log_question.createMany({
                 data: questionData,
@@ -372,6 +465,110 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             return count.count; // Return the number of connected topics
         } catch (error: any) {
             return throwException(error);
+        }
+    }
+
+    private getPromptForQuiz(department: Department, topics: Topic[], payload: QuestionGeneratePayloadType): string {
+        const topicNames = topics.map(topic => topic.name).join(', ');
+        const prompt = `
+            Generate ${payload.question_count} UNIQUE ${payload.difficulty}-level multiple choice quiz 
+            questions about ${topicNames} for ${department.name} department.
+            
+            **Requirements:**
+            1. Each question must be **completely unique** (avoid repeating common quiz questions).
+            2. Cover **different aspects and subtopics** of ${topicNames}.
+            3. Include **some less common but still relevant concepts**.
+            4. Vary question formats (**definition, scenario-based, comparison, etc.**).
+            5. Provide a **clear and concise explanation** for why the correct answer is right.
+            6. Ensure explanations are **instructive** (not just repeating the answer).
+
+            **Response Format (JSON):**
+            {
+                "questions": [
+                    {
+                        "question": "The question text",
+                        "options": ["Option A", "Option B", "Option C", "Option D"],
+                        "answer": [1], // Index of correct option(s)
+                        "question_type": "CHOICE" | "MULTIPLE_CHOICE",
+                        "explanation": "A clear explanation of why the answer is correct."
+                    },
+                    // More questions...
+                ]
+            }
+
+            **Example:**
+            {
+                "questions": [
+                    {
+                        "question": "What is the capital of France?",
+                        "options": ["London", "Berlin", "Paris", "Madrid"],
+                        "answer": [2],
+                        "question_type": "CHOICE",
+                        "explanation": "Paris is the capital of France, a well-known fact in geography. London is the capital of the UK, Berlin is Germany's capital, and Madrid is Spain's capital."
+                    },
+                    {
+                        "question": "Which of these are frontend frameworks?",
+                        "options": ["React", "Angular", "Vue", "Django"],
+                        "answer": [0, 1, 2],
+                        "question_type": "MULTIPLE_CHOICE",
+                        "explanation": "React, Angular, and Vue are all JavaScript frontend frameworks. Django, however, is a Python backend framework and does not belong in this list."
+                    }
+                ]
+            }
+
+            **Now generate the requested questions about ${topicNames}:**
+        `;
+        return prompt;
+    }
+
+    private getParticipant() {
+        // This method is not implemented in the original code.
+        // Implement the logic to retrieve the participant from the request context.
+        const participant = RequestContext.getParticipant();
+        if (!participant) {
+            throw new NotFoundException('Participant not found');
+        }
+        return participant;
+    }
+
+    private async updateQuizesTimer() {
+        try {
+            const prisma = await this.prisma$();
+            const logs = await prisma.question_log.findMany({
+                where: {
+                    completed: false, // Only update incomplete logs
+                },
+                select: {
+                    uuid: true,
+                    end_time: true,
+                    timezone_offset: true
+                }
+            });
+
+            for (const questionLog of logs) {
+                if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
+
+                const now = new Date();
+                const endTime = new Date(questionLog.end_time);
+
+                // Calculate remaining time in seconds
+                const remainingMs = endTime.getTime() - now.getTime();
+                if (remainingMs <= 0) {
+                    // If the timer has expired, mark the question log as completed
+                    await prisma.question_log.updateMany({
+                        where: {
+                            uuid: questionLog.uuid,
+                            completed: false
+                        },
+                        data: {
+                            completed: true
+                        }
+                    });
+                }
+            }
+        } catch (error: any) {
+            return throwException(error);
+
         }
     }
 }
