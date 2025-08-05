@@ -81,7 +81,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 options: question.options,
                 question_type: question.question_type,
             }));
-            await this.updateQuizTimer(questionLogUUID); // Update the quiz timer on each request
             return data;
         } catch (error: any) {
             return throwException(error);
@@ -185,10 +184,16 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     public async getQuizResult(questionLogUUID: string): Promise<QuestionLog> {
-        // This method is not implemented in the original code.
-        // Implement the logic to retrieve the quiz result based on the question log UUID.
         try {
             const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true);
+            if (questionLog.created_at) {
+                const createdTime = questionLog.created_at.getTime();
+                const fiveMinLater = new Date(createdTime + 5 * 60 * 1000);
+                const now = Date.now();
+                if (now > fiveMinLater.getTime()) {
+                    throw new BadRequestException('Quiz result can only be retrieved within 5 minutes of completion.');
+                }
+            }
 
             return questionLog;
         } catch (error: any) {
@@ -209,17 +214,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     id: 'desc' // Order by ID in descending order
                 }
             });
-            return questionLogs.map((questionLog: any) => ({
-                uuid: questionLog.uuid,
-                department: questionLog.question_department,
-                timer: questionLog.timer,
-                difficulty: questionLog.difficulty,
-                question_count: questionLog.question_count,
-                completed: questionLog.completed,
-                score: questionLog.score,
-                total_answers: questionLog.total_answers,
-                total_correct: questionLog.total_correct,
-            })) as QuestionLog[];
+            return questionLogs.map((questionLog: any) => this.formatQuestionLog(questionLog)) as QuestionLog[];
         } catch (error) {
             return throwException(error);
         }
@@ -254,7 +249,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 throw new NotFoundException('Quiz session not found');
             }
 
-            if (!questionLog.end_time) {
+            if (!questionLog?.end_time) {
                 questionLog = await this.updateQuizTimer(questionLogUUID); // Update the timer if not set
             }
 
@@ -289,7 +284,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
-                    end_time: null,
                 }
             });
 
@@ -321,7 +315,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     private async getQuestionLogByUUID(questionLogUUID: string, isCompleted: boolean = true): Promise<QuestionLog> {
-        // This method is not implemented in the original code. 
         try {
             const participant = this.getParticipant();
 
@@ -340,24 +333,26 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             if (!questionLog) {
                 throw new NotFoundException('Question log not found or not completed');
             }
-
-            const result = {
-                id: questionLog.id,
-                uuid: questionLog.uuid,
-                department: questionLog.question_department,
-                timer: questionLog.timer,
-                difficulty: questionLog.difficulty,
-                question_count: questionLog.question_count,
-                completed: questionLog.completed,
-                score: questionLog.score,
-                total_answers: questionLog.total_answers,
-                total_correct: questionLog.total_correct,
-            }
-
-            return result as QuestionLog;
+            return this.formatQuestionLog(questionLog) as QuestionLog;
         } catch (error: any) {
             return throwException(error);
         }
+    }
+
+    private formatQuestionLog(questionLog: any): QuestionLog {
+        return {
+            id: questionLog.id,
+            uuid: questionLog.uuid,
+            department: questionLog.question_department,
+            timer: questionLog.timer,
+            difficulty: questionLog.difficulty,
+            question_count: questionLog.question_count,
+            completed: questionLog.completed,
+            score: questionLog.score,
+            total_answers: questionLog.total_answers,
+            total_correct: questionLog.total_correct,
+            created_at: new Date(questionLog.created_at - questionLog.timezone_offset * 60000), // Adjust for timezone offset
+        };
     }
 
     private async getQuestionsBylogUUID(questionLogUUID: string, isCompleted: boolean = false): Promise<Question[]> {
@@ -551,7 +546,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             });
 
             for (const questionLog of logs) {
-                if (!questionLog.end_time && questionLog.timezone_offset == null) continue;
+                if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
 
                 const now = new Date();
                 const endTime = new Date(questionLog.end_time);

@@ -51,14 +51,15 @@ export type QuestionLog = {
     timer: number;
     difficulty: string;
     question_count: number;
-    participant: Participant;
+    participant?: Participant;
     completed: boolean;
     score: boolean;
     total_answers: number;
     total_correct: number;
-    end_time: Date;
-    timezone_offset: number;
-    timezone_name: string;
+    end_time?: Date;
+    timezone_offset?: number;
+    timezone_name?: string;
+    created_at: Date;
 }
 
 export type QuizTimer = {
