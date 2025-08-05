@@ -3,12 +3,12 @@ import express, { Request, Response, NextFunction, ErrorRequestHandler } from "e
 import { InversifyExpressServer } from "inversify-express-utils";
 import container from "./core/container.core";
 import { responseWrapper } from "./middlewares/response-wrapper";
-import { NotFoundException, BadRequestException, InternalServerErrorException, UnauthorizedException, ConflictException, ForbiddenException, MethodNotAllowedException, RequestTimeoutException } from "./shared/errors/all.exception";
+import { NotFoundException, BadRequestException, InternalServerErrorException, UnauthorizedException, ConflictException, ForbiddenException, MethodNotAllowedException, RequestTimeoutException, TooManyRequestsException } from "./shared/errors/all.exception";
 import { HttpStatusCode } from "./shared/utils/enum";
 import passport from "./utils/google-oauth/passport";
 import session from "express-session";
 import cookieParser from "cookie-parser";
-import { setRequestContext } from "./middlewares/participant.middleware";
+import { rateLimit } from "express-rate-limit";
 
 export const server = new InversifyExpressServer(container);
 const corsOptions: cors.CorsOptions = {
@@ -27,11 +27,21 @@ const corsOptions: cors.CorsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
+const rateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 60, // Limit each IP to 60 requests per windowMs
+    standardHeaders: false, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: 'Too many requests. Stop spamming us!', // Custom message
+    statusCode: HttpStatusCode.TOO_MANY_REQUESTS, // Use the custom status
+})
+
 server.setConfig((app) => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(responseWrapper);
     app.use(cors(corsOptions));
+    app.use(rateLimiter);
     app.use(cookieParser());
     app.use(session({ secret: process.env.PASSPORT_SECRET || '', resave: true, saveUninitialized: true }));
     //? passport for google oauth
@@ -87,6 +97,11 @@ const errorHandler: ErrorRequestHandler = (error: any, req: Request, res: Respon
 
     if (error instanceof RequestTimeoutException) {
         errorResponse(req, res, error.message, HttpStatusCode.REQUEST_TIMEOUT);
+        return;
+    }
+
+    if (error instanceof TooManyRequestsException) {
+        errorResponse(req, res, error.message, HttpStatusCode.TOO_MANY_REQUESTS);
         return;
     }
 

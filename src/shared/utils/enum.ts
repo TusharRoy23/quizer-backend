@@ -11,4 +11,5 @@ export enum HttpStatusCode {
     REQUEST_TIMEOUT = 408,
     CONFLICT = 409,
     INTERNAL_SERVER = 500,
+    TOO_MANY_REQUESTS = 429,
 }
