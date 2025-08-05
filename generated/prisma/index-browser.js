@@ -129,6 +129,7 @@ exports.Prisma.ParticipantScalarFieldEnum = {
   created_at: 'created_at',
   email: 'email',
   name: 'name',
+  google_id: 'google_id',
   uuid: 'uuid'
 };
 
@@ -160,7 +161,10 @@ exports.Prisma.Question_logScalarFieldEnum = {
   completed: 'completed',
   total_answers: 'total_answers',
   total_correct: 'total_correct',
-  score: 'score'
+  score: 'score',
+  end_time: 'end_time',
+  timezone_offset: 'timezone_offset',
+  timezone_name: 'timezone_name'
 };
 
 exports.Prisma.Question_log_topicScalarFieldEnum = {
@@ -174,6 +178,7 @@ exports.Prisma.Question_log_questionScalarFieldEnum = {
   question: 'question',
   options: 'options',
   answer: 'answer',
+  explanation: 'explanation',
   selected_answer: 'selected_answer',
   question_type: 'question_type',
   created_at: 'created_at',

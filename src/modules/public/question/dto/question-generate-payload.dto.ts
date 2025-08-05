@@ -1,13 +1,5 @@
 import { z, string, number, enum as enum_, array } from 'zod';
 export const QuestionGeneratePayloadDto = z.object({
-    name: string({
-        required_error: 'Name is required',
-        invalid_type_error: 'Name must be a string',
-    }).nonempty({ message: 'Name is required' }),
-    email: string({
-        required_error: 'Email is required',
-        invalid_type_error: 'Email must be a string',
-    }).email({ message: 'Email is invalid' }),
     department: string({
         required_error: 'Department is required',
         invalid_type_error: 'Department must be a uuid',

@@ -52,13 +52,17 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     async createParticipant(payload: ParticipantPayloadType): Promise<Participant | null> {
         try {
             const prisma = await this.prisma$();
-            const participant = await prisma.participant.create({
-                data: {
-                    name: payload.name,
-                    email: payload.email,
-                    created_at: new Date(),
-                }
-            });
+            let participant = await this.getParticipantByEmail(payload.email);
+            if (!participant) {
+                participant = await prisma.participant.create({
+                    data: {
+                        name: payload.name,
+                        email: payload.email,
+                        created_at: new Date(),
+                        google_id: payload?.googleId
+                    }
+                });
+            }
             return participant as Participant;
         } catch (error) {
             return throwException(error);
