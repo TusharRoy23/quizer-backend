@@ -129,6 +129,7 @@ exports.Prisma.ParticipantScalarFieldEnum = {
   created_at: 'created_at',
   email: 'email',
   name: 'name',
+  google_id: 'google_id',
   uuid: 'uuid'
 };
 
@@ -137,6 +138,50 @@ exports.Prisma.TopicScalarFieldEnum = {
   created_at: 'created_at',
   name: 'name',
   department: 'department',
+  uuid: 'uuid'
+};
+
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  created_at: 'created_at',
+  email: 'email',
+  name: 'name',
+  uuid: 'uuid'
+};
+
+exports.Prisma.Question_logScalarFieldEnum = {
+  id: 'id',
+  created_at: 'created_at',
+  uuid: 'uuid',
+  department: 'department',
+  participant: 'participant',
+  timer: 'timer',
+  question_count: 'question_count',
+  difficulty: 'difficulty',
+  completed: 'completed',
+  total_answers: 'total_answers',
+  total_correct: 'total_correct',
+  score: 'score',
+  end_time: 'end_time',
+  timezone_offset: 'timezone_offset',
+  timezone_name: 'timezone_name'
+};
+
+exports.Prisma.Question_log_topicScalarFieldEnum = {
+  question_log_id: 'question_log_id',
+  topic_id: 'topic_id'
+};
+
+exports.Prisma.Question_log_questionScalarFieldEnum = {
+  id: 'id',
+  question_log_id: 'question_log_id',
+  question: 'question',
+  options: 'options',
+  answer: 'answer',
+  explanation: 'explanation',
+  selected_answer: 'selected_answer',
+  question_type: 'question_type',
+  created_at: 'created_at',
   uuid: 'uuid'
 };
 
@@ -154,12 +199,19 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
+exports.QuestionType = exports.$Enums.QuestionType = {
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+  CHOICE: 'CHOICE'
+};
 
 exports.Prisma.ModelName = {
   department: 'department',
   participant: 'participant',
-  topic: 'topic'
+  topic: 'topic',
+  user: 'user',
+  question_log: 'question_log',
+  question_log_topic: 'question_log_topic',
+  question_log_question: 'question_log_question'
 };
 
 /**

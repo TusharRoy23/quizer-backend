@@ -1,13 +1,5 @@
 import { z, string, number, enum as enum_, array } from 'zod';
-export const QuestionPayloadDto = z.object({
-    name: string({
-        required_error: 'Name is required',
-        invalid_type_error: 'Name must be a string',
-    }).nonempty({ message: 'Name is required' }),
-    email: string({
-        required_error: 'Email is required',
-        invalid_type_error: 'Email must be a string',
-    }).email({ message: 'Email is invalid' }),
+export const QuestionGeneratePayloadDto = z.object({
     department: string({
         required_error: 'Department is required',
         invalid_type_error: 'Department must be a uuid',
@@ -27,4 +19,4 @@ export const QuestionPayloadDto = z.object({
     }).min(1, { message: 'Timer must be at least 1 second' }),
 });
 
-export type QuestionPayloadType = z.infer<typeof QuestionPayloadDto>;
+export type QuestionGeneratePayloadType = z.infer<typeof QuestionGeneratePayloadDto>;
