@@ -7,14 +7,16 @@ import { TYPES } from "../../../../core/type.core";
 import { IQuestionService } from "../interface/IQuestion.service";
 import { QuestionSavePayloadDto, QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middleware";
+import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
+import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
 
-@controller("/question")
+@controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware)
 export class QuestionController {
     constructor(
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service
     ) { }
 
-    @httpGet("/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
+    @httpGet("/quiz/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
     public async getGeneratedQuestions(
         req: Request, res: Response
     ) {
@@ -23,7 +25,7 @@ export class QuestionController {
         return res.status(200).json(data);
     }
 
-    @httpPost("/:questionLogUUID/save", ValidateUUIDParam("questionLogUUID"), DtoValidationMiddleware(QuestionSavePayloadDto))
+    @httpPost("/quiz/:questionLogUUID/save", ValidateUUIDParam("questionLogUUID"), DtoValidationMiddleware(QuestionSavePayloadDto))
     public async saveAnswerForQuestion(
         @requestBody() payload: QuestionSavePayloadType, req: Request, res: Response
     ) {
@@ -32,7 +34,7 @@ export class QuestionController {
         return res.status(200).json({ data: result });
     }
 
-    @httpPost("/:questionLogUUID/submit", ValidateUUIDParam("questionLogUUID"))
+    @httpPost("/quiz/:questionLogUUID/submit", ValidateUUIDParam("questionLogUUID"))
     public async submitQuestionLog(
         req: Request, res: Response
     ) {
@@ -41,7 +43,7 @@ export class QuestionController {
         return res.status(200).json({ data: result });
     }
 
-    @httpGet("/:questionLogUUID/result", ValidateUUIDParam("questionLogUUID"))
+    @httpGet("/quiz/:questionLogUUID/result", ValidateUUIDParam("questionLogUUID"))
     public async getQuestionLogResult(
         req: Request, res: Response
     ) {
@@ -50,11 +52,35 @@ export class QuestionController {
         return res.status(200).json({ data: result });
     }
 
-    @httpPost("/generate", DtoValidationMiddleware(QuestionGeneratePayloadDto))
+    @httpPost("/quiz/generate", DtoValidationMiddleware(QuestionGeneratePayloadDto))
     public async getGeneratedQuestion(
         @requestBody() payload: QuestionGeneratePayloadType, req: Request, res: Response
     ) {
         const result = await this.questionService.generatedQuestions(payload);
         return res.status(201).json({ data: result });
+    }
+
+    @httpGet("/quiz/:questionLogUUID/timer", ValidateUUIDParam("questionLogUUID"))
+    public async getQuizTimer(
+        req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const timer = await this.questionService.getQuizTimer(questionLogUUID);
+        return res.status(200).json({ data: { ...timer } });
+    }
+
+    @httpGet("/logs")
+    public async getQuestionLogs(req: Request, res: Response) {
+        const data = await this.questionService.getQuestionLogs();
+        return res.status(200).json({ data });
+    }
+
+    @httpGet("/logs/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
+    public async getQuestionLogByUUID(
+        req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const data = await this.questionService.getQuestionDetailsLogByUUID(questionLogUUID);
+        return res.status(200).json({ data });
     }
 }

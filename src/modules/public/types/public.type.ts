@@ -22,6 +22,7 @@ export type User = {
 
 export type Participant = {
     id: number;
+    google_id: string;
     uuid: string;
     name: string;
     email: string;
@@ -37,8 +38,9 @@ export type Question = {
     uuid: string;
     question: string;
     options: string[];
-    answer: number[];
-    selected_answer: number[];
+    answer?: number[];
+    explanation?: string;
+    selected_answer?: number[];
     question_type: QuestionType;
 }
 
@@ -49,9 +51,20 @@ export type QuestionLog = {
     timer: number;
     difficulty: string;
     question_count: number;
-    participant: Participant;
+    participant?: Participant;
     completed: boolean;
     score: boolean;
     total_answers: number;
     total_correct: number;
+    end_time?: Date;
+    timezone_offset?: number;
+    timezone_name?: string;
+    created_at: Date;
+}
+
+export type QuizTimer = {
+    remainingSeconds: number;
+    expiresAt: string;
+    timezoneOffset?: number;
+    timezoneName?: string;
 }
