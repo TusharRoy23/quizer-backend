@@ -68,3 +68,13 @@ export type QuizTimer = {
     timezoneOffset?: number;
     timezoneName?: string;
 }
+
+export type PaginationParams = {
+    skip: number;
+    take: number;
+}
+
+export type PaginationResponse<T> = {
+    data: T[];
+    total: number;
+}
