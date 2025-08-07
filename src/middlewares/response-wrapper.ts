@@ -35,6 +35,7 @@ export function responseWrapper(req: Request, res: Response, next: NextFunction)
         const wrapped = {
             status: res.statusCode,
             data: cleaned,
+            meta: body?.meta || {},
             message: body?.message || "Success",
             __isWrapped: true, // flag to prevent re-wrapping
         };
