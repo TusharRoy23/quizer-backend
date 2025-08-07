@@ -3,7 +3,7 @@ import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { IQuestionService } from "../interface/IQuestion.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { TYPES } from "../../../../core/type.core";
-import { Question, QuestionLog, QuizTimer } from "../../types/public.type";
+import { PaginationParams, PaginationResponse, Question, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
 @injectable()
@@ -32,8 +32,8 @@ export class QuestionService implements IQuestionService {
         return this.questionRepository.getQuizResult(questionLogUUID);
     }
 
-    public getQuestionLogs(): Promise<QuestionLog[]> {
-        return this.questionRepository.getQuestionLogs();
+    public getQuestionLogs(paginationParams: PaginationParams): Promise<PaginationResponse<QuestionLog>> {
+        return this.questionRepository.getQuestionLogs(paginationParams);
     }
 
     public getQuestionDetailsLogByUUID(questionLogUUID: string): Promise<Question[]> {

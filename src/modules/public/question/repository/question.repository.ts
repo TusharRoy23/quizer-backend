@@ -7,7 +7,7 @@ import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.servic
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
 import { IUserService } from "../../user/interface/IUser.service";
-import { Department, Question, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
+import { Department, PaginationParams, PaginationResponse, Question, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { RequestContext } from "../../../../shared/context/request-context";
@@ -201,20 +201,32 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    public async getQuestionLogs(): Promise<QuestionLog[]> {
+    public async getQuestionLogs(paginationParams: PaginationParams): Promise<PaginationResponse<QuestionLog>> {
         try {
             const participant = this.getParticipant();
             const prisma = await this.prisma$();
+            const { skip, take } = paginationParams;
+            const condition = {
+                participant: participant?.id,
+                completed: true,
+            }
+            // Get total count for pagination metadata
+            const total = await prisma.question_log.count({
+                where: condition,
+            });
             const questionLogs = await prisma.question_log.findMany({
-                where: {
-                    participant: participant?.id,
-                    completed: true, // Only retrieve completed question logs
-                },
+                where: condition,
                 orderBy: {
                     id: 'desc' // Order by ID in descending order
-                }
+                },
+                skip: skip,
+                take: take,
             });
-            return questionLogs.map((questionLog: any) => this.formatQuestionLog(questionLog)) as QuestionLog[];
+            const logs = questionLogs.map((questionLog: any) => this.formatQuestionLog(questionLog)) as QuestionLog[];
+            return {
+                data: logs,
+                total: total
+            }
         } catch (error) {
             return throwException(error);
         }

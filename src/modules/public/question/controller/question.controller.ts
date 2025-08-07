@@ -71,8 +71,26 @@ export class QuestionController {
 
     @httpGet("/logs")
     public async getQuestionLogs(req: Request, res: Response) {
-        const data = await this.questionService.getQuestionLogs();
-        return res.status(200).json({ data });
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        const validatedPage = Math.max(1, page);
+        const validatedLimit = Math.min(Math.max(1, limit), 100); // Cap at 100 items per page
+
+        const skip = (validatedPage - 1) * validatedLimit;
+
+        const data = await this.questionService.getQuestionLogs({ skip, take: validatedLimit });
+        return res.status(200).json({
+            data: data.data,
+            meta: {
+                page: validatedPage,
+                limit: validatedLimit,
+                totalItems: data.total,
+                totalPages: Math.ceil(data.total / validatedLimit),
+                hasNextPage: validatedPage * validatedLimit < data.total,
+                hasPreviousPage: validatedPage > 1
+            }
+        });
     }
 
     @httpGet("/logs/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
