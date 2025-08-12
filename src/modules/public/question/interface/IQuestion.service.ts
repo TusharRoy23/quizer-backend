@@ -1,4 +1,4 @@
-import { PaginationParams, PaginationResponse, Question, QuestionLog, QuizTimer } from "../../types/public.type";
+import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
@@ -11,4 +11,7 @@ export interface IQuestionService {
     getQuestionLogs: (paginationParams: PaginationParams) => Promise<PaginationResponse<QuestionLog>>;
     getQuestionDetailsLogByUUID: (questionLogUUID: string) => Promise<Question[]>;
     getQuizTimer: (questionLogUUID: string) => Promise<QuizTimer>;
+    getQuestionKeywords: (questionUUID: string) => Promise<QuestionKeyword[]>;
+    getKeywordDetails: (keywordUuid: string) => Promise<QuestionKeyword>;
+    getKeywordExample: (keywordUuid: string) => Promise<string>;
 }

@@ -101,4 +101,31 @@ export class QuestionController {
         const data = await this.questionService.getQuestionDetailsLogByUUID(questionLogUUID);
         return res.status(200).json({ data });
     }
+
+    @httpGet("/keywords/:questionUUID", ValidateUUIDParam("questionUUID"))
+    public async getQuestionKeywords(
+        req: Request, res: Response
+    ) {
+        const questionUUID = req.params.questionUUID;
+        const data = await this.questionService.getQuestionKeywords(questionUUID);
+        return res.status(200).json({ data });
+    }
+
+    @httpGet("/keywords/details/:keywordUuid", ValidateUUIDParam("keywordUuid"))
+    public async getKeywordDetails(
+        req: Request, res: Response
+    ) {
+        const keywordUuid = req.params.keywordUuid;
+        const data = await this.questionService.getKeywordDetails(keywordUuid);
+        return res.status(200).json({ data });
+    }
+
+    @httpGet("/keywords/example/:keywordUuid", ValidateUUIDParam("keywordUuid"))
+    public async getKeywordExample(
+        req: Request, res: Response
+    ) {
+        const keywordUuid = req.params.keywordUuid;
+        const data = await this.questionService.getKeywordExample(keywordUuid);
+        return res.status(200).json({ data });
+    }
 }

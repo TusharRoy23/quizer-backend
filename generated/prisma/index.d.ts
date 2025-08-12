@@ -51,6 +51,11 @@ export type question_log_topic = $Result.DefaultSelection<Prisma.$question_log_t
  * 
  */
 export type question_log_question = $Result.DefaultSelection<Prisma.$question_log_questionPayload>
+/**
+ * Model question_keyword
+ * 
+ */
+export type question_keyword = $Result.DefaultSelection<Prisma.$question_keywordPayload>
 
 /**
  * Enums
@@ -263,6 +268,16 @@ export class PrismaClient<
     * ```
     */
   get question_log_question(): Prisma.question_log_questionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.question_keyword`: Exposes CRUD operations for the **question_keyword** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Question_keywords
+    * const question_keywords = await prisma.question_keyword.findMany()
+    * ```
+    */
+  get question_keyword(): Prisma.question_keywordDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -709,7 +724,8 @@ export namespace Prisma {
     user: 'user',
     question_log: 'question_log',
     question_log_topic: 'question_log_topic',
-    question_log_question: 'question_log_question'
+    question_log_question: 'question_log_question',
+    question_keyword: 'question_keyword'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -728,7 +744,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "participant" | "topic" | "user" | "question_log" | "question_log_topic" | "question_log_question"
+      modelProps: "department" | "participant" | "topic" | "user" | "question_log" | "question_log_topic" | "question_log_question" | "question_keyword"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1250,6 +1266,80 @@ export namespace Prisma {
           }
         }
       }
+      question_keyword: {
+        payload: Prisma.$question_keywordPayload<ExtArgs>
+        fields: Prisma.question_keywordFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.question_keywordFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.question_keywordFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>
+          }
+          findFirst: {
+            args: Prisma.question_keywordFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.question_keywordFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>
+          }
+          findMany: {
+            args: Prisma.question_keywordFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>[]
+          }
+          create: {
+            args: Prisma.question_keywordCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>
+          }
+          createMany: {
+            args: Prisma.question_keywordCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.question_keywordCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>[]
+          }
+          delete: {
+            args: Prisma.question_keywordDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>
+          }
+          update: {
+            args: Prisma.question_keywordUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>
+          }
+          deleteMany: {
+            args: Prisma.question_keywordDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.question_keywordUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.question_keywordUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>[]
+          }
+          upsert: {
+            args: Prisma.question_keywordUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$question_keywordPayload>
+          }
+          aggregate: {
+            args: Prisma.Question_keywordAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuestion_keyword>
+          }
+          groupBy: {
+            args: Prisma.question_keywordGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Question_keywordGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.question_keywordCountArgs<ExtArgs>
+            result: $Utils.Optional<Question_keywordCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1341,6 +1431,7 @@ export namespace Prisma {
     question_log?: question_logOmit
     question_log_topic?: question_log_topicOmit
     question_log_question?: question_log_questionOmit
+    question_keyword?: question_keywordOmit
   }
 
   /* Types for Logging */
@@ -1569,6 +1660,37 @@ export namespace Prisma {
    */
   export type Question_logCountOutputTypeCountQuestion_log_questionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: question_log_questionWhereInput
+  }
+
+
+  /**
+   * Count Type Question_log_questionCountOutputType
+   */
+
+  export type Question_log_questionCountOutputType = {
+    question_keyword: number
+  }
+
+  export type Question_log_questionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_keyword?: boolean | Question_log_questionCountOutputTypeCountQuestion_keywordArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * Question_log_questionCountOutputType without action
+   */
+  export type Question_log_questionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Question_log_questionCountOutputType
+     */
+    select?: Question_log_questionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * Question_log_questionCountOutputType without action
+   */
+  export type Question_log_questionCountOutputTypeCountQuestion_keywordArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_keywordWhereInput
   }
 
 
@@ -8402,6 +8524,7 @@ export namespace Prisma {
     question_log_id: number | null
     question: string | null
     explanation: string | null
+    topic: string | null
     question_type: $Enums.QuestionType | null
     created_at: Date | null
     uuid: string | null
@@ -8412,6 +8535,7 @@ export namespace Prisma {
     question_log_id: number | null
     question: string | null
     explanation: string | null
+    topic: string | null
     question_type: $Enums.QuestionType | null
     created_at: Date | null
     uuid: string | null
@@ -8424,6 +8548,7 @@ export namespace Prisma {
     options: number
     answer: number
     explanation: number
+    topic: number
     selected_answer: number
     question_type: number
     created_at: number
@@ -8451,6 +8576,7 @@ export namespace Prisma {
     question_log_id?: true
     question?: true
     explanation?: true
+    topic?: true
     question_type?: true
     created_at?: true
     uuid?: true
@@ -8461,6 +8587,7 @@ export namespace Prisma {
     question_log_id?: true
     question?: true
     explanation?: true
+    topic?: true
     question_type?: true
     created_at?: true
     uuid?: true
@@ -8473,6 +8600,7 @@ export namespace Prisma {
     options?: true
     answer?: true
     explanation?: true
+    topic?: true
     selected_answer?: true
     question_type?: true
     created_at?: true
@@ -8573,6 +8701,7 @@ export namespace Prisma {
     options: string[]
     answer: number[]
     explanation: string | null
+    topic: string | null
     selected_answer: number[]
     question_type: $Enums.QuestionType
     created_at: Date
@@ -8605,11 +8734,14 @@ export namespace Prisma {
     options?: boolean
     answer?: boolean
     explanation?: boolean
+    topic?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
     uuid?: boolean
     question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    question_keyword?: boolean | question_log_question$question_keywordArgs<ExtArgs>
+    _count?: boolean | Question_log_questionCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["question_log_question"]>
 
   export type question_log_questionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -8619,6 +8751,7 @@ export namespace Prisma {
     options?: boolean
     answer?: boolean
     explanation?: boolean
+    topic?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
@@ -8633,6 +8766,7 @@ export namespace Prisma {
     options?: boolean
     answer?: boolean
     explanation?: boolean
+    topic?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
@@ -8647,15 +8781,18 @@ export namespace Prisma {
     options?: boolean
     answer?: boolean
     explanation?: boolean
+    topic?: boolean
     selected_answer?: boolean
     question_type?: boolean
     created_at?: boolean
     uuid?: boolean
   }
 
-  export type question_log_questionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question_log_id" | "question" | "options" | "answer" | "explanation" | "selected_answer" | "question_type" | "created_at" | "uuid", ExtArgs["result"]["question_log_question"]>
+  export type question_log_questionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question_log_id" | "question" | "options" | "answer" | "explanation" | "topic" | "selected_answer" | "question_type" | "created_at" | "uuid", ExtArgs["result"]["question_log_question"]>
   export type question_log_questionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     question_log?: boolean | question_logDefaultArgs<ExtArgs>
+    question_keyword?: boolean | question_log_question$question_keywordArgs<ExtArgs>
+    _count?: boolean | Question_log_questionCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type question_log_questionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     question_log?: boolean | question_logDefaultArgs<ExtArgs>
@@ -8668,6 +8805,7 @@ export namespace Prisma {
     name: "question_log_question"
     objects: {
       question_log: Prisma.$question_logPayload<ExtArgs>
+      question_keyword: Prisma.$question_keywordPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -8676,6 +8814,7 @@ export namespace Prisma {
       options: string[]
       answer: number[]
       explanation: string | null
+      topic: string | null
       selected_answer: number[]
       question_type: $Enums.QuestionType
       created_at: Date
@@ -9075,6 +9214,7 @@ export namespace Prisma {
   export interface Prisma__question_log_questionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     question_log<T extends question_logDefaultArgs<ExtArgs> = {}>(args?: Subset<T, question_logDefaultArgs<ExtArgs>>): Prisma__question_logClient<$Result.GetResult<Prisma.$question_logPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    question_keyword<T extends question_log_question$question_keywordArgs<ExtArgs> = {}>(args?: Subset<T, question_log_question$question_keywordArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9110,6 +9250,7 @@ export namespace Prisma {
     readonly options: FieldRef<"question_log_question", 'String[]'>
     readonly answer: FieldRef<"question_log_question", 'Int[]'>
     readonly explanation: FieldRef<"question_log_question", 'String'>
+    readonly topic: FieldRef<"question_log_question", 'String'>
     readonly selected_answer: FieldRef<"question_log_question", 'Int[]'>
     readonly question_type: FieldRef<"question_log_question", 'QuestionType'>
     readonly created_at: FieldRef<"question_log_question", 'DateTime'>
@@ -9510,6 +9651,30 @@ export namespace Prisma {
   }
 
   /**
+   * question_log_question.question_keyword
+   */
+  export type question_log_question$question_keywordArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    where?: question_keywordWhereInput
+    orderBy?: question_keywordOrderByWithRelationInput | question_keywordOrderByWithRelationInput[]
+    cursor?: question_keywordWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Question_keywordScalarFieldEnum | Question_keywordScalarFieldEnum[]
+  }
+
+  /**
    * question_log_question without action
    */
   export type question_log_questionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9525,6 +9690,1128 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: question_log_questionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model question_keyword
+   */
+
+  export type AggregateQuestion_keyword = {
+    _count: Question_keywordCountAggregateOutputType | null
+    _avg: Question_keywordAvgAggregateOutputType | null
+    _sum: Question_keywordSumAggregateOutputType | null
+    _min: Question_keywordMinAggregateOutputType | null
+    _max: Question_keywordMaxAggregateOutputType | null
+  }
+
+  export type Question_keywordAvgAggregateOutputType = {
+    id: number | null
+    question_id: number | null
+  }
+
+  export type Question_keywordSumAggregateOutputType = {
+    id: number | null
+    question_id: number | null
+  }
+
+  export type Question_keywordMinAggregateOutputType = {
+    id: number | null
+    created_at: Date | null
+    keyword: string | null
+    question_id: number | null
+    uuid: string | null
+    explanation: string | null
+    example: string | null
+  }
+
+  export type Question_keywordMaxAggregateOutputType = {
+    id: number | null
+    created_at: Date | null
+    keyword: string | null
+    question_id: number | null
+    uuid: string | null
+    explanation: string | null
+    example: string | null
+  }
+
+  export type Question_keywordCountAggregateOutputType = {
+    id: number
+    created_at: number
+    keyword: number
+    question_id: number
+    uuid: number
+    explanation: number
+    example: number
+    _all: number
+  }
+
+
+  export type Question_keywordAvgAggregateInputType = {
+    id?: true
+    question_id?: true
+  }
+
+  export type Question_keywordSumAggregateInputType = {
+    id?: true
+    question_id?: true
+  }
+
+  export type Question_keywordMinAggregateInputType = {
+    id?: true
+    created_at?: true
+    keyword?: true
+    question_id?: true
+    uuid?: true
+    explanation?: true
+    example?: true
+  }
+
+  export type Question_keywordMaxAggregateInputType = {
+    id?: true
+    created_at?: true
+    keyword?: true
+    question_id?: true
+    uuid?: true
+    explanation?: true
+    example?: true
+  }
+
+  export type Question_keywordCountAggregateInputType = {
+    id?: true
+    created_at?: true
+    keyword?: true
+    question_id?: true
+    uuid?: true
+    explanation?: true
+    example?: true
+    _all?: true
+  }
+
+  export type Question_keywordAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which question_keyword to aggregate.
+     */
+    where?: question_keywordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_keywords to fetch.
+     */
+    orderBy?: question_keywordOrderByWithRelationInput | question_keywordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: question_keywordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_keywords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_keywords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned question_keywords
+    **/
+    _count?: true | Question_keywordCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Question_keywordAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Question_keywordSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Question_keywordMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Question_keywordMaxAggregateInputType
+  }
+
+  export type GetQuestion_keywordAggregateType<T extends Question_keywordAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuestion_keyword]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuestion_keyword[P]>
+      : GetScalarType<T[P], AggregateQuestion_keyword[P]>
+  }
+
+
+
+
+  export type question_keywordGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: question_keywordWhereInput
+    orderBy?: question_keywordOrderByWithAggregationInput | question_keywordOrderByWithAggregationInput[]
+    by: Question_keywordScalarFieldEnum[] | Question_keywordScalarFieldEnum
+    having?: question_keywordScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Question_keywordCountAggregateInputType | true
+    _avg?: Question_keywordAvgAggregateInputType
+    _sum?: Question_keywordSumAggregateInputType
+    _min?: Question_keywordMinAggregateInputType
+    _max?: Question_keywordMaxAggregateInputType
+  }
+
+  export type Question_keywordGroupByOutputType = {
+    id: number
+    created_at: Date
+    keyword: string
+    question_id: number
+    uuid: string
+    explanation: string | null
+    example: string | null
+    _count: Question_keywordCountAggregateOutputType | null
+    _avg: Question_keywordAvgAggregateOutputType | null
+    _sum: Question_keywordSumAggregateOutputType | null
+    _min: Question_keywordMinAggregateOutputType | null
+    _max: Question_keywordMaxAggregateOutputType | null
+  }
+
+  type GetQuestion_keywordGroupByPayload<T extends question_keywordGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Question_keywordGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Question_keywordGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Question_keywordGroupByOutputType[P]>
+            : GetScalarType<T[P], Question_keywordGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type question_keywordSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    keyword?: boolean
+    question_id?: boolean
+    uuid?: boolean
+    explanation?: boolean
+    example?: boolean
+    question_log_question?: boolean | question_log_questionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_keyword"]>
+
+  export type question_keywordSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    keyword?: boolean
+    question_id?: boolean
+    uuid?: boolean
+    explanation?: boolean
+    example?: boolean
+    question_log_question?: boolean | question_log_questionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_keyword"]>
+
+  export type question_keywordSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    created_at?: boolean
+    keyword?: boolean
+    question_id?: boolean
+    uuid?: boolean
+    explanation?: boolean
+    example?: boolean
+    question_log_question?: boolean | question_log_questionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["question_keyword"]>
+
+  export type question_keywordSelectScalar = {
+    id?: boolean
+    created_at?: boolean
+    keyword?: boolean
+    question_id?: boolean
+    uuid?: boolean
+    explanation?: boolean
+    example?: boolean
+  }
+
+  export type question_keywordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "keyword" | "question_id" | "uuid" | "explanation" | "example", ExtArgs["result"]["question_keyword"]>
+  export type question_keywordInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log_question?: boolean | question_log_questionDefaultArgs<ExtArgs>
+  }
+  export type question_keywordIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log_question?: boolean | question_log_questionDefaultArgs<ExtArgs>
+  }
+  export type question_keywordIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question_log_question?: boolean | question_log_questionDefaultArgs<ExtArgs>
+  }
+
+  export type $question_keywordPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "question_keyword"
+    objects: {
+      question_log_question: Prisma.$question_log_questionPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      created_at: Date
+      keyword: string
+      question_id: number
+      uuid: string
+      explanation: string | null
+      example: string | null
+    }, ExtArgs["result"]["question_keyword"]>
+    composites: {}
+  }
+
+  type question_keywordGetPayload<S extends boolean | null | undefined | question_keywordDefaultArgs> = $Result.GetResult<Prisma.$question_keywordPayload, S>
+
+  type question_keywordCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<question_keywordFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Question_keywordCountAggregateInputType | true
+    }
+
+  export interface question_keywordDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['question_keyword'], meta: { name: 'question_keyword' } }
+    /**
+     * Find zero or one Question_keyword that matches the filter.
+     * @param {question_keywordFindUniqueArgs} args - Arguments to find a Question_keyword
+     * @example
+     * // Get one Question_keyword
+     * const question_keyword = await prisma.question_keyword.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends question_keywordFindUniqueArgs>(args: SelectSubset<T, question_keywordFindUniqueArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Question_keyword that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {question_keywordFindUniqueOrThrowArgs} args - Arguments to find a Question_keyword
+     * @example
+     * // Get one Question_keyword
+     * const question_keyword = await prisma.question_keyword.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends question_keywordFindUniqueOrThrowArgs>(args: SelectSubset<T, question_keywordFindUniqueOrThrowArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Question_keyword that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_keywordFindFirstArgs} args - Arguments to find a Question_keyword
+     * @example
+     * // Get one Question_keyword
+     * const question_keyword = await prisma.question_keyword.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends question_keywordFindFirstArgs>(args?: SelectSubset<T, question_keywordFindFirstArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Question_keyword that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_keywordFindFirstOrThrowArgs} args - Arguments to find a Question_keyword
+     * @example
+     * // Get one Question_keyword
+     * const question_keyword = await prisma.question_keyword.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends question_keywordFindFirstOrThrowArgs>(args?: SelectSubset<T, question_keywordFindFirstOrThrowArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Question_keywords that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_keywordFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Question_keywords
+     * const question_keywords = await prisma.question_keyword.findMany()
+     * 
+     * // Get first 10 Question_keywords
+     * const question_keywords = await prisma.question_keyword.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const question_keywordWithIdOnly = await prisma.question_keyword.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends question_keywordFindManyArgs>(args?: SelectSubset<T, question_keywordFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Question_keyword.
+     * @param {question_keywordCreateArgs} args - Arguments to create a Question_keyword.
+     * @example
+     * // Create one Question_keyword
+     * const Question_keyword = await prisma.question_keyword.create({
+     *   data: {
+     *     // ... data to create a Question_keyword
+     *   }
+     * })
+     * 
+     */
+    create<T extends question_keywordCreateArgs>(args: SelectSubset<T, question_keywordCreateArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Question_keywords.
+     * @param {question_keywordCreateManyArgs} args - Arguments to create many Question_keywords.
+     * @example
+     * // Create many Question_keywords
+     * const question_keyword = await prisma.question_keyword.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends question_keywordCreateManyArgs>(args?: SelectSubset<T, question_keywordCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Question_keywords and returns the data saved in the database.
+     * @param {question_keywordCreateManyAndReturnArgs} args - Arguments to create many Question_keywords.
+     * @example
+     * // Create many Question_keywords
+     * const question_keyword = await prisma.question_keyword.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Question_keywords and only return the `id`
+     * const question_keywordWithIdOnly = await prisma.question_keyword.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends question_keywordCreateManyAndReturnArgs>(args?: SelectSubset<T, question_keywordCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Question_keyword.
+     * @param {question_keywordDeleteArgs} args - Arguments to delete one Question_keyword.
+     * @example
+     * // Delete one Question_keyword
+     * const Question_keyword = await prisma.question_keyword.delete({
+     *   where: {
+     *     // ... filter to delete one Question_keyword
+     *   }
+     * })
+     * 
+     */
+    delete<T extends question_keywordDeleteArgs>(args: SelectSubset<T, question_keywordDeleteArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Question_keyword.
+     * @param {question_keywordUpdateArgs} args - Arguments to update one Question_keyword.
+     * @example
+     * // Update one Question_keyword
+     * const question_keyword = await prisma.question_keyword.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends question_keywordUpdateArgs>(args: SelectSubset<T, question_keywordUpdateArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Question_keywords.
+     * @param {question_keywordDeleteManyArgs} args - Arguments to filter Question_keywords to delete.
+     * @example
+     * // Delete a few Question_keywords
+     * const { count } = await prisma.question_keyword.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends question_keywordDeleteManyArgs>(args?: SelectSubset<T, question_keywordDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Question_keywords.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_keywordUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Question_keywords
+     * const question_keyword = await prisma.question_keyword.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends question_keywordUpdateManyArgs>(args: SelectSubset<T, question_keywordUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Question_keywords and returns the data updated in the database.
+     * @param {question_keywordUpdateManyAndReturnArgs} args - Arguments to update many Question_keywords.
+     * @example
+     * // Update many Question_keywords
+     * const question_keyword = await prisma.question_keyword.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Question_keywords and only return the `id`
+     * const question_keywordWithIdOnly = await prisma.question_keyword.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends question_keywordUpdateManyAndReturnArgs>(args: SelectSubset<T, question_keywordUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Question_keyword.
+     * @param {question_keywordUpsertArgs} args - Arguments to update or create a Question_keyword.
+     * @example
+     * // Update or create a Question_keyword
+     * const question_keyword = await prisma.question_keyword.upsert({
+     *   create: {
+     *     // ... data to create a Question_keyword
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Question_keyword we want to update
+     *   }
+     * })
+     */
+    upsert<T extends question_keywordUpsertArgs>(args: SelectSubset<T, question_keywordUpsertArgs<ExtArgs>>): Prisma__question_keywordClient<$Result.GetResult<Prisma.$question_keywordPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Question_keywords.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_keywordCountArgs} args - Arguments to filter Question_keywords to count.
+     * @example
+     * // Count the number of Question_keywords
+     * const count = await prisma.question_keyword.count({
+     *   where: {
+     *     // ... the filter for the Question_keywords we want to count
+     *   }
+     * })
+    **/
+    count<T extends question_keywordCountArgs>(
+      args?: Subset<T, question_keywordCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Question_keywordCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Question_keyword.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Question_keywordAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Question_keywordAggregateArgs>(args: Subset<T, Question_keywordAggregateArgs>): Prisma.PrismaPromise<GetQuestion_keywordAggregateType<T>>
+
+    /**
+     * Group by Question_keyword.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {question_keywordGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends question_keywordGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: question_keywordGroupByArgs['orderBy'] }
+        : { orderBy?: question_keywordGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, question_keywordGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuestion_keywordGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the question_keyword model
+   */
+  readonly fields: question_keywordFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for question_keyword.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__question_keywordClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    question_log_question<T extends question_log_questionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, question_log_questionDefaultArgs<ExtArgs>>): Prisma__question_log_questionClient<$Result.GetResult<Prisma.$question_log_questionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the question_keyword model
+   */
+  interface question_keywordFieldRefs {
+    readonly id: FieldRef<"question_keyword", 'Int'>
+    readonly created_at: FieldRef<"question_keyword", 'DateTime'>
+    readonly keyword: FieldRef<"question_keyword", 'String'>
+    readonly question_id: FieldRef<"question_keyword", 'Int'>
+    readonly uuid: FieldRef<"question_keyword", 'String'>
+    readonly explanation: FieldRef<"question_keyword", 'String'>
+    readonly example: FieldRef<"question_keyword", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * question_keyword findUnique
+   */
+  export type question_keywordFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * Filter, which question_keyword to fetch.
+     */
+    where: question_keywordWhereUniqueInput
+  }
+
+  /**
+   * question_keyword findUniqueOrThrow
+   */
+  export type question_keywordFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * Filter, which question_keyword to fetch.
+     */
+    where: question_keywordWhereUniqueInput
+  }
+
+  /**
+   * question_keyword findFirst
+   */
+  export type question_keywordFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * Filter, which question_keyword to fetch.
+     */
+    where?: question_keywordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_keywords to fetch.
+     */
+    orderBy?: question_keywordOrderByWithRelationInput | question_keywordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for question_keywords.
+     */
+    cursor?: question_keywordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_keywords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_keywords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of question_keywords.
+     */
+    distinct?: Question_keywordScalarFieldEnum | Question_keywordScalarFieldEnum[]
+  }
+
+  /**
+   * question_keyword findFirstOrThrow
+   */
+  export type question_keywordFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * Filter, which question_keyword to fetch.
+     */
+    where?: question_keywordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_keywords to fetch.
+     */
+    orderBy?: question_keywordOrderByWithRelationInput | question_keywordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for question_keywords.
+     */
+    cursor?: question_keywordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_keywords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_keywords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of question_keywords.
+     */
+    distinct?: Question_keywordScalarFieldEnum | Question_keywordScalarFieldEnum[]
+  }
+
+  /**
+   * question_keyword findMany
+   */
+  export type question_keywordFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * Filter, which question_keywords to fetch.
+     */
+    where?: question_keywordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of question_keywords to fetch.
+     */
+    orderBy?: question_keywordOrderByWithRelationInput | question_keywordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing question_keywords.
+     */
+    cursor?: question_keywordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` question_keywords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` question_keywords.
+     */
+    skip?: number
+    distinct?: Question_keywordScalarFieldEnum | Question_keywordScalarFieldEnum[]
+  }
+
+  /**
+   * question_keyword create
+   */
+  export type question_keywordCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * The data needed to create a question_keyword.
+     */
+    data: XOR<question_keywordCreateInput, question_keywordUncheckedCreateInput>
+  }
+
+  /**
+   * question_keyword createMany
+   */
+  export type question_keywordCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many question_keywords.
+     */
+    data: question_keywordCreateManyInput | question_keywordCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * question_keyword createManyAndReturn
+   */
+  export type question_keywordCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * The data used to create many question_keywords.
+     */
+    data: question_keywordCreateManyInput | question_keywordCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * question_keyword update
+   */
+  export type question_keywordUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * The data needed to update a question_keyword.
+     */
+    data: XOR<question_keywordUpdateInput, question_keywordUncheckedUpdateInput>
+    /**
+     * Choose, which question_keyword to update.
+     */
+    where: question_keywordWhereUniqueInput
+  }
+
+  /**
+   * question_keyword updateMany
+   */
+  export type question_keywordUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update question_keywords.
+     */
+    data: XOR<question_keywordUpdateManyMutationInput, question_keywordUncheckedUpdateManyInput>
+    /**
+     * Filter which question_keywords to update
+     */
+    where?: question_keywordWhereInput
+    /**
+     * Limit how many question_keywords to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * question_keyword updateManyAndReturn
+   */
+  export type question_keywordUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * The data used to update question_keywords.
+     */
+    data: XOR<question_keywordUpdateManyMutationInput, question_keywordUncheckedUpdateManyInput>
+    /**
+     * Filter which question_keywords to update
+     */
+    where?: question_keywordWhereInput
+    /**
+     * Limit how many question_keywords to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * question_keyword upsert
+   */
+  export type question_keywordUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * The filter to search for the question_keyword to update in case it exists.
+     */
+    where: question_keywordWhereUniqueInput
+    /**
+     * In case the question_keyword found by the `where` argument doesn't exist, create a new question_keyword with this data.
+     */
+    create: XOR<question_keywordCreateInput, question_keywordUncheckedCreateInput>
+    /**
+     * In case the question_keyword was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<question_keywordUpdateInput, question_keywordUncheckedUpdateInput>
+  }
+
+  /**
+   * question_keyword delete
+   */
+  export type question_keywordDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
+    /**
+     * Filter which question_keyword to delete.
+     */
+    where: question_keywordWhereUniqueInput
+  }
+
+  /**
+   * question_keyword deleteMany
+   */
+  export type question_keywordDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which question_keywords to delete
+     */
+    where?: question_keywordWhereInput
+    /**
+     * Limit how many question_keywords to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * question_keyword without action
+   */
+  export type question_keywordDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the question_keyword
+     */
+    select?: question_keywordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the question_keyword
+     */
+    omit?: question_keywordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: question_keywordInclude<ExtArgs> | null
   }
 
 
@@ -9622,6 +10909,7 @@ export namespace Prisma {
     options: 'options',
     answer: 'answer',
     explanation: 'explanation',
+    topic: 'topic',
     selected_answer: 'selected_answer',
     question_type: 'question_type',
     created_at: 'created_at',
@@ -9629,6 +10917,19 @@ export namespace Prisma {
   };
 
   export type Question_log_questionScalarFieldEnum = (typeof Question_log_questionScalarFieldEnum)[keyof typeof Question_log_questionScalarFieldEnum]
+
+
+  export const Question_keywordScalarFieldEnum: {
+    id: 'id',
+    created_at: 'created_at',
+    keyword: 'keyword',
+    question_id: 'question_id',
+    uuid: 'uuid',
+    explanation: 'explanation',
+    example: 'example'
+  };
+
+  export type Question_keywordScalarFieldEnum = (typeof Question_keywordScalarFieldEnum)[keyof typeof Question_keywordScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -10143,11 +11444,13 @@ export namespace Prisma {
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
     explanation?: StringNullableFilter<"question_log_question"> | string | null
+    topic?: StringNullableFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeFilter<"question_log_question"> | Date | string
     uuid?: UuidFilter<"question_log_question"> | string
     question_log?: XOR<Question_logScalarRelationFilter, question_logWhereInput>
+    question_keyword?: Question_keywordListRelationFilter
   }
 
   export type question_log_questionOrderByWithRelationInput = {
@@ -10157,11 +11460,13 @@ export namespace Prisma {
     options?: SortOrder
     answer?: SortOrder
     explanation?: SortOrderInput | SortOrder
+    topic?: SortOrderInput | SortOrder
     selected_answer?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
     uuid?: SortOrder
     question_log?: question_logOrderByWithRelationInput
+    question_keyword?: question_keywordOrderByRelationAggregateInput
   }
 
   export type question_log_questionWhereUniqueInput = Prisma.AtLeast<{
@@ -10175,10 +11480,12 @@ export namespace Prisma {
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
     explanation?: StringNullableFilter<"question_log_question"> | string | null
+    topic?: StringNullableFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeFilter<"question_log_question"> | Date | string
     question_log?: XOR<Question_logScalarRelationFilter, question_logWhereInput>
+    question_keyword?: Question_keywordListRelationFilter
   }, "id" | "uuid">
 
   export type question_log_questionOrderByWithAggregationInput = {
@@ -10188,6 +11495,7 @@ export namespace Prisma {
     options?: SortOrder
     answer?: SortOrder
     explanation?: SortOrderInput | SortOrder
+    topic?: SortOrderInput | SortOrder
     selected_answer?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
@@ -10209,10 +11517,78 @@ export namespace Prisma {
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
     explanation?: StringNullableWithAggregatesFilter<"question_log_question"> | string | null
+    topic?: StringNullableWithAggregatesFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeWithAggregatesFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeWithAggregatesFilter<"question_log_question"> | Date | string
     uuid?: UuidWithAggregatesFilter<"question_log_question"> | string
+  }
+
+  export type question_keywordWhereInput = {
+    AND?: question_keywordWhereInput | question_keywordWhereInput[]
+    OR?: question_keywordWhereInput[]
+    NOT?: question_keywordWhereInput | question_keywordWhereInput[]
+    id?: IntFilter<"question_keyword"> | number
+    created_at?: DateTimeFilter<"question_keyword"> | Date | string
+    keyword?: StringFilter<"question_keyword"> | string
+    question_id?: IntFilter<"question_keyword"> | number
+    uuid?: UuidFilter<"question_keyword"> | string
+    explanation?: StringNullableFilter<"question_keyword"> | string | null
+    example?: StringNullableFilter<"question_keyword"> | string | null
+    question_log_question?: XOR<Question_log_questionScalarRelationFilter, question_log_questionWhereInput>
+  }
+
+  export type question_keywordOrderByWithRelationInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    keyword?: SortOrder
+    question_id?: SortOrder
+    uuid?: SortOrder
+    explanation?: SortOrderInput | SortOrder
+    example?: SortOrderInput | SortOrder
+    question_log_question?: question_log_questionOrderByWithRelationInput
+  }
+
+  export type question_keywordWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    uuid?: string
+    AND?: question_keywordWhereInput | question_keywordWhereInput[]
+    OR?: question_keywordWhereInput[]
+    NOT?: question_keywordWhereInput | question_keywordWhereInput[]
+    created_at?: DateTimeFilter<"question_keyword"> | Date | string
+    keyword?: StringFilter<"question_keyword"> | string
+    question_id?: IntFilter<"question_keyword"> | number
+    explanation?: StringNullableFilter<"question_keyword"> | string | null
+    example?: StringNullableFilter<"question_keyword"> | string | null
+    question_log_question?: XOR<Question_log_questionScalarRelationFilter, question_log_questionWhereInput>
+  }, "id" | "uuid">
+
+  export type question_keywordOrderByWithAggregationInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    keyword?: SortOrder
+    question_id?: SortOrder
+    uuid?: SortOrder
+    explanation?: SortOrderInput | SortOrder
+    example?: SortOrderInput | SortOrder
+    _count?: question_keywordCountOrderByAggregateInput
+    _avg?: question_keywordAvgOrderByAggregateInput
+    _max?: question_keywordMaxOrderByAggregateInput
+    _min?: question_keywordMinOrderByAggregateInput
+    _sum?: question_keywordSumOrderByAggregateInput
+  }
+
+  export type question_keywordScalarWhereWithAggregatesInput = {
+    AND?: question_keywordScalarWhereWithAggregatesInput | question_keywordScalarWhereWithAggregatesInput[]
+    OR?: question_keywordScalarWhereWithAggregatesInput[]
+    NOT?: question_keywordScalarWhereWithAggregatesInput | question_keywordScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"question_keyword"> | number
+    created_at?: DateTimeWithAggregatesFilter<"question_keyword"> | Date | string
+    keyword?: StringWithAggregatesFilter<"question_keyword"> | string
+    question_id?: IntWithAggregatesFilter<"question_keyword"> | number
+    uuid?: UuidWithAggregatesFilter<"question_keyword"> | string
+    explanation?: StringNullableWithAggregatesFilter<"question_keyword"> | string | null
+    example?: StringNullableWithAggregatesFilter<"question_keyword"> | string | null
   }
 
   export type departmentCreateInput = {
@@ -10610,11 +11986,13 @@ export namespace Prisma {
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
     explanation?: string | null
+    topic?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
     uuid?: string
     question_log: question_logCreateNestedOneWithoutQuestion_log_questionInput
+    question_keyword?: question_keywordCreateNestedManyWithoutQuestion_log_questionInput
   }
 
   export type question_log_questionUncheckedCreateInput = {
@@ -10624,10 +12002,12 @@ export namespace Prisma {
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
     explanation?: string | null
+    topic?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
     uuid?: string
+    question_keyword?: question_keywordUncheckedCreateNestedManyWithoutQuestion_log_questionInput
   }
 
   export type question_log_questionUpdateInput = {
@@ -10635,11 +12015,13 @@ export namespace Prisma {
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
     explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     uuid?: StringFieldUpdateOperationsInput | string
     question_log?: question_logUpdateOneRequiredWithoutQuestion_log_questionNestedInput
+    question_keyword?: question_keywordUpdateManyWithoutQuestion_log_questionNestedInput
   }
 
   export type question_log_questionUncheckedUpdateInput = {
@@ -10649,10 +12031,12 @@ export namespace Prisma {
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
     explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     uuid?: StringFieldUpdateOperationsInput | string
+    question_keyword?: question_keywordUncheckedUpdateManyWithoutQuestion_log_questionNestedInput
   }
 
   export type question_log_questionCreateManyInput = {
@@ -10662,6 +12046,7 @@ export namespace Prisma {
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
     explanation?: string | null
+    topic?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -10673,6 +12058,7 @@ export namespace Prisma {
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
     explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10686,10 +12072,77 @@ export namespace Prisma {
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
     explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     uuid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type question_keywordCreateInput = {
+    created_at?: Date | string
+    keyword: string
+    uuid?: string
+    explanation?: string | null
+    example?: string | null
+    question_log_question: question_log_questionCreateNestedOneWithoutQuestion_keywordInput
+  }
+
+  export type question_keywordUncheckedCreateInput = {
+    id?: number
+    created_at?: Date | string
+    keyword: string
+    question_id: number
+    uuid?: string
+    explanation?: string | null
+    example?: string | null
+  }
+
+  export type question_keywordUpdateInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    example?: NullableStringFieldUpdateOperationsInput | string | null
+    question_log_question?: question_log_questionUpdateOneRequiredWithoutQuestion_keywordNestedInput
+  }
+
+  export type question_keywordUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    question_id?: IntFieldUpdateOperationsInput | number
+    uuid?: StringFieldUpdateOperationsInput | string
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    example?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type question_keywordCreateManyInput = {
+    id?: number
+    created_at?: Date | string
+    keyword: string
+    question_id: number
+    uuid?: string
+    explanation?: string | null
+    example?: string | null
+  }
+
+  export type question_keywordUpdateManyMutationInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    example?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type question_keywordUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    question_id?: IntFieldUpdateOperationsInput | number
+    uuid?: StringFieldUpdateOperationsInput | string
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    example?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -11260,6 +12713,16 @@ export namespace Prisma {
     not?: NestedEnumQuestionTypeFilter<$PrismaModel> | $Enums.QuestionType
   }
 
+  export type Question_keywordListRelationFilter = {
+    every?: question_keywordWhereInput
+    some?: question_keywordWhereInput
+    none?: question_keywordWhereInput
+  }
+
+  export type question_keywordOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type question_log_questionCountOrderByAggregateInput = {
     id?: SortOrder
     question_log_id?: SortOrder
@@ -11267,6 +12730,7 @@ export namespace Prisma {
     options?: SortOrder
     answer?: SortOrder
     explanation?: SortOrder
+    topic?: SortOrder
     selected_answer?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
@@ -11285,6 +12749,7 @@ export namespace Prisma {
     question_log_id?: SortOrder
     question?: SortOrder
     explanation?: SortOrder
+    topic?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
     uuid?: SortOrder
@@ -11295,6 +12760,7 @@ export namespace Prisma {
     question_log_id?: SortOrder
     question?: SortOrder
     explanation?: SortOrder
+    topic?: SortOrder
     question_type?: SortOrder
     created_at?: SortOrder
     uuid?: SortOrder
@@ -11315,6 +12781,51 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumQuestionTypeFilter<$PrismaModel>
     _max?: NestedEnumQuestionTypeFilter<$PrismaModel>
+  }
+
+  export type Question_log_questionScalarRelationFilter = {
+    is?: question_log_questionWhereInput
+    isNot?: question_log_questionWhereInput
+  }
+
+  export type question_keywordCountOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    keyword?: SortOrder
+    question_id?: SortOrder
+    uuid?: SortOrder
+    explanation?: SortOrder
+    example?: SortOrder
+  }
+
+  export type question_keywordAvgOrderByAggregateInput = {
+    id?: SortOrder
+    question_id?: SortOrder
+  }
+
+  export type question_keywordMaxOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    keyword?: SortOrder
+    question_id?: SortOrder
+    uuid?: SortOrder
+    explanation?: SortOrder
+    example?: SortOrder
+  }
+
+  export type question_keywordMinOrderByAggregateInput = {
+    id?: SortOrder
+    created_at?: SortOrder
+    keyword?: SortOrder
+    question_id?: SortOrder
+    uuid?: SortOrder
+    explanation?: SortOrder
+    example?: SortOrder
+  }
+
+  export type question_keywordSumOrderByAggregateInput = {
+    id?: SortOrder
+    question_id?: SortOrder
   }
 
   export type topicCreateNestedManyWithoutDepartment_topic_departmentTodepartmentInput = {
@@ -11695,6 +13206,20 @@ export namespace Prisma {
     connect?: question_logWhereUniqueInput
   }
 
+  export type question_keywordCreateNestedManyWithoutQuestion_log_questionInput = {
+    create?: XOR<question_keywordCreateWithoutQuestion_log_questionInput, question_keywordUncheckedCreateWithoutQuestion_log_questionInput> | question_keywordCreateWithoutQuestion_log_questionInput[] | question_keywordUncheckedCreateWithoutQuestion_log_questionInput[]
+    connectOrCreate?: question_keywordCreateOrConnectWithoutQuestion_log_questionInput | question_keywordCreateOrConnectWithoutQuestion_log_questionInput[]
+    createMany?: question_keywordCreateManyQuestion_log_questionInputEnvelope
+    connect?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+  }
+
+  export type question_keywordUncheckedCreateNestedManyWithoutQuestion_log_questionInput = {
+    create?: XOR<question_keywordCreateWithoutQuestion_log_questionInput, question_keywordUncheckedCreateWithoutQuestion_log_questionInput> | question_keywordCreateWithoutQuestion_log_questionInput[] | question_keywordUncheckedCreateWithoutQuestion_log_questionInput[]
+    connectOrCreate?: question_keywordCreateOrConnectWithoutQuestion_log_questionInput | question_keywordCreateOrConnectWithoutQuestion_log_questionInput[]
+    createMany?: question_keywordCreateManyQuestion_log_questionInputEnvelope
+    connect?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+  }
+
   export type question_log_questionUpdateoptionsInput = {
     set?: string[]
     push?: string | string[]
@@ -11720,6 +13245,48 @@ export namespace Prisma {
     upsert?: question_logUpsertWithoutQuestion_log_questionInput
     connect?: question_logWhereUniqueInput
     update?: XOR<XOR<question_logUpdateToOneWithWhereWithoutQuestion_log_questionInput, question_logUpdateWithoutQuestion_log_questionInput>, question_logUncheckedUpdateWithoutQuestion_log_questionInput>
+  }
+
+  export type question_keywordUpdateManyWithoutQuestion_log_questionNestedInput = {
+    create?: XOR<question_keywordCreateWithoutQuestion_log_questionInput, question_keywordUncheckedCreateWithoutQuestion_log_questionInput> | question_keywordCreateWithoutQuestion_log_questionInput[] | question_keywordUncheckedCreateWithoutQuestion_log_questionInput[]
+    connectOrCreate?: question_keywordCreateOrConnectWithoutQuestion_log_questionInput | question_keywordCreateOrConnectWithoutQuestion_log_questionInput[]
+    upsert?: question_keywordUpsertWithWhereUniqueWithoutQuestion_log_questionInput | question_keywordUpsertWithWhereUniqueWithoutQuestion_log_questionInput[]
+    createMany?: question_keywordCreateManyQuestion_log_questionInputEnvelope
+    set?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    disconnect?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    delete?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    connect?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    update?: question_keywordUpdateWithWhereUniqueWithoutQuestion_log_questionInput | question_keywordUpdateWithWhereUniqueWithoutQuestion_log_questionInput[]
+    updateMany?: question_keywordUpdateManyWithWhereWithoutQuestion_log_questionInput | question_keywordUpdateManyWithWhereWithoutQuestion_log_questionInput[]
+    deleteMany?: question_keywordScalarWhereInput | question_keywordScalarWhereInput[]
+  }
+
+  export type question_keywordUncheckedUpdateManyWithoutQuestion_log_questionNestedInput = {
+    create?: XOR<question_keywordCreateWithoutQuestion_log_questionInput, question_keywordUncheckedCreateWithoutQuestion_log_questionInput> | question_keywordCreateWithoutQuestion_log_questionInput[] | question_keywordUncheckedCreateWithoutQuestion_log_questionInput[]
+    connectOrCreate?: question_keywordCreateOrConnectWithoutQuestion_log_questionInput | question_keywordCreateOrConnectWithoutQuestion_log_questionInput[]
+    upsert?: question_keywordUpsertWithWhereUniqueWithoutQuestion_log_questionInput | question_keywordUpsertWithWhereUniqueWithoutQuestion_log_questionInput[]
+    createMany?: question_keywordCreateManyQuestion_log_questionInputEnvelope
+    set?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    disconnect?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    delete?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    connect?: question_keywordWhereUniqueInput | question_keywordWhereUniqueInput[]
+    update?: question_keywordUpdateWithWhereUniqueWithoutQuestion_log_questionInput | question_keywordUpdateWithWhereUniqueWithoutQuestion_log_questionInput[]
+    updateMany?: question_keywordUpdateManyWithWhereWithoutQuestion_log_questionInput | question_keywordUpdateManyWithWhereWithoutQuestion_log_questionInput[]
+    deleteMany?: question_keywordScalarWhereInput | question_keywordScalarWhereInput[]
+  }
+
+  export type question_log_questionCreateNestedOneWithoutQuestion_keywordInput = {
+    create?: XOR<question_log_questionCreateWithoutQuestion_keywordInput, question_log_questionUncheckedCreateWithoutQuestion_keywordInput>
+    connectOrCreate?: question_log_questionCreateOrConnectWithoutQuestion_keywordInput
+    connect?: question_log_questionWhereUniqueInput
+  }
+
+  export type question_log_questionUpdateOneRequiredWithoutQuestion_keywordNestedInput = {
+    create?: XOR<question_log_questionCreateWithoutQuestion_keywordInput, question_log_questionUncheckedCreateWithoutQuestion_keywordInput>
+    connectOrCreate?: question_log_questionCreateOrConnectWithoutQuestion_keywordInput
+    upsert?: question_log_questionUpsertWithoutQuestion_keywordInput
+    connect?: question_log_questionWhereUniqueInput
+    update?: XOR<XOR<question_log_questionUpdateToOneWithWhereWithoutQuestion_keywordInput, question_log_questionUpdateWithoutQuestion_keywordInput>, question_log_questionUncheckedUpdateWithoutQuestion_keywordInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -12342,10 +13909,12 @@ export namespace Prisma {
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
     explanation?: string | null
+    topic?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
     uuid?: string
+    question_keyword?: question_keywordCreateNestedManyWithoutQuestion_log_questionInput
   }
 
   export type question_log_questionUncheckedCreateWithoutQuestion_logInput = {
@@ -12354,10 +13923,12 @@ export namespace Prisma {
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
     explanation?: string | null
+    topic?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
     uuid?: string
+    question_keyword?: question_keywordUncheckedCreateNestedManyWithoutQuestion_log_questionInput
   }
 
   export type question_log_questionCreateOrConnectWithoutQuestion_logInput = {
@@ -12466,6 +14037,7 @@ export namespace Prisma {
     options?: StringNullableListFilter<"question_log_question">
     answer?: IntNullableListFilter<"question_log_question">
     explanation?: StringNullableFilter<"question_log_question"> | string | null
+    topic?: StringNullableFilter<"question_log_question"> | string | null
     selected_answer?: IntNullableListFilter<"question_log_question">
     question_type?: EnumQuestionTypeFilter<"question_log_question"> | $Enums.QuestionType
     created_at?: DateTimeFilter<"question_log_question"> | Date | string
@@ -12650,6 +14222,33 @@ export namespace Prisma {
     create: XOR<question_logCreateWithoutQuestion_log_questionInput, question_logUncheckedCreateWithoutQuestion_log_questionInput>
   }
 
+  export type question_keywordCreateWithoutQuestion_log_questionInput = {
+    created_at?: Date | string
+    keyword: string
+    uuid?: string
+    explanation?: string | null
+    example?: string | null
+  }
+
+  export type question_keywordUncheckedCreateWithoutQuestion_log_questionInput = {
+    id?: number
+    created_at?: Date | string
+    keyword: string
+    uuid?: string
+    explanation?: string | null
+    example?: string | null
+  }
+
+  export type question_keywordCreateOrConnectWithoutQuestion_log_questionInput = {
+    where: question_keywordWhereUniqueInput
+    create: XOR<question_keywordCreateWithoutQuestion_log_questionInput, question_keywordUncheckedCreateWithoutQuestion_log_questionInput>
+  }
+
+  export type question_keywordCreateManyQuestion_log_questionInputEnvelope = {
+    data: question_keywordCreateManyQuestion_log_questionInput | question_keywordCreateManyQuestion_log_questionInput[]
+    skipDuplicates?: boolean
+  }
+
   export type question_logUpsertWithoutQuestion_log_questionInput = {
     update: XOR<question_logUpdateWithoutQuestion_log_questionInput, question_logUncheckedUpdateWithoutQuestion_log_questionInput>
     create: XOR<question_logCreateWithoutQuestion_log_questionInput, question_logUncheckedCreateWithoutQuestion_log_questionInput>
@@ -12696,6 +14295,105 @@ export namespace Prisma {
     timezone_offset?: NullableIntFieldUpdateOperationsInput | number | null
     timezone_name?: NullableStringFieldUpdateOperationsInput | string | null
     topics?: question_log_topicUncheckedUpdateManyWithoutQuestion_logNestedInput
+  }
+
+  export type question_keywordUpsertWithWhereUniqueWithoutQuestion_log_questionInput = {
+    where: question_keywordWhereUniqueInput
+    update: XOR<question_keywordUpdateWithoutQuestion_log_questionInput, question_keywordUncheckedUpdateWithoutQuestion_log_questionInput>
+    create: XOR<question_keywordCreateWithoutQuestion_log_questionInput, question_keywordUncheckedCreateWithoutQuestion_log_questionInput>
+  }
+
+  export type question_keywordUpdateWithWhereUniqueWithoutQuestion_log_questionInput = {
+    where: question_keywordWhereUniqueInput
+    data: XOR<question_keywordUpdateWithoutQuestion_log_questionInput, question_keywordUncheckedUpdateWithoutQuestion_log_questionInput>
+  }
+
+  export type question_keywordUpdateManyWithWhereWithoutQuestion_log_questionInput = {
+    where: question_keywordScalarWhereInput
+    data: XOR<question_keywordUpdateManyMutationInput, question_keywordUncheckedUpdateManyWithoutQuestion_log_questionInput>
+  }
+
+  export type question_keywordScalarWhereInput = {
+    AND?: question_keywordScalarWhereInput | question_keywordScalarWhereInput[]
+    OR?: question_keywordScalarWhereInput[]
+    NOT?: question_keywordScalarWhereInput | question_keywordScalarWhereInput[]
+    id?: IntFilter<"question_keyword"> | number
+    created_at?: DateTimeFilter<"question_keyword"> | Date | string
+    keyword?: StringFilter<"question_keyword"> | string
+    question_id?: IntFilter<"question_keyword"> | number
+    uuid?: UuidFilter<"question_keyword"> | string
+    explanation?: StringNullableFilter<"question_keyword"> | string | null
+    example?: StringNullableFilter<"question_keyword"> | string | null
+  }
+
+  export type question_log_questionCreateWithoutQuestion_keywordInput = {
+    question: string
+    options?: question_log_questionCreateoptionsInput | string[]
+    answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
+    topic?: string | null
+    selected_answer?: question_log_questionCreateselected_answerInput | number[]
+    question_type?: $Enums.QuestionType
+    created_at?: Date | string
+    uuid?: string
+    question_log: question_logCreateNestedOneWithoutQuestion_log_questionInput
+  }
+
+  export type question_log_questionUncheckedCreateWithoutQuestion_keywordInput = {
+    id?: number
+    question_log_id: number
+    question: string
+    options?: question_log_questionCreateoptionsInput | string[]
+    answer?: question_log_questionCreateanswerInput | number[]
+    explanation?: string | null
+    topic?: string | null
+    selected_answer?: question_log_questionCreateselected_answerInput | number[]
+    question_type?: $Enums.QuestionType
+    created_at?: Date | string
+    uuid?: string
+  }
+
+  export type question_log_questionCreateOrConnectWithoutQuestion_keywordInput = {
+    where: question_log_questionWhereUniqueInput
+    create: XOR<question_log_questionCreateWithoutQuestion_keywordInput, question_log_questionUncheckedCreateWithoutQuestion_keywordInput>
+  }
+
+  export type question_log_questionUpsertWithoutQuestion_keywordInput = {
+    update: XOR<question_log_questionUpdateWithoutQuestion_keywordInput, question_log_questionUncheckedUpdateWithoutQuestion_keywordInput>
+    create: XOR<question_log_questionCreateWithoutQuestion_keywordInput, question_log_questionUncheckedCreateWithoutQuestion_keywordInput>
+    where?: question_log_questionWhereInput
+  }
+
+  export type question_log_questionUpdateToOneWithWhereWithoutQuestion_keywordInput = {
+    where?: question_log_questionWhereInput
+    data: XOR<question_log_questionUpdateWithoutQuestion_keywordInput, question_log_questionUncheckedUpdateWithoutQuestion_keywordInput>
+  }
+
+  export type question_log_questionUpdateWithoutQuestion_keywordInput = {
+    question?: StringFieldUpdateOperationsInput | string
+    options?: question_log_questionUpdateoptionsInput | string[]
+    answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
+    selected_answer?: question_log_questionUpdateselected_answerInput | number[]
+    question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    question_log?: question_logUpdateOneRequiredWithoutQuestion_log_questionNestedInput
+  }
+
+  export type question_log_questionUncheckedUpdateWithoutQuestion_keywordInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    question_log_id?: IntFieldUpdateOperationsInput | number
+    question?: StringFieldUpdateOperationsInput | string
+    options?: question_log_questionUpdateoptionsInput | string[]
+    answer?: question_log_questionUpdateanswerInput | number[]
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
+    selected_answer?: question_log_questionUpdateselected_answerInput | number[]
+    question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    uuid?: StringFieldUpdateOperationsInput | string
   }
 
   export type topicCreateManyDepartment_topic_departmentTodepartmentInput = {
@@ -12895,6 +14593,7 @@ export namespace Prisma {
     options?: question_log_questionCreateoptionsInput | string[]
     answer?: question_log_questionCreateanswerInput | number[]
     explanation?: string | null
+    topic?: string | null
     selected_answer?: question_log_questionCreateselected_answerInput | number[]
     question_type?: $Enums.QuestionType
     created_at?: Date | string
@@ -12918,10 +14617,12 @@ export namespace Prisma {
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
     explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     uuid?: StringFieldUpdateOperationsInput | string
+    question_keyword?: question_keywordUpdateManyWithoutQuestion_log_questionNestedInput
   }
 
   export type question_log_questionUncheckedUpdateWithoutQuestion_logInput = {
@@ -12930,10 +14631,12 @@ export namespace Prisma {
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
     explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     uuid?: StringFieldUpdateOperationsInput | string
+    question_keyword?: question_keywordUncheckedUpdateManyWithoutQuestion_log_questionNestedInput
   }
 
   export type question_log_questionUncheckedUpdateManyWithoutQuestion_logInput = {
@@ -12942,10 +14645,46 @@ export namespace Prisma {
     options?: question_log_questionUpdateoptionsInput | string[]
     answer?: question_log_questionUpdateanswerInput | number[]
     explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    topic?: NullableStringFieldUpdateOperationsInput | string | null
     selected_answer?: question_log_questionUpdateselected_answerInput | number[]
     question_type?: EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     uuid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type question_keywordCreateManyQuestion_log_questionInput = {
+    id?: number
+    created_at?: Date | string
+    keyword: string
+    uuid?: string
+    explanation?: string | null
+    example?: string | null
+  }
+
+  export type question_keywordUpdateWithoutQuestion_log_questionInput = {
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    example?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type question_keywordUncheckedUpdateWithoutQuestion_log_questionInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    example?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type question_keywordUncheckedUpdateManyWithoutQuestion_log_questionInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    uuid?: StringFieldUpdateOperationsInput | string
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    example?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

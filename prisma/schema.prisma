@@ -97,10 +97,24 @@ model question_log_question {
   options         String[]
   answer          Int[]
   explanation     String?      @db.Text
+  topic           String?      @db.VarChar
   selected_answer Int[]        @default([])
   question_type   QuestionType @default(CHOICE)
   created_at      DateTime     @default(now()) @db.Timestamptz(6)
   uuid            String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  question_log question_log @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
+  question_log     question_log       @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
+  question_keyword question_keyword[]
+}
+
+model question_keyword {
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  keyword     String   @db.VarChar
+  question_id Int
+  uuid        String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  explanation String?  @db.Text
+  example     String?  @db.Text
+
+  question_log_question question_log_question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 }

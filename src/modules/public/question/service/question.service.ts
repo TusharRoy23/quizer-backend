@@ -3,7 +3,7 @@ import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { IQuestionService } from "../interface/IQuestion.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { TYPES } from "../../../../core/type.core";
-import { PaginationParams, PaginationResponse, Question, QuestionLog, QuizTimer } from "../../types/public.type";
+import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
 @injectable()
@@ -42,5 +42,17 @@ export class QuestionService implements IQuestionService {
 
     public getQuizTimer(questionLogUUID: string): Promise<QuizTimer> {
         return this.questionRepository.getQuizTimer(questionLogUUID);
+    }
+
+    public getQuestionKeywords(questionUUID: string): Promise<QuestionKeyword[]> {
+        return this.questionRepository.getQuestionKeywords(questionUUID);
+    }
+
+    public getKeywordDetails(keywordUuid: string): Promise<QuestionKeyword> {
+        return this.questionRepository.getKeywordDetails(keywordUuid);
+    }
+
+    public getKeywordExample(keywordUuid: string): Promise<string> {
+        return this.questionRepository.getKeywordExample(keywordUuid);
     }
 }

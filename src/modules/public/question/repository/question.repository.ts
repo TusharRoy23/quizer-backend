@@ -1,4 +1,4 @@
-import { inject, injectable } from "inversify";
+import { id, inject, injectable } from "inversify";
 import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
@@ -7,7 +7,7 @@ import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.servic
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
 import { IUserService } from "../../user/interface/IUser.service";
-import { Department, PaginationParams, PaginationResponse, Question, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
+import { Department, PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { RequestContext } from "../../../../shared/context/request-context";
@@ -88,8 +88,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     public async saveAnswerForQuestion(questionLogUUID: string, payload: QuestionSavePayloadType): Promise<Question> {
-        // This method is not implemented in the original code.
-        // Implement the logic to submit answers for questions.
         try {
             const prisma = await this.prisma$();
             const questionLog = await prisma.question_log.findUnique({
@@ -125,8 +123,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     public async submitQuestionLog(questionLogUUID: string): Promise<string> {
-        // This method is not implemented in the original code.
-        // Implement the logic to submit the question log and retrieve the questions.
         try {
             const prisma = await this.prisma$();
             const questionLog = await this.getQuestionLogByUUID(questionLogUUID, false);
@@ -289,6 +285,223 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
+    public async getQuestionKeywords(questionUUID: string): Promise<QuestionKeyword[]> {
+        try {
+            const prisma = await this.prisma$();
+            const keywords = await this.getKeywords(questionUUID);
+
+            if (keywords && keywords.length) {
+                return keywords as QuestionKeyword[];
+            }
+
+            /*
+                Create new keywords 
+                1) get the question from the database
+                2) extract explanation from the result
+                3) Using explanation, generate keywords using OpenAI
+                4) Save the keywords to the database
+            */
+            const question = await this.getQuestionDetails(questionUUID);
+            const generatedKeywords = await this.getKeywordsFromOpenAI(
+                question?.explanation || '',
+                question?.question || '',
+                question?.topic || ''
+            )
+            if (generatedKeywords && generatedKeywords.length > 0) {
+                const keywordData = generatedKeywords.map((keyword: string) => ({
+                    question_id: question?.id,
+                    keyword: keyword.trim(),
+                }));
+                await prisma.question_keyword.createMany({
+                    data: keywordData,
+                    skipDuplicates: true,
+                });
+            }
+
+            const newKeywords = await this.getKeywords(questionUUID);
+
+            return newKeywords as QuestionKeyword[];
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    public async getKeywordDetails(keywordUuid: string): Promise<QuestionKeyword> {
+        try {
+            const prisma = await this.prisma$();
+            const keyword = await prisma.question_keyword.findUnique({
+                where: {
+                    uuid: keywordUuid,
+                },
+                include: {
+                    question_log_question: {
+                        select: {
+                            uuid: true,
+                            question: true,
+                            topic: true,
+                        }
+                    }
+                }
+            });
+            if (!keyword) {
+                throw new NotFoundException('Keyword not found');
+            }
+            if (!keyword.explanation) {
+                // gnerate explanation using OpenAI
+                const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
+                const prompt = `
+                    Generate a clear and concise explanation for the keyword "${keyword.keyword}"
+                    in the context of the question "${question?.question}" and its topic "${question?.topic}".
+                    Provide a detailed explanation that helps in understanding the keyword and its relevance to the question.
+                    Format the response as a JSON object with the following structure:
+                    {
+                        "explanation": "The explanation text"
+                    }
+                    if the explanation has code then it should be in markdown format.
+                `
+                const response = await this.openAIService.getChatCompletions(prompt);
+                const parsedJSON = JSON.parse(response);
+                keyword.explanation = parsedJSON['explanation'].trim();
+                // Update the keyword with the generated explanation
+                await prisma.question_keyword.update({
+                    where: {
+                        uuid: keyword.uuid,
+                    },
+                    data: {
+                        explanation: keyword.explanation,
+                    }
+                });
+            }
+            return {
+                id: keyword.id,
+                uuid: keyword.uuid,
+                keyword: keyword.keyword,
+                explanation: keyword.explanation || '',
+                question_id: keyword.question_id,
+                example: keyword.example || '',
+            } as QuestionKeyword;
+
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getKeywordExample(keywordUuid: string): Promise<string> {
+        try {
+            const prisma = await this.prisma$();
+            const keyword = await prisma.question_keyword.findUnique({
+                where: {
+                    uuid: keywordUuid,
+                },
+                include: {
+                    question_log_question: {
+                        select: {
+                            uuid: true,
+                            question: true,
+                            topic: true,
+                        }
+                    }
+                }
+            });
+            if (!keyword) {
+                throw new NotFoundException('Keyword not found');
+            }
+            if (!keyword.example) {
+                const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
+                const prompt = `
+                    Generate a clear and concise example for the keyword "${keyword.keyword}"
+                    in the context of the question "${question?.question}" and its topic "${question?.topic}".
+                    And exaplanation of the keyword is "${keyword.exaplanation}"
+                    Format the response as a JSON object with the following structure:
+                    {
+                        "example": "The example text/code"
+                    }
+                    if the example has code then it should be in markdown format.
+                `;
+                const response = await this.openAIService.getChatCompletions(prompt);
+                const parsedJSON = JSON.parse(response);
+                keyword.example = parsedJSON['example'].trim();
+
+                await prisma.question_keyword.update({
+                    where: {
+                        uuid: keyword.uuid,
+                    },
+                    data: {
+                        example: keyword.example,
+                    }
+                });
+            }
+            return keyword.example;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    private async getKeywords(questionUUID: string) {
+        const prisma = await this.prisma$();
+        const keywords = await prisma.question_keyword.findMany({
+            where: {
+                question_log_question: {
+                    uuid: questionUUID,
+                }
+            },
+            select: {
+                id: true,
+                uuid: true,
+                keyword: true,
+                explanation: true,
+                question_id: true,
+            }
+        });
+
+        if (keywords && keywords.length) {
+            return keywords as QuestionKeyword[];
+        }
+    }
+
+    private async getKeywordsFromOpenAI(explanation: string, question: string, topic: string): Promise<string[]> {
+        try {
+            const prompt = `
+                Extract keywords from the following explanation and question:
+                
+                Question: ${question}
+                Topic: ${topic}
+                Explanation: ${explanation}
+
+                Provide a minimal list of keywords (Maximun 5 keywords) which is strictly limited to Question, 
+                Topic & Explanation that can help in understanding the question and its context.
+                Format the response as a JSON array of strings.
+                Example: {
+                    "keywords": ["keyword1", "keyword2", "keyword3"]
+                }
+            `;
+
+            const response = await this.openAIService.getChatCompletions(prompt);
+            const parsedJSON = JSON.parse(response);
+            return parsedJSON['keywords'] || [];
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    private async getQuestionDetails(questionUUID: string): Promise<Question | undefined> {
+        try {
+            const prisma = await this.prisma$();
+            const question = await prisma.question_log_question.findUnique({
+                where: {
+                    uuid: questionUUID,
+                },
+            });
+            if (!question) {
+                throw new NotFoundException('Question not found');
+            }
+            return question as Question;
+        } catch (error: any) {
+            return throwException(error);
+
+        }
+    }
+
     private async updateQuizTimer(questionLogUUID: string): Promise<QuestionLog | undefined> {
         try {
             const prisma = await this.prisma$();
@@ -446,6 +659,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 answer: question?.answer?.sort((a, b) => a - b), // Sort the answer indices
                 question_type: question.question_type,
                 explanation: question.explanation, // Ensure explanation is trimmed
+                topic: question.topic || '', // Ensure topic is trimmed
             }));
             const count = await prisma.question_log_question.createMany({
                 data: questionData,
@@ -503,6 +717,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                         "answer": [1], // Index of correct option(s)
                         "question_type": "CHOICE" | "MULTIPLE_CHOICE",
                         "explanation": "A clear explanation of why the answer is correct."
+                        "topic": "The topic of the question"
                     },
                     // More questions...
                 ]
@@ -517,6 +732,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                         "answer": [2],
                         "question_type": "CHOICE",
                         "explanation": "Paris is the capital of France, a well-known fact in geography. London is the capital of the UK, Berlin is Germany's capital, and Madrid is Spain's capital."
+                        "topic": "Geography"
                     },
                     {
                         "question": "Which of these are frontend frameworks?",
@@ -524,6 +740,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                         "answer": [0, 1, 2],
                         "question_type": "MULTIPLE_CHOICE",
                         "explanation": "React, Angular, and Vue are all JavaScript frontend frameworks. Django, however, is a Python backend framework and does not belong in this list."
+                        "topic": "frontend development"
                     }
                 ]
             }
