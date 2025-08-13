@@ -5,15 +5,23 @@ import { Participant } from "../../types/public.type";
 import { generateToken } from "../../../../shared/utils/token-generation";
 import AccessTokenStrategy from "../../../../shared/strategy/access-token.strategy";
 import RefreshTokenStrategy from "../../../../shared/strategy/refresh-token.strategy";
+import { inject } from "inversify";
+import { TYPES } from "../../../../core/type.core";
+import { IUserService } from "../interface/IUser.service";
+import { SessionMiddleware } from "../../../../middlewares/session.middleware";
 
 @controller("/user")
 export class UserController {
+    constructor(
+        @inject(TYPES.IUserService) private readonly userService: IUserService
+    ) { }
+
     @httpGet("/auth/google")
     public googleAuth(req: any, res: any, next: any) {
         passport.authenticate("google", { scope: ['profile', 'email'] })(req, res, next);
     }
 
-    @httpGet("/auth/check")
+    @httpGet("/auth/check", SessionMiddleware)
     public async cookieAuth(req: Request, res: Response, next: NextFunction) {
         const token = req.cookies['accessToken'];
 
@@ -80,10 +88,25 @@ export class UserController {
     }))
     public async googleCallback(req: Request, res: Response, next: NextFunction) {
         const response = await this.addTokensToCookies(req, res);
+        if (req.user) {
+            const user = req.user as Participant;
+            const participant = await this.userService.generateSessionForParticipant(user?.email);
+            res.cookie("session", participant?.session_id, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax"
+            });
+            res.cookie("email", participant?.email, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax"
+            });
+        }
+
         return response.redirect(`${process.env.FRONTEND_URL}`);
     }
 
-    @httpGet("/auth/refresh", RefreshTokenStrategy.authenticate("refresh", { session: false }))
+    @httpGet("/auth/refresh", RefreshTokenStrategy.authenticate("refresh", { session: false }), SessionMiddleware)
     public async refreshTokenHandler(req: Request, res: Response) {
         const response = await this.addTokensToCookies(req, res);
         return response.status(200).json({
@@ -96,8 +119,9 @@ export class UserController {
 
     @httpGet("/auth/logout", AccessTokenStrategy.authenticate("jwt", { session: false }))
     public async logout(req: Request, res: Response) {
-        res.clearCookie("accessToken");
-        res.clearCookie("refreshToken");
+        ["accessToken", "refreshToken", "session", "email"].forEach((cookieName) => {
+            res.clearCookie(cookieName)
+        });
         return res.status(200).json({
             message: "Logged out successfully",
             authenticated: false

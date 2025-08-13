@@ -9,8 +9,9 @@ import { QuestionSavePayloadDto, QuestionSavePayloadType } from "../dto/question
 import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middleware";
 import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
 import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
+import { SessionMiddleware } from "../../../../middlewares/session.middleware";
 
-@controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware)
+@controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
     constructor(
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service

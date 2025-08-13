@@ -2844,6 +2844,7 @@ export namespace Prisma {
     name: string | null
     google_id: string | null
     uuid: string | null
+    session_id: string | null
   }
 
   export type ParticipantMaxAggregateOutputType = {
@@ -2853,6 +2854,7 @@ export namespace Prisma {
     name: string | null
     google_id: string | null
     uuid: string | null
+    session_id: string | null
   }
 
   export type ParticipantCountAggregateOutputType = {
@@ -2862,6 +2864,7 @@ export namespace Prisma {
     name: number
     google_id: number
     uuid: number
+    session_id: number
     _all: number
   }
 
@@ -2881,6 +2884,7 @@ export namespace Prisma {
     name?: true
     google_id?: true
     uuid?: true
+    session_id?: true
   }
 
   export type ParticipantMaxAggregateInputType = {
@@ -2890,6 +2894,7 @@ export namespace Prisma {
     name?: true
     google_id?: true
     uuid?: true
+    session_id?: true
   }
 
   export type ParticipantCountAggregateInputType = {
@@ -2899,6 +2904,7 @@ export namespace Prisma {
     name?: true
     google_id?: true
     uuid?: true
+    session_id?: true
     _all?: true
   }
 
@@ -2995,6 +3001,7 @@ export namespace Prisma {
     name: string
     google_id: string
     uuid: string
+    session_id: string | null
     _count: ParticipantCountAggregateOutputType | null
     _avg: ParticipantAvgAggregateOutputType | null
     _sum: ParticipantSumAggregateOutputType | null
@@ -3023,6 +3030,7 @@ export namespace Prisma {
     name?: boolean
     google_id?: boolean
     uuid?: boolean
+    session_id?: boolean
     question_log?: boolean | participant$question_logArgs<ExtArgs>
     _count?: boolean | ParticipantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participant"]>
@@ -3034,6 +3042,7 @@ export namespace Prisma {
     name?: boolean
     google_id?: boolean
     uuid?: boolean
+    session_id?: boolean
   }, ExtArgs["result"]["participant"]>
 
   export type participantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3043,6 +3052,7 @@ export namespace Prisma {
     name?: boolean
     google_id?: boolean
     uuid?: boolean
+    session_id?: boolean
   }, ExtArgs["result"]["participant"]>
 
   export type participantSelectScalar = {
@@ -3052,9 +3062,10 @@ export namespace Prisma {
     name?: boolean
     google_id?: boolean
     uuid?: boolean
+    session_id?: boolean
   }
 
-  export type participantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "email" | "name" | "google_id" | "uuid", ExtArgs["result"]["participant"]>
+  export type participantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "created_at" | "email" | "name" | "google_id" | "uuid" | "session_id", ExtArgs["result"]["participant"]>
   export type participantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     question_log?: boolean | participant$question_logArgs<ExtArgs>
     _count?: boolean | ParticipantCountOutputTypeDefaultArgs<ExtArgs>
@@ -3074,6 +3085,7 @@ export namespace Prisma {
       name: string
       google_id: string
       uuid: string
+      session_id: string | null
     }, ExtArgs["result"]["participant"]>
     composites: {}
   }
@@ -3504,6 +3516,7 @@ export namespace Prisma {
     readonly name: FieldRef<"participant", 'String'>
     readonly google_id: FieldRef<"participant", 'String'>
     readonly uuid: FieldRef<"participant", 'String'>
+    readonly session_id: FieldRef<"participant", 'String'>
   }
     
 
@@ -10845,7 +10858,8 @@ export namespace Prisma {
     email: 'email',
     name: 'name',
     google_id: 'google_id',
-    uuid: 'uuid'
+    uuid: 'uuid',
+    session_id: 'session_id'
   };
 
   export type ParticipantScalarFieldEnum = (typeof ParticipantScalarFieldEnum)[keyof typeof ParticipantScalarFieldEnum]
@@ -11106,6 +11120,7 @@ export namespace Prisma {
     name?: StringFilter<"participant"> | string
     google_id?: StringFilter<"participant"> | string
     uuid?: UuidFilter<"participant"> | string
+    session_id?: StringNullableFilter<"participant"> | string | null
     question_log?: Question_logListRelationFilter
   }
 
@@ -11116,6 +11131,7 @@ export namespace Prisma {
     name?: SortOrder
     google_id?: SortOrder
     uuid?: SortOrder
+    session_id?: SortOrderInput | SortOrder
     question_log?: question_logOrderByRelationAggregateInput
   }
 
@@ -11129,6 +11145,7 @@ export namespace Prisma {
     email?: StringFilter<"participant"> | string
     name?: StringFilter<"participant"> | string
     google_id?: StringFilter<"participant"> | string
+    session_id?: StringNullableFilter<"participant"> | string | null
     question_log?: Question_logListRelationFilter
   }, "id" | "uuid">
 
@@ -11139,6 +11156,7 @@ export namespace Prisma {
     name?: SortOrder
     google_id?: SortOrder
     uuid?: SortOrder
+    session_id?: SortOrderInput | SortOrder
     _count?: participantCountOrderByAggregateInput
     _avg?: participantAvgOrderByAggregateInput
     _max?: participantMaxOrderByAggregateInput
@@ -11156,6 +11174,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"participant"> | string
     google_id?: StringWithAggregatesFilter<"participant"> | string
     uuid?: UuidWithAggregatesFilter<"participant"> | string
+    session_id?: StringNullableWithAggregatesFilter<"participant"> | string | null
   }
 
   export type topicWhereInput = {
@@ -11651,6 +11670,7 @@ export namespace Prisma {
     name: string
     google_id?: string
     uuid?: string
+    session_id?: string | null
     question_log?: question_logCreateNestedManyWithoutQuestion_generatorInput
   }
 
@@ -11661,6 +11681,7 @@ export namespace Prisma {
     name: string
     google_id?: string
     uuid?: string
+    session_id?: string | null
     question_log?: question_logUncheckedCreateNestedManyWithoutQuestion_generatorInput
   }
 
@@ -11670,6 +11691,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
     question_log?: question_logUpdateManyWithoutQuestion_generatorNestedInput
   }
 
@@ -11680,6 +11702,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
     question_log?: question_logUncheckedUpdateManyWithoutQuestion_generatorNestedInput
   }
 
@@ -11690,6 +11713,7 @@ export namespace Prisma {
     name: string
     google_id?: string
     uuid?: string
+    session_id?: string | null
   }
 
   export type participantUpdateManyMutationInput = {
@@ -11698,6 +11722,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type participantUncheckedUpdateManyInput = {
@@ -11707,6 +11732,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type topicCreateInput = {
@@ -12345,6 +12371,7 @@ export namespace Prisma {
     name?: SortOrder
     google_id?: SortOrder
     uuid?: SortOrder
+    session_id?: SortOrder
   }
 
   export type participantAvgOrderByAggregateInput = {
@@ -12358,6 +12385,7 @@ export namespace Prisma {
     name?: SortOrder
     google_id?: SortOrder
     uuid?: SortOrder
+    session_id?: SortOrder
   }
 
   export type participantMinOrderByAggregateInput = {
@@ -12367,6 +12395,7 @@ export namespace Prisma {
     name?: SortOrder
     google_id?: SortOrder
     uuid?: SortOrder
+    session_id?: SortOrder
   }
 
   export type participantSumOrderByAggregateInput = {
@@ -13850,6 +13879,7 @@ export namespace Prisma {
     name: string
     google_id?: string
     uuid?: string
+    session_id?: string | null
   }
 
   export type participantUncheckedCreateWithoutQuestion_logInput = {
@@ -13859,6 +13889,7 @@ export namespace Prisma {
     name: string
     google_id?: string
     uuid?: string
+    session_id?: string | null
   }
 
   export type participantCreateOrConnectWithoutQuestion_logInput = {
@@ -13958,6 +13989,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type participantUncheckedUpdateWithoutQuestion_logInput = {
@@ -13967,6 +13999,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     google_id?: StringFieldUpdateOperationsInput | string
     uuid?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type departmentUpsertWithoutQuestion_log_question_departmentInput = {

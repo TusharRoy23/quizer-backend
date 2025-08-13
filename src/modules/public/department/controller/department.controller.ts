@@ -5,8 +5,9 @@ import { IDepartmentService } from "../interface/IDepartment.service";
 import { TYPES } from "../../../../core/type.core";
 import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middleware";
 import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
+import { SessionMiddleware } from "../../../../middlewares/session.middleware";
 
-@controller("/department", AuthStrategy.authenticate("jwt", { session: false }))
+@controller("/department", AuthStrategy.authenticate("jwt", { session: false }), SessionMiddleware)
 export class DepartmentController {
     constructor(
         @inject(TYPES.IDepartmentService) private readonly departmentService: IDepartmentService, // Replace 'any' with the actual type of your service

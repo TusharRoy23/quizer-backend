@@ -130,7 +130,8 @@ exports.Prisma.ParticipantScalarFieldEnum = {
   email: 'email',
   name: 'name',
   google_id: 'google_id',
-  uuid: 'uuid'
+  uuid: 'uuid',
+  session_id: 'session_id'
 };
 
 exports.Prisma.TopicScalarFieldEnum = {

@@ -29,6 +29,7 @@ model participant {
   name         String         @db.VarChar
   google_id    String         @default("0") @db.Text
   uuid         String         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id   String?        @db.VarChar
   question_log question_log[] @relation("question_generator")
 }
 
