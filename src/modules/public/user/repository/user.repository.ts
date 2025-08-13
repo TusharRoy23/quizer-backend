@@ -6,7 +6,7 @@ import { UserPayloadType } from "../dto/user-payload.dto";
 import { IUserRepository } from "../interface/IUser.repository";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { ParticipantPayloadType } from "../dto/participant-payload.dto";
-import { throwException } from "../../../../shared/errors/all.exception";
+import { NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 
 export class UserRepository extends BaseRepository implements IUserRepository {
     constructor(
@@ -83,6 +83,29 @@ export class UserRepository extends BaseRepository implements IUserRepository {
             }
             return participant as Participant;
         } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    async generateSessionForParticipant(email: string): Promise<Participant> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = await this.getParticipantByEmail(email);
+            if (!participant) {
+                throw new NotFoundException('Participant not found');
+            }
+
+            const updatedParticipant = await prisma.participant.update({
+                where: {
+                    uuid: participant.uuid
+                },
+                data: {
+                    session_id: Date.now().toString()
+                }
+            });
+
+            return updatedParticipant as Participant;
+        } catch (error: any) {
             return throwException(error);
         }
     }

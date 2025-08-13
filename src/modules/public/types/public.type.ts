@@ -27,6 +27,7 @@ export type Participant = {
     name: string;
     email: string;
     created_at: Date;
+    session_id?: string;
 }
 
 enum QuestionType {
@@ -35,11 +36,13 @@ enum QuestionType {
 }
 
 export type Question = {
+    id?: number;
     uuid: string;
     question: string;
     options: string[];
     answer?: number[];
     explanation?: string;
+    topic?: string; // Optional field for the topic of the question
     selected_answer?: number[];
     question_type: QuestionType;
 }
@@ -77,4 +80,13 @@ export type PaginationParams = {
 export type PaginationResponse<T> = {
     data: T[];
     total: number;
+}
+
+export type QuestionKeyword = {
+    id: number;
+    keyword: string;
+    question_id: number;
+    uuid: string;
+    explanation?: string;
+    example?: string;
 }

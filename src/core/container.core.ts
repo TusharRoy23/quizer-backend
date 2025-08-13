@@ -20,6 +20,7 @@ import { IUserService } from '../modules/public/user/interface/IUser.service';
 import { UserRepository } from '../modules/public/user/repository/user.repository';
 import { UserService } from '../modules/public/user/service/user.service';
 import { RequestContextMiddleware } from '../middlewares/request-context.middleware';
+import { SessionMiddleware } from '../middlewares/session.middleware';
 
 const container = new Container();
 
@@ -30,6 +31,7 @@ container.bind<IOpenAIService>(TYPES.IOpenAIService).to(DeepSeekService);
 container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(DeepSeekRepository);
 
 container.bind<RequestContextMiddleware>(RequestContextMiddleware).toSelf();
+container.bind<SessionMiddleware>(SessionMiddleware).toSelf();
 
 //? Department Module
 container.bind<IDepartmentRepository>(TYPES.IDepartmentRepository).to(DepartmentRepository);

@@ -13,7 +13,7 @@ function removeIdKeys(data: any): any {
     if (data && typeof data === "object" && !Buffer.isBuffer(data)) {
         const result: any = {};
         for (const [key, value] of Object.entries(data)) {
-            if (key.toLowerCase() === "id") continue;
+            if (key.toLowerCase() === "id" || key.includes('_id')) continue;
             result[key] = removeIdKeys(value);
         }
         return result;

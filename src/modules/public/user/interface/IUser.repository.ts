@@ -7,4 +7,5 @@ export interface IUserRepository {
     getUserByEmail(email: string): Promise<User | null>;
     createParticipant(payload: ParticipantPayloadType): Promise<Participant | null>;
     getParticipantByEmail(email: string): Promise<Participant | null>;
+    generateSessionForParticipant(email: string): Promise<Participant>;
 }
