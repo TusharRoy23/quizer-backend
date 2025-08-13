@@ -26,4 +26,8 @@ export class UserService implements IUserService {
     async getParticipantByEmail(email: string): Promise<Participant | null> {
         return this.userRepository.getParticipantByEmail(email);
     }
+
+    async generateSessionForParticipant(email: string): Promise<Participant> {
+        return this.userRepository.generateSessionForParticipant(email);
+    }
 }

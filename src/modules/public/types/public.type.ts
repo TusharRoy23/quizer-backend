@@ -27,6 +27,7 @@ export type Participant = {
     name: string;
     email: string;
     created_at: Date;
+    session_id?: string;
 }
 
 enum QuestionType {
