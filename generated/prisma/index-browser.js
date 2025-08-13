@@ -130,7 +130,8 @@ exports.Prisma.ParticipantScalarFieldEnum = {
   email: 'email',
   name: 'name',
   google_id: 'google_id',
-  uuid: 'uuid'
+  uuid: 'uuid',
+  session_id: 'session_id'
 };
 
 exports.Prisma.TopicScalarFieldEnum = {
@@ -179,10 +180,21 @@ exports.Prisma.Question_log_questionScalarFieldEnum = {
   options: 'options',
   answer: 'answer',
   explanation: 'explanation',
+  topic: 'topic',
   selected_answer: 'selected_answer',
   question_type: 'question_type',
   created_at: 'created_at',
   uuid: 'uuid'
+};
+
+exports.Prisma.Question_keywordScalarFieldEnum = {
+  id: 'id',
+  created_at: 'created_at',
+  keyword: 'keyword',
+  question_id: 'question_id',
+  uuid: 'uuid',
+  explanation: 'explanation',
+  example: 'example'
 };
 
 exports.Prisma.SortOrder = {
@@ -211,7 +223,8 @@ exports.Prisma.ModelName = {
   user: 'user',
   question_log: 'question_log',
   question_log_topic: 'question_log_topic',
-  question_log_question: 'question_log_question'
+  question_log_question: 'question_log_question',
+  question_keyword: 'question_keyword'
 };
 
 /**

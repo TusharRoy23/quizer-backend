@@ -9,8 +9,9 @@ import { QuestionSavePayloadDto, QuestionSavePayloadType } from "../dto/question
 import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middleware";
 import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
 import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
+import { SessionMiddleware } from "../../../../middlewares/session.middleware";
 
-@controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware)
+@controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
     constructor(
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service
@@ -99,6 +100,33 @@ export class QuestionController {
     ) {
         const questionLogUUID = req.params.questionLogUUID;
         const data = await this.questionService.getQuestionDetailsLogByUUID(questionLogUUID);
+        return res.status(200).json({ data });
+    }
+
+    @httpGet("/keywords/:questionUUID", ValidateUUIDParam("questionUUID"))
+    public async getQuestionKeywords(
+        req: Request, res: Response
+    ) {
+        const questionUUID = req.params.questionUUID;
+        const data = await this.questionService.getQuestionKeywords(questionUUID);
+        return res.status(200).json({ data });
+    }
+
+    @httpGet("/keywords/details/:keywordUuid", ValidateUUIDParam("keywordUuid"))
+    public async getKeywordDetails(
+        req: Request, res: Response
+    ) {
+        const keywordUuid = req.params.keywordUuid;
+        const data = await this.questionService.getKeywordDetails(keywordUuid);
+        return res.status(200).json({ data });
+    }
+
+    @httpGet("/keywords/example/:keywordUuid", ValidateUUIDParam("keywordUuid"))
+    public async getKeywordExample(
+        req: Request, res: Response
+    ) {
+        const keywordUuid = req.params.keywordUuid;
+        const data = await this.questionService.getKeywordExample(keywordUuid);
         return res.status(200).json({ data });
     }
 }
