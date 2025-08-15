@@ -14,4 +14,5 @@ export interface IQuestionRepository {
     getQuestionKeywords: (questionUUID: string) => Promise<QuestionKeyword[]>;
     getKeywordDetails: (keywordUuid: string) => Promise<QuestionKeyword>;
     getKeywordExample: (keywordUuid: string) => Promise<string>;
+    getLatestOngoingQuiz: () => Promise<QuestionLog | null>;
 }
