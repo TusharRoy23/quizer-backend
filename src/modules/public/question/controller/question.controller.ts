@@ -53,6 +53,12 @@ export class QuestionController {
         return res.status(200).json({ data: result });
     }
 
+    @httpGet("/ongoing/quiz")
+    public async checkOngoingQuiz(req: Request, res: Response) {
+        const quiz = await this.questionService.getLatestOngoingQuiz();
+        return res.status(200).json({ data: quiz || null });
+    }
+
     @httpPost("/quiz/generate", DtoValidationMiddleware(QuestionGeneratePayloadDto))
     public async getGeneratedQuestion(
         @requestBody() payload: QuestionGeneratePayloadType, req: Request, res: Response
