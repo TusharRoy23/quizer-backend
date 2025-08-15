@@ -39,6 +39,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
         try {
             const participant = this.getParticipant();
+            await this.checkOngoingQuiz();
             const department = await this.departmentService.getDepartmentByUUID(payload.department);
             if (!department) {
                 throw new NotFoundException('Department not found');
@@ -57,11 +58,11 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 difficulty: payload.difficulty,
             };
             const promptResponse = await this.getPromptQuestions(payload, department, topics);
-            const questionLog = await this.saveQuestionLog(questionPayload);
-            await this.connectTopicsWithQuestionLog(topics, questionLog.id);
-            await this.saveQuestions(promptResponse, questionLog.id);
+            const savedQuestionLog = await this.saveQuestionLog(questionPayload);
+            await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id);
+            await this.saveQuestions(promptResponse, savedQuestionLog.id);
 
-            return questionLog.uuid; // Return the UUID of the question log
+            return savedQuestionLog.uuid; // Return the UUID of the question log
         } catch (error: any) {
             return throwException(error);
         }
@@ -326,6 +327,26 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
+    public async getLatestOngoingQuiz(): Promise<QuestionLog | null> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+            this.updateQuizesTimer();
+            const questionLog = await prisma.question_log.findFirst({
+                where: {
+                    participant: participant?.id,
+                    completed: false, // Ensure the question log is not completed
+                }
+            });
+            if (!questionLog) {
+                return null; // No ongoing quiz found
+            }
+            return this.formatQuestionLog(questionLog) as QuestionLog;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
     public async getKeywordDetails(keywordUuid: string): Promise<QuestionKeyword> {
         try {
             const prisma = await this.prisma$();
@@ -552,7 +573,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 },
                 include: {
                     question_department: true,
-                    // participant: true
                 }
             });
             if (!questionLog) {
@@ -798,6 +818,25 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         } catch (error: any) {
             return throwException(error);
 
+        }
+    }
+
+    private async checkOngoingQuiz(): Promise<boolean> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            const questionLog = await prisma.question_log.findFirst({
+                where: {
+                    participant: participant?.id,
+                    completed: false, // Ensure the participant does not have an ongoing quiz
+                }
+            });
+            if (questionLog) {
+                throw new BadRequestException('You already have an ongoing quiz. Please complete it before starting a new one.');
+            }
+            return false;
+        } catch (error) {
+            return throwException(error);
         }
     }
 }

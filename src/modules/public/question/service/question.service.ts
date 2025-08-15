@@ -55,4 +55,8 @@ export class QuestionService implements IQuestionService {
     public getKeywordExample(keywordUuid: string): Promise<string> {
         return this.questionRepository.getKeywordExample(keywordUuid);
     }
+
+    public getLatestOngoingQuiz(): Promise<QuestionLog | null> {
+        return this.questionRepository.getLatestOngoingQuiz();
+    }
 }
