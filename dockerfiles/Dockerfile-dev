@@ -1,3 +1,4 @@
+# Docker-dev
 FROM node:20-alpine
 
 # Set environment variables
@@ -18,20 +19,17 @@ COPY package.json package-lock.json ./
 # 3. Install all dependencies
 RUN npm install
 
-# 4. Install globally
+# 4. Install globally useful tools
 RUN npm install -g ts-node nodemon typescript
 
-# 5. Copy Prisma schema
-COPY prisma/schema.prisma ./prisma/
-
-# 6. Generate Prisma client (must happen before app code)
-RUN npx prisma generate
-
-# 7. Copy environment variables (for Supabase connection)
-COPY .envs/.local/.env ./.env
-
-# 8. Copy the rest of the application
+# 5. Copy the whole project (not just schema)
 COPY . .
 
+# 6. Generate Prisma client
+RUN npx prisma generate
+
+# 7. Expose ports
 EXPOSE 9229 8000
-CMD ["npm", "run", "start:watch"]
+
+# 8. Always regenerate Prisma client on container start
+CMD ["sh", "-c", "npx prisma generate && npm run dev"]

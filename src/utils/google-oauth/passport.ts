@@ -11,7 +11,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID || '',
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-            callbackURL: process.env.GOOGLE_AUTH_REDIRECT_URL,
+            callbackURL: `${process.env.APP_HOST}${process.env.GOOGLE_AUTH_REDIRECT_URL || ''}`,
             passReqToCallback: false,
         },
         async (

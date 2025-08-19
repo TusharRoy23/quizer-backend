@@ -4,10 +4,10 @@
   "description": "Backend for quizer app",
   "main": "src/main.ts",
   "scripts": {
-    "start": "NODE_ENV=dev ts-node --transpile-only src/main.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "npm run build && node dist/main.js",
-    "start:watch": "nodemon --trace-warnings"
+    "dev": "nodemon --watch src --exec ts-node --transpile-only src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "start:prod": "npm run build && npm start"
   },
   "author": "",
   "license": "ISC",
