@@ -4,17 +4,23 @@ services:
     image: quizer-api
     env_file:
       - ./.envs/.local/.env
+      - ./.envs/.utils/.env
+      - ./.envs/.db/.env
     build:
       context: .
       dockerfile: ./dockerfiles/Dockerfile-dev
     volumes:
-      - .:/app # create volumn in current directory of container
-      - /app/node_modules # anonymus/unnamed volumn in container
+      - .:/app
+      - node_modules:/app/node_modules   # <-- use named volume
     ports:
-      - "${APP_PORT}:${APP_PORT}"
-      - "9229:9229" # for debugging
+      - "8000:8000"
+      - "9229:9229"
     restart: unless-stopped
     networks:
       - quiz_api
+
+volumes:
+  node_modules:   # <-- declare named volume here
+
 networks:
   quiz_api:
