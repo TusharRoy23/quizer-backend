@@ -26,7 +26,6 @@ passport.use(
             try {
                 const userService = container.get<IUserService>(TYPES.IUserService);
                 const { id, displayName, emails } = profile;
-                console.log('profile: ', profile);
                 if (!(id && displayName && emails)) done(null, false);
 
                 // Call your createParticipent function with relevant data from the Google profile
@@ -38,7 +37,6 @@ passport.use(
                 });
                 done(null, user || false);
             } catch (error) {
-                console.log('error: ', error);
                 done(error, false);
             }
             // return done(null, profile);
