@@ -95,12 +95,12 @@ export class UserController {
             res.cookie("session", participant?.session_id, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "lax"
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
             });
             res.cookie("email", participant?.email, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "lax"
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
             });
         }
 
@@ -138,14 +138,14 @@ export class UserController {
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME),
         });
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME),
         });
 
