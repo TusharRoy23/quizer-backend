@@ -24,6 +24,7 @@ export class UserController {
     @httpGet("/auth/check", SessionMiddleware)
     public async cookieAuth(req: Request, res: Response, next: NextFunction) {
         const token = req.cookies['accessToken'];
+        console.log('token: ', token);
 
         // If no token exists
         if (!token) {
@@ -87,7 +88,6 @@ export class UserController {
         failureRedirect: `${process.env.FRONTEND_URL}login?error=auth_failed`
     }))
     public async googleCallback(req: Request, res: Response, next: NextFunction) {
-        console.log('req: ', req?.user);
         const response = await this.addTokensToCookies(req, res);
         if (req.user) {
             const user = req.user as Participant;
