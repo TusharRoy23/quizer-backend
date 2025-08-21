@@ -87,6 +87,7 @@ export class UserController {
         failureRedirect: `${process.env.FRONTEND_URL}login?error=auth_failed`
     }))
     public async googleCallback(req: Request, res: Response, next: NextFunction) {
+        console.log('req: ', req?.user);
         const response = await this.addTokensToCookies(req, res);
         if (req.user) {
             const user = req.user as Participant;
