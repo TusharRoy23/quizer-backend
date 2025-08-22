@@ -24,8 +24,6 @@ export class UserController {
     @httpGet("/auth/check", SessionMiddleware)
     public async cookieAuth(req: Request, res: Response, next: NextFunction) {
         const token = req.cookies['accessToken'];
-        console.log('token: ', token);
-
         // If no token exists
         if (!token) {
             return res.status(200).json({

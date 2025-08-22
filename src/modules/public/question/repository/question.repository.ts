@@ -795,10 +795,12 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             });
 
             for (const questionLog of logs) {
+                console.log('questionLog: ', questionLog);
                 if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
 
                 const now = new Date();
                 const endTime = new Date(questionLog.end_time);
+                console.log('endTime: ', endTime);
 
                 // Calculate remaining time in seconds
                 const remainingMs = endTime.getTime() - now.getTime();
