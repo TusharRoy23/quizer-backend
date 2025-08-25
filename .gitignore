@@ -9,7 +9,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment variables
-.env
+# .env
 
 # Build files
 dist/
@@ -41,3 +41,5 @@ jspm_packages/
 # Miscellaneous
 *.swp
 *.swo
+
+generated/

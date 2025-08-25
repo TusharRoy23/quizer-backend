@@ -24,7 +24,6 @@ export class UserController {
     @httpGet("/auth/check", SessionMiddleware)
     public async cookieAuth(req: Request, res: Response, next: NextFunction) {
         const token = req.cookies['accessToken'];
-
         // If no token exists
         if (!token) {
             return res.status(200).json({
@@ -94,12 +93,12 @@ export class UserController {
             res.cookie("session", participant?.session_id, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "lax"
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
             });
             res.cookie("email", participant?.email, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "lax"
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
             });
         }
 
@@ -137,14 +136,14 @@ export class UserController {
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME),
         });
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME),
         });
 

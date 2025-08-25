@@ -1,0 +1,19 @@
+services:
+  api:
+    container_name: quizer-api
+    build:
+      context: .
+      dockerfile: ./dockerfiles/Dockerfile
+    image: quizer-api:prod
+    env_file:
+      - ./.envs/.prod/.env
+      - ./.envs/.utils/.env
+      - ./.envs/.db/.env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - quiz_api
+
+networks:
+  quiz_api:

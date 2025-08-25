@@ -21,12 +21,22 @@ export class DatabaseService implements IDatabaseService {
             }).$extends({
                 query: {
                     $allModels: {
-                        findMany: async ({ model, operation, args, query }) => {
+                        findMany: async ({ args, query }: { args: any, query: (args: any) => Promise<any[]> }) => {
                             /* Can Be used for modify the response */
                             const results = await query(args);
                             return results;
                         },
-                        findFirst: async ({ model, operation, args, query }) => {
+                        findFirst: async ({
+                            model,
+                            operation,
+                            args,
+                            query
+                        }: {
+                            model: string;
+                            operation: string;
+                            args: any;
+                            query: (args: any) => Promise<any>;
+                        }) => {
                             /* Can Be used for modify the response */
                             const result = await query(args);
                             return result;
