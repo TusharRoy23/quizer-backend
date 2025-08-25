@@ -41,3 +41,5 @@ jspm_packages/
 # Miscellaneous
 *.swp
 *.swo
+
+generated/
