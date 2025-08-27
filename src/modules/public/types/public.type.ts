@@ -56,7 +56,7 @@ export type QuestionLog = {
     question_count: number;
     participant?: Participant;
     completed: boolean;
-    score: boolean;
+    score: number;
     total_answers: number;
     total_correct: number;
     end_time?: Date;
