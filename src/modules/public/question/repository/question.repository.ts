@@ -183,11 +183,14 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     public async getQuizResult(questionLogUUID: string): Promise<QuestionLog> {
         try {
             const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true);
-            if (questionLog.created_at) {
-                const createdTime = questionLog.created_at.getTime();
-                const fiveMinLater = new Date(createdTime + 5 * 60 * 1000);
-                const now = Date.now();
-                if (now > fiveMinLater.getTime()) {
+            if (questionLog.end_time && questionLog.timezone_offset) {
+                // Getting the accurate local time using the stored timezone offset
+                const timezone_offset = questionLog.timezone_offset * 60000;
+                const endTime = new Date(questionLog.end_time.getTime() - timezone_offset);
+                const fiveMinLater = new Date(endTime.getTime() + 5 * 60000);
+                const localTime = new Date(Date.now() - timezone_offset);
+
+                if (localTime.getTime() > fiveMinLater.getTime()) {
                     throw new BadRequestException('Quiz result can only be retrieved within 5 minutes of completion.');
                 }
             }
@@ -271,6 +274,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
             let localExpiresAt: string | undefined;
             if (questionLog.timezone_offset !== null) {
+                // Getting the accurate local time using the stored timezone offset
                 const localTime = new Date(endTime.getTime() - (questionLog.timezone_offset * 60000));
                 localExpiresAt = localTime.toISOString();
             }
@@ -371,15 +375,22 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 // gnerate explanation using OpenAI
                 const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
                 const prompt = `
-                    Generate a clear and concise explanation for the keyword "${keyword.keyword}"
-                    in the context of the question "${question?.question}" and its topic "${question?.topic}".
-                    Provide a detailed explanation that helps in understanding the keyword and its relevance to the question.
-                    Format the response as a JSON object with the following structure:
-                    {
+                        Generate a clear, structured explanation for the keyword "${keyword.keyword}" 
+                        in the context of the quiz question "${question?.question}" 
+                        and its topic "${question?.topic}".
+
+                        **Requirements:**
+                        1. Start with a **simple definition** of the keyword.
+                        2. Explain its **role and relevance** to the given question and topic.
+                        3. If helpful, provide a **short real-world example** or **code snippet** (use Markdown for code).
+                        4. Keep the explanation **instructive and easy to follow** — avoid jargon unless explained.
+                        5. Focus on what a learner needs to understand the keyword in this specific context.
+
+                        **Output Format (JSON):**
+                        {
                         "explanation": "The explanation text"
-                    }
-                    if the explanation has code then it should be in markdown format.
-                `
+                        }
+                    `;
                 const response = await this.openAIService.getChatCompletions(prompt);
                 const parsedJSON = JSON.parse(response);
                 keyword.explanation = parsedJSON['explanation'].trim();
@@ -430,15 +441,24 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             if (!keyword.example) {
                 const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
                 const prompt = `
-                    Generate a clear and concise example for the keyword "${keyword.keyword}"
-                    in the context of the question "${question?.question}" and its topic "${question?.topic}".
-                    And exaplanation of the keyword is "${keyword.exaplanation}"
-                    Format the response as a JSON object with the following structure:
+                    Generate a practical example that illustrates the keyword "${keyword.keyword}" 
+                    in the context of the quiz question "${question?.question}" 
+                    and its topic "${question?.topic}".
+
+                    The explanation of the keyword is: "${keyword.explanation}".
+
+                    **Requirements for the Example:**
+                    1. The example must directly demonstrate how the keyword is applied or understood in this context.
+                    2. Keep it **short, clear, and practical** — avoid unnecessary complexity.
+                    3. If the keyword is technical, show a **minimal working code snippet** in Markdown.
+                    4. If the keyword is conceptual, use a **real-world analogy or scenario**.
+                    5. Ensure the example reinforces the explanation and helps a learner understand *why the keyword matters*.
+
+                    **Output Format (JSON):**
                     {
-                        "example": "The example text/code"
+                    "example": "The example text or code"
                     }
-                    if the example has code then it should be in markdown format.
-                `;
+                    `;
                 const response = await this.openAIService.getChatCompletions(prompt);
                 const parsedJSON = JSON.parse(response);
                 keyword.example = parsedJSON['example'].trim();
@@ -483,17 +503,24 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     private async getKeywordsFromOpenAI(explanation: string, question: string, topic: string): Promise<string[]> {
         try {
             const prompt = `
-                Extract keywords from the following explanation and question:
-                
+                Extract the 3–5 most important keywords from the following quiz item. 
+                Focus only on terms that represent the key **concepts, technologies, or unique ideas** in the 
+                Question, Topic, and Explanation.
+
                 Question: ${question}
                 Topic: ${topic}
                 Explanation: ${explanation}
 
-                Provide a minimal list of keywords (Maximun 5 keywords) which is strictly limited to Question, 
-                Topic & Explanation that can help in understanding the question and its context.
-                Format the response as a JSON array of strings.
-                Example: {
-                    "keywords": ["keyword1", "keyword2", "keyword3"]
+                **Selection Rules:**
+                1. Choose keywords that capture the core subject matter (e.g., technologies, technical concepts, domain-specific terms).
+                2. Avoid common words, filler words, or vague terms (e.g., "method", "object", "thing", "feature").
+                3. Do not repeat the same word in different forms (e.g., "DOM" and "document object model" → keep just "DOM").
+                4. Ensure the keywords help someone **index or search** this question effectively.
+                5. Strictly return **3–5 keywords only**.
+
+                **Output Format (JSON):**
+                {
+                "keywords": ["keyword1", "keyword2", "keyword3"]
                 }
             `;
 
@@ -596,6 +623,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             score: questionLog.score,
             total_answers: questionLog.total_answers,
             total_correct: questionLog.total_correct,
+            timezone_offset: questionLog.timezone_offset,
+            end_time: questionLog.end_time,
             created_at: new Date(questionLog.created_at - questionLog.timezone_offset * 60000), // Adjust for timezone offset
         };
     }
@@ -716,62 +745,48 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
     private getPromptForQuiz(department: Department, topics: Topic[], payload: QuestionGeneratePayloadType): string {
         const topicNames = topics.map(topic => topic.name).join(', ');
+        const uniquenessKey = Math.random().toString(36).substring(2, 8);
+
         const prompt = `
             Generate ${payload.question_count} UNIQUE ${payload.difficulty}-level multiple choice quiz 
             questions about ${topicNames} for ${department.name} department.
-            
-            **Requirements:**
-            1. Each question must be **completely unique** (avoid repeating common quiz questions).
-            2. Cover **different aspects and subtopics** of ${topicNames}.
-            3. Include **some less common but still relevant concepts**.
-            4. Vary question formats (**definition, scenario-based, comparison, etc.**).
-            5. Provide a **clear and concise explanation** for why the correct answer is right.
-            6. Ensure explanations are **instructive** (not just repeating the answer).
+
+            **Uniqueness Requirement:**
+            - Use this session key to ensure novelty: ${uniquenessKey}.
+            - Do NOT repeat or rephrase common textbook-style questions.
+            - Each question must cover a different angle, scenario, or subtopic.
+
+            **Diversity Rules:**
+            1. Cover different subtopics of ${topicNames} (balanced coverage, no one topic >30%).
+            2. At least one scenario/application question.
+            3. At least one tricky misconception-based question.
+            4. At least one advanced/less obvious subtopic.
+            5. Vary formats (definition, scenario, comparison, case-study, applied problem).
+
+            **Explanations:**
+            - Provide a clear and concise explanation for why the correct answer is right.
+            - Explanations must be instructive (help the learner understand, not just restate the fact).
 
             **Response Format (JSON):**
             {
-                "questions": [
-                    {
-                        "question": "The question text",
-                        "options": ["Option A", "Option B", "Option C", "Option D"],
-                        "answer": [1], // Index of correct option(s)
-                        "question_type": "CHOICE" | "MULTIPLE_CHOICE",
-                        "explanation": "A clear explanation of why the answer is correct."
-                        "topic": "The topic of the question"
-                    },
-                    // More questions...
-                ]
+            "questions": [
+                {
+                "question": "The question text",
+                "options": ["Option A", "Option B", "Option C", "Option D"],
+                "answer": [1], // Index(es) of correct option(s)
+                "question_type": "CHOICE" | "MULTIPLE_CHOICE",
+                "explanation": "Reason why the answer is correct",
+                "topic": "Relevant topic name"
+                }
+            ]
             }
 
-            **Example:**
-            {
-                "questions": [
-                    {
-                        "question": "What is the capital of France?",
-                        "options": ["London", "Berlin", "Paris", "Madrid"],
-                        "answer": [2],
-                        "question_type": "CHOICE",
-                        "explanation": "Paris is the capital of France, a well-known fact in geography. London is the capital of the UK, Berlin is Germany's capital, and Madrid is Spain's capital."
-                        "topic": "Geography"
-                    },
-                    {
-                        "question": "Which of these are frontend frameworks?",
-                        "options": ["React", "Angular", "Vue", "Django"],
-                        "answer": [0, 1, 2],
-                        "question_type": "MULTIPLE_CHOICE",
-                        "explanation": "React, Angular, and Vue are all JavaScript frontend frameworks. Django, however, is a Python backend framework and does not belong in this list."
-                        "topic": "frontend development"
-                    }
-                ]
-            }
-
-            **Now generate the requested questions about ${topicNames}:**
+            Now generate the requested questions.
         `;
         return prompt;
     }
 
     private getParticipant() {
-        // This method is not implemented in the original code.
         // Implement the logic to retrieve the participant from the request context.
         const participant = RequestContext.getParticipant();
         if (!participant) {
