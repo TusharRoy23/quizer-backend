@@ -63,6 +63,7 @@ model question_log {
   question_count      Int
   difficulty          String
   completed           Boolean     @default(false)
+  generated           Boolean     @default(true)
   total_answers       Int         @default(0)
   total_correct       Int         @default(0)
   score               Int         @default(0)
