@@ -40,7 +40,10 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         try {
             const participant = this.getParticipant();
             await this.checkPromptInProgress();
-            await this.checkOngoingQuiz();
+            const questionLog = await this.getOngoingQuiz();
+            if (questionLog) {
+                return questionLog.uuid; // Return existing ongoing quiz UUID
+            }
             const department = await this.departmentService.getDepartmentByUUID(payload.department);
             if (!department) {
                 throw new NotFoundException('Department not found');
@@ -851,7 +854,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async checkOngoingQuiz(): Promise<boolean> {
+    private async getOngoingQuiz(): Promise<QuestionLog | null> {
         try {
             const prisma = await this.prisma$();
             const participant = this.getParticipant();
@@ -862,10 +865,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     generated: true
                 }
             });
-            if (questionLog) {
-                throw new BadRequestException('You already have an ongoing quiz. Please complete it before starting a new one.');
-            }
-            return false;
+            return questionLog || null;
         } catch (error) {
             return throwException(error);
         }
