@@ -59,4 +59,8 @@ export class QuestionService implements IQuestionService {
     public getLatestOngoingQuiz(): Promise<QuestionLog | null> {
         return this.questionRepository.getLatestOngoingQuiz();
     }
+
+    public checkIfParticipatedInQuiz(): Promise<boolean> {
+        return this.questionRepository.checkIfParticipatedInQuiz();
+    }
 }

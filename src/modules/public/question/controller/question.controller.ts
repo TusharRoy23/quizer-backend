@@ -135,4 +135,12 @@ export class QuestionController {
         const data = await this.questionService.getKeywordExample(keywordUuid);
         return res.status(200).json({ data });
     }
+
+    @httpGet("/participated")
+    public async checkIfParticipatedInQuiz(
+        req: Request, res: Response
+    ) {
+        const hasQuizzes = await this.questionService.checkIfParticipatedInQuiz();
+        return res.status(200).json({ data: hasQuizzes });
+    }
 }

@@ -483,6 +483,21 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
+    public async checkIfParticipatedInQuiz(): Promise<boolean> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            const count = await prisma.question_log.count({
+                where: {
+                    participant: participant?.id,
+                }
+            });
+            return count > 0;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
     private async getKeywords(questionUUID: string) {
         const prisma = await this.prisma$();
         const keywords = await prisma.question_keyword.findMany({
