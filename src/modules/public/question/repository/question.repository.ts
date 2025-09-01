@@ -33,7 +33,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     private cronJob() {
-        CronJob.schedule('*/5 * * * *', async () => this.updateQuizesTimer());
+        CronJob.schedule('*/30 * * * *', async () => this.updateQuizesTimer());
     }
 
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
@@ -85,6 +85,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 question: question.question,
                 options: question.options,
                 question_type: question.question_type,
+                selected_answer: question.selected_answer || [],
             }));
             return data;
         } catch (error: any) {
@@ -749,6 +750,19 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 data: { generated: true }
             });
         } catch (error: any) {
+            this.refactorGeneratedQuestion(questionLogId);
+            return throwException(error);
+        }
+    }
+
+    private async refactorGeneratedQuestion(questionLogId: number) {
+        try {
+            const prisma = await this.prisma$();
+            const questionLog = await prisma.question_log.update({
+                where: { id: questionLogId },
+                data: { generated: true }
+            })
+        } catch (error) {
             return throwException(error);
         }
     }
@@ -769,6 +783,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
             return count.count; // Return the number of connected topics
         } catch (error: any) {
+            this.refactorGeneratedQuestion(questionLogId);
             return throwException(error);
         }
     }
@@ -778,41 +793,31 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         const uniquenessKey = Math.random().toString(36).substring(2, 8);
 
         const prompt = `
-            Generate ${payload.question_count} UNIQUE ${payload.difficulty}-level multiple choice quiz 
-            questions about ${topicNames} for ${department.name} department.
+        Generate ${payload.question_count} ${payload.difficulty} MCQ questions about ${topicNames} for ${department.name}.
+        Session: ${uniquenessKey}. Ensure novelty and avoid textbook repeats.
 
-            **Uniqueness Requirement:**
-            - Use this session key to ensure novelty: ${uniquenessKey}.
-            - Do NOT repeat or rephrase common textbook-style questions.
-            - Each question must cover a different angle, scenario, or subtopic.
+        **Requirements:**
+        - Cover different subtopics of ${topicNames} (balanced coverage)
+        - Include: 1 scenario question, 1 misconception question, 1 advanced question
+        - Vary question formats (definition, scenario, comparison, case-study, applied problem).
 
-            **Diversity Rules:**
-            1. Cover different subtopics of ${topicNames} (balanced coverage, no one topic >30%).
-            2. At least one scenario/application question.
-            3. At least one tricky misconception-based question.
-            4. At least one advanced/less obvious subtopic.
-            5. Vary formats (definition, scenario, comparison, case-study, applied problem).
-
-            **Explanations:**
-            - Provide a clear and concise explanation for why the correct answer is right.
-            - Explanations must be instructive (help the learner understand, not just restate the fact).
-
-            **Response Format (JSON):**
+        **Format (JSON):**
+        {
+          "questions": [
             {
-            "questions": [
-                {
-                "question": "The question text",
-                "options": ["Option A", "Option B", "Option C", "Option D"],
-                "answer": [1], // Index(es) of correct option(s)
-                "question_type": "CHOICE" | "MULTIPLE_CHOICE",
-                "explanation": "Reason why the answer is correct",
-                "topic": "Relevant topic name"
-                }
-            ]
+              "question": "text",
+              "options": ["A", "B", "C", "D"],
+              "answer": [index],
+              "question_type": "CHOICE" | "MULTIPLE_CHOICE",
+              "explanation": "concise explanation",
+              "topic": "topic name"
             }
+          ]
+        }
 
-            Now generate the requested questions.
-        `;
+        Generate questions now.
+    `;
+
         return prompt;
     }
 
