@@ -1,17 +1,19 @@
+import { AsyncLocalStorage } from "async_hooks";
 import { Participant } from "../../modules/public/types/public.type";
 
+type Store = { participant: Participant };
 export class RequestContext {
-    private static participant: Participant | null;
+    private static als = new AsyncLocalStorage<Store>();
 
-    static setParticipant(participant: Participant) {
-        this.participant = participant;
+    static run(participant: Participant | null, callback: () => void) {
+        if (participant) {
+            this.als.run({ participant }, callback);
+        } else {
+            this.als.run({ participant: null as any }, callback);
+        }
     }
 
     static getParticipant(): Participant | null {
-        return this.participant || null;
-    }
-
-    static clear() {
-        this.participant = null;
+        return this.als.getStore()?.participant ?? null;
     }
 }

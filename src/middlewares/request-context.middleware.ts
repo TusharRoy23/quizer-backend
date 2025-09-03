@@ -7,14 +7,15 @@ import { Participant } from "../modules/public/types/public.type";
 @injectable()
 export class RequestContextMiddleware extends BaseMiddleware {
     public handler(req: Request, res: Response, next: NextFunction): void {
-        if (req.user) {
-            RequestContext.setParticipant(req.user as Participant);
-        }
+        const participant = req.user as Participant | null;
 
-        res.on("finish", () => {
-            RequestContext.clear();
+        RequestContext.run(participant, () => {
+            res.on("finish", () => {
+                // ALS automatically clears when the request completes,
+                // so no need for explicit cleanup here.
+            });
+
+            next();
         });
-
-        next();
     }
 }
