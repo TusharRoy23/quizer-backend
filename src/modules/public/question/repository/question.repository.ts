@@ -12,6 +12,7 @@ import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { RequestContext } from "../../../../shared/context/request-context";
 import CronJob from "node-cron";
+import { Prisma } from "@prisma/client";
 
 type QuestionLogPayloadType = {
     department: number;
@@ -61,12 +62,16 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 question_count: payload.question_count,
                 difficulty: payload.difficulty,
             };
-            const savedQuestionLog = await this.saveQuestionLog(questionPayload);
+            const prisma = await this.prisma$();
+            const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const savedQuestionLog = await this.saveQuestionLog(questionPayload, tx);
+                await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id, tx);
+                return savedQuestionLog;
+            });
             const promptResponse = await this.getPromptQuestions(payload, department, topics);
-            await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id);
-            await this.saveQuestions(promptResponse, savedQuestionLog.id);
+            await this.saveQuestions(promptResponse, result.id);
 
-            return savedQuestionLog.uuid; // Return the UUID of the question log
+            return result.uuid; // Return the UUID of the question log
         } catch (error: any) {
             return throwException(error);
         }
@@ -165,7 +170,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const questionLogUpdate = await prisma.question_log.update({
                 where: {
                     uuid: questionLogUUID,
-                    completed: false, // Ensure the question log is not completed
+                    completed: false,
                 },
                 data: {
                     completed: true, // Mark the question log as completed,
@@ -691,12 +696,11 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async saveQuestionLog(payload: QuestionLogPayloadType) {
+    private async saveQuestionLog(payload: QuestionLogPayloadType, tx: Prisma.TransactionClient): Promise<QuestionLog> {
         // Save the question log to the database
         // This is a placeholder function. Implement the actual logic to save the question log.
         try {
-            const prisma = await this.prisma$();
-            const questionLog = await prisma.question_log.create({
+            const questionLog = await tx.question_log.create({
                 data: {
                     ...payload,
                     completed: false,
@@ -736,54 +740,63 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 explanation: question.explanation, // Ensure explanation is trimmed
                 topic: question.topic || '', // Ensure topic is trimmed
             }));
-            const count = await prisma.question_log_question.createMany({
-                data: questionData,
-                skipDuplicates: true, // Skip duplicates if any
-            });
+            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const count = await tx.question_log_question.createMany({
+                    data: questionData,
+                    skipDuplicates: true, // Skip duplicates if any
+                });
 
-            if (count.count === 0) {
-                throw new NotFoundException('No questions were saved');
-            }
+                if (count.count === 0) {
+                    throw new NotFoundException('No questions were saved');
+                }
 
-            await prisma.question_log.update({
-                where: { id: questionLogId },
-                data: { generated: true }
+                await tx.question_log.update({
+                    where: { id: questionLogId },
+                    data: { generated: true }
+                });
             });
         } catch (error: any) {
-            this.refactorGeneratedQuestion(questionLogId);
+            this.deleteGeneratedQuestion(questionLogId);
             return throwException(error);
         }
     }
 
-    private async refactorGeneratedQuestion(questionLogId: number) {
+    private async deleteGeneratedQuestion(questionLogId: number) {
         try {
             const prisma = await this.prisma$();
-            const questionLog = await prisma.question_log.update({
-                where: { id: questionLogId },
-                data: { generated: true }
-            })
+            // delete quesstion log & connected data
+            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                await tx.question_log_topic.deleteMany({
+                    where: {
+                        question_log_id: questionLogId,
+                    }
+                });
+                await tx.question_log.delete({
+                    where: {
+                        id: questionLogId,
+                    }
+                });
+            });
         } catch (error) {
             return throwException(error);
         }
     }
 
-    private async connectTopicsWithQuestionLog(topics: Topic[], questionLogId: number): Promise<number> {
+    private async connectTopicsWithQuestionLog(topics: Topic[], questionLogId: number, tx: Prisma.TransactionClient): Promise<number> {
         // Connect the topics with the question log
         // This is a placeholder function. Implement the actual logic to connect the topics with the question log.
         try {
-            const prisma = await this.prisma$();
             const payload = topics.map(topic => ({
                 question_log_id: questionLogId,
                 topic_id: topic.id,
             }));
-            const count = await prisma.question_log_topic.createMany({
+            const count = await tx.question_log_topic.createMany({
                 data: payload,
                 skipDuplicates: true, // Skip duplicates if any
             });
 
             return count.count; // Return the number of connected topics
         } catch (error: any) {
-            this.refactorGeneratedQuestion(questionLogId);
             return throwException(error);
         }
     }
@@ -833,41 +846,44 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     private async updateQuizesTimer() {
         try {
             const prisma = await this.prisma$();
-            const logs = await prisma.question_log.findMany({
-                where: {
-                    completed: false, // Only update incomplete logs
-                    generated: true,
-                    end_time: { not: null },
-                    timezone_offset: { not: null }
-                },
-                select: {
-                    uuid: true,
-                    end_time: true,
-                    timezone_offset: true
+            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const logs = await tx.question_log.findMany({
+                    where: {
+                        completed: false, // Only update incomplete logs
+                        generated: true,
+                        end_time: { not: null },
+                        timezone_offset: { not: null }
+                    },
+                    select: {
+                        uuid: true,
+                        end_time: true,
+                        timezone_offset: true
+                    }
+                });
+
+                for (const questionLog of logs) {
+                    if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
+
+                    const now = new Date();
+                    const endTime = new Date(questionLog.end_time);
+
+                    // Calculate remaining time in seconds
+                    const remainingMs = endTime.getTime() - now.getTime();
+                    if (remainingMs <= 0) {
+                        // If the timer has expired, mark the question log as completed
+                        await tx.question_log.updateMany({
+                            where: {
+                                uuid: questionLog.uuid,
+                                completed: false
+                            },
+                            data: {
+                                completed: true
+                            }
+                        });
+                    }
                 }
             });
 
-            for (const questionLog of logs) {
-                if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
-
-                const now = new Date();
-                const endTime = new Date(questionLog.end_time);
-
-                // Calculate remaining time in seconds
-                const remainingMs = endTime.getTime() - now.getTime();
-                if (remainingMs <= 0) {
-                    // If the timer has expired, mark the question log as completed
-                    await prisma.question_log.updateMany({
-                        where: {
-                            uuid: questionLog.uuid,
-                            completed: false
-                        },
-                        data: {
-                            completed: true
-                        }
-                    });
-                }
-            }
         } catch (error: any) {
             return throwException(error);
 
