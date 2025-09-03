@@ -25,7 +25,7 @@ import { SessionMiddleware } from '../middlewares/session.middleware';
 const container = new Container();
 
 //? Database Module
-container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService);
+container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService).inSingletonScope();
 //? OpenAI Module
 container.bind<IOpenAIService>(TYPES.IOpenAIService).to(DeepSeekService);
 container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(DeepSeekRepository);
