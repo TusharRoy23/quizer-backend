@@ -813,6 +813,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         - Cover different subtopics of ${topicNames} (balanced coverage)
         - Include: 1 scenario question, 1 misconception question, 1 advanced question
         - Vary question formats (definition, scenario, comparison, case-study, applied problem).
+        - If the question or options has code, use Markdown formatting.
 
         **Format (JSON):**
         {
