@@ -63,4 +63,8 @@ export class QuestionService implements IQuestionService {
     public checkIfParticipatedInQuiz(): Promise<boolean> {
         return this.questionRepository.checkIfParticipatedInQuiz();
     }
+
+    public getExplanationForQuestion(questionUUID: string): Promise<string> {
+        return this.questionRepository.getExplanationForQuestion(questionUUID);
+    }
 }

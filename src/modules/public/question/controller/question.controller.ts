@@ -109,6 +109,15 @@ export class QuestionController {
         return res.status(200).json({ data });
     }
 
+    @httpGet("/explanation/:questionUUID", ValidateUUIDParam("questionUUID"))
+    public async getExplanationForQuestion(
+        req: Request, res: Response
+    ) {
+        const questionUUID = req.params.questionUUID;
+        const data = await this.questionService.getExplanationForQuestion(questionUUID);
+        return res.status(200).json({ data });
+    }
+
     @httpGet("/keywords/:questionUUID", ValidateUUIDParam("questionUUID"))
     public async getQuestionKeywords(
         req: Request, res: Response
