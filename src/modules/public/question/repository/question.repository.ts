@@ -504,6 +504,45 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
+    public async getExplanationForQuestion(questionUUID: string) {
+        try {
+            const prisma = await this.prisma$();
+            const question: Question = await this.getQuestionDetails(questionUUID);
+            if (question?.explanation) {
+                return question.explanation;
+            }
+
+            const prompt = `
+                Provide a clear, concise explanation for the following quiz question:
+                Question: ${question?.question}
+                Topic: ${question?.topic}
+                Options: ${question?.options.join(', ')}
+                Answer: ${(question?.answer && question?.answer?.length > 0) ? question?.answer?.map((index: number) => question?.options[index]).join(', ') : ''}
+                **Requirements:**
+                1. Start with a brief definition of the core concept.
+                2. Explain why the correct answer is right and why the other options are wrong.
+                3. Use simple language and avoid jargon.
+                4. Keep it concise (2-3 sentences).
+                5. If the explanation has code, use Markdown formatting.
+                **Output Format (JSON):**
+                {
+                "explanation": "The explanation text"
+                }
+            `;
+            const response = await this.openAIService.getChatCompletions(prompt);
+            const parsedJSON = JSON.parse(response);
+            const explanation = parsedJSON['explanation'].trim();
+            // Update the question with the generated explanation
+            await prisma.question_log_question.update({
+                where: { uuid: questionUUID },
+                data: { explanation: explanation }
+            });
+            return parsedJSON['explanation'].trim();
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
     private async getKeywords(questionUUID: string) {
         const prisma = await this.prisma$();
         const keywords = await prisma.question_keyword.findMany({
@@ -558,7 +597,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async getQuestionDetails(questionUUID: string): Promise<Question | undefined> {
+    private async getQuestionDetails(questionUUID: string): Promise<Question> {
         try {
             const prisma = await this.prisma$();
             const question = await prisma.question_log_question.findUnique({
@@ -737,8 +776,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 options: question.options, // Ensure options are trimmed
                 answer: question?.answer?.sort((a, b) => a - b), // Sort the answer indices
                 question_type: question.question_type,
-                explanation: question.explanation, // Ensure explanation is trimmed
-                topic: question.topic || '', // Ensure topic is trimmed
+                explanation: question?.explanation || undefined, // Ensure explanation is trimmed
+                topic: question.topic || undefined, // Ensure topic is trimmed
             }));
             await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
                 const count = await tx.question_log_question.createMany({
@@ -823,7 +862,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
               "options": ["A", "B", "C", "D"],
               "answer": [index],
               "question_type": "CHOICE" | "MULTIPLE_CHOICE",
-              "explanation": "concise explanation",
               "topic": "topic name"
             }
           ]
