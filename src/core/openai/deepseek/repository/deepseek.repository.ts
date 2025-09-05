@@ -24,9 +24,6 @@ export class DeepSeekRepository implements IOpenAIRepository {
                 messages: [
                     { role: "user", content: prompt }
                 ],
-                response_format: {
-                    type: "json_object"
-                },
                 temperature: 0.0,
                 stream: true
             });
