@@ -10,7 +10,6 @@ import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middlew
 import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
 import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
 import { SessionMiddleware } from "../../../../middlewares/session.middleware";
-import { Readable } from "stream";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
@@ -162,81 +161,99 @@ export class QuestionController {
 
         try {
             const stream = await this.questionService.getStreamedExplanationForQuestion(questionUUID);
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
+    }
 
-            // Set headers for streaming
-            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            res.setHeader('Cache-Control', 'no-cache');
-            res.setHeader('Connection', 'keep-alive');
-            res.setHeader('X-Accel-Buffering', 'no'); // Disable buffering in Nginx
+    @httpGet("/explanation/keywords/stream/:keywordUUID", ValidateUUIDParam("keywordUUID"))
+    public async getStreamExplanationForKeyword(req: Request, res: Response) {
+        const keywordUUID = req.params.keywordUUID;
 
-            // Flush headers immediately
-            res.flushHeaders();
+        try {
+            const stream = await this.questionService.getStreamedKeywordExplanation(keywordUUID);
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
+    }
 
-            const reader = stream.getReader();
-            const decoder = new TextDecoder();
+    private async streamingSuccessResponse(req: Request, res: Response, stream: ReadableStream<any>) {
+        // Set headers for streaming
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no'); // Disable buffering in Nginx
 
-            const processStream = async () => {
-                try {
-                    while (true) {
-                        const { done, value } = await reader.read();
+        // Flush headers immediately
+        res.flushHeaders();
 
-                        if (done) {
-                            res.end();
+        const reader = stream.getReader();
+        const decoder = new TextDecoder();
+
+        const processStream = async () => {
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+
+                    if (done) {
+                        res.end();
+                        return;
+                    }
+
+                    // Decode the chunk
+                    const textChunk = decoder.decode(value, { stream: true });
+
+                    // Send each character individually with delay
+                    for (const char of textChunk) {
+                        if (req.destroyed) {
+                            // Client disconnected, stop processing
                             return;
                         }
 
-                        // Decode the chunk
-                        const textChunk = decoder.decode(value, { stream: true });
+                        res.write(char);
 
-                        // Send each character individually with delay
-                        for (const char of textChunk) {
-                            if (req.destroyed) {
-                                // Client disconnected, stop processing
-                                return;
-                            }
+                        // Add delay for typing effect (adjust timing as needed)
+                        await new Promise(resolve => setTimeout(resolve, 0));
 
-                            res.write(char);
-
-                            // Add delay for typing effect (adjust timing as needed)
-                            await new Promise(resolve => setTimeout(resolve, 0));
-
-                            // Force flush the response to send immediately
-                            if (typeof (res as any).flush === 'function') {
-                                (res as any).flush();
-                            }
+                        // Force flush the response to send immediately
+                        if (typeof (res as any).flush === 'function') {
+                            (res as any).flush();
                         }
                     }
-                } catch (error) {
-                    console.error('Stream processing error:', error);
-                    if (!res.headersSent) {
-                        res.status(500).end();
-                    } else {
-                        res.end();
-                    }
                 }
-            };
-
-            // Start processing the stream
-            processStream();
-
-            // Handle client disconnect
-            req.on('close', () => {
-                reader.cancel().catch(() => { });
-                console.log('Client disconnected from explanation stream');
-            });
-
-        } catch (error) {
-            console.error("Stream initialization error:", error);
-
-            if (!res.headersSent) {
-                return res.status(500).json({
-                    error: "Failed to initialize explanation stream",
-                    message: error instanceof Error ? error.message : 'Unknown error'
-                });
-            } else {
-                // If headers were sent but error occurred later
-                res.end();
+            } catch (error) {
+                console.error('Stream processing error:', error);
+                if (!res.headersSent) {
+                    res.status(500).end();
+                } else {
+                    res.end();
+                }
             }
+        };
+
+        // Start processing the stream
+        processStream();
+
+        // Handle client disconnect
+        req.on('close', () => {
+            reader.cancel().catch(() => { });
+            console.log('Client disconnected from explanation stream');
+        });
+    }
+
+    private async streamingErrorResponse(res: Response, error: any) {
+        console.error("Stream initialization error:", error);
+
+        if (!res.headersSent) {
+            return res.status(500).json({
+                error: "Failed to initialize explanation stream",
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        } else {
+            // If headers were sent but error occurred later
+            res.end();
         }
     }
 }

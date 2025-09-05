@@ -71,4 +71,8 @@ export class QuestionService implements IQuestionService {
     public getStreamedExplanationForQuestion(questionUUID: string): Promise<ReadableStream> {
         return this.questionRepository.getStreamedExplanationForQuestion(questionUUID);
     }
+
+    public getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream> {
+        return this.questionRepository.getStreamedKeywordExplanation(keywordUuid);
+    }
 }

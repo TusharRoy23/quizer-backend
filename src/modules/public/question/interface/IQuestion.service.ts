@@ -18,4 +18,5 @@ export interface IQuestionService {
     checkIfParticipatedInQuiz: () => Promise<boolean>;
     getExplanationForQuestion: (questionUUID: string) => Promise<string>;
     getStreamedExplanationForQuestion: (questionUUID: string) => Promise<ReadableStream>;
+    getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream>;
 }

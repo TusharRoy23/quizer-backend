@@ -4,7 +4,7 @@ import { deepseekConfig } from "../config";
 export class DeepSeekRepository implements IOpenAIRepository {
     async getChatCompletions(prompt: string): Promise<any> {
         const completion = await deepseekConfig.create({
-            model: "deepseek-chat",
+            model: "deepseek-coder",
             messages: [
                 { role: "user", content: prompt }
             ],
@@ -20,7 +20,7 @@ export class DeepSeekRepository implements IOpenAIRepository {
         try {
             // Use the deepseekConfig with streaming enabled
             const response = await deepseekConfig.create({
-                model: "deepseek-chat",
+                model: "deepseek-coder",
                 messages: [
                     { role: "user", content: prompt }
                 ],
