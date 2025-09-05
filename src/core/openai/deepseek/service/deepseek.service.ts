@@ -12,4 +12,8 @@ export class DeepSeekService implements IOpenAIService {
     ): Promise<any> {
         return this.openAIRepository.getChatCompletions(prompt);
     }
+
+    async getChatCompletionsStream(prompt: string): Promise<ReadableStream> {
+        return this.openAIRepository.getChatCompletionsStream(prompt);
+    }
 }

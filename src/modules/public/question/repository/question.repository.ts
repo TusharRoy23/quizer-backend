@@ -543,6 +543,188 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
+    public async getStreamedExplanationForQuestion(questionUUID: string): Promise<ReadableStream> {
+        try {
+            const question: Question = await this.getQuestionDetails(questionUUID);
+
+            // Return existing explanation as character-by-character stream
+            if (question?.explanation) {
+                return this.textToCharacterStream(question.explanation);
+            }
+
+            const prompt = `
+            Provide a clear, concise explanation for the following quiz question:
+            Question: ${question?.question}
+            Topic: ${question?.topic}
+            Options: ${question?.options.join(', ')}
+            Answer: ${(question?.answer && question?.answer?.length > 0) ? question?.answer?.map((index: number) => question?.options[index]).join(', ') : ''}
+            **Requirements:**
+            1. Start with a brief definition of the core concept.
+            2. Explain why the correct answer is right and why the other options are wrong.
+            3. Use simple language and avoid jargon.
+            4. Keep it concise (2-3 sentences).
+            5. If the explanation has code, use Markdown formatting.
+            **Output Format (JSON):**
+            {
+            "explanation": "The explanation text"
+            }
+        `;
+
+            // Get the stream from DeepSeek
+            const stream = await this.openAIService.getChatCompletionsStream(prompt);
+            const encoder = new TextEncoder();
+            let fullContent = "";
+            let jsonBuffer = "";
+
+            // Capture 'this' reference for use inside the stream
+            const self = this;
+
+            return new ReadableStream({
+                async start(controller) {
+                    try {
+                        const reader = stream.getReader();
+                        const decoder = new TextDecoder();
+
+                        while (true) {
+                            const { done, value } = await reader.read();
+
+                            if (done) {
+                                // Try to save whatever content we have
+                                try {
+                                    if (jsonBuffer.trim()) {
+                                        const parsed = JSON.parse(jsonBuffer);
+                                        if (parsed.explanation) {
+                                            await self.saveExplanation(questionUUID, parsed.explanation);
+                                        }
+                                    } else if (fullContent.trim()) {
+                                        // If we couldn't parse as JSON, try to extract explanation
+                                        const explanation = self.extractExplanationFromText(fullContent);
+                                        if (explanation) {
+                                            await self.saveExplanation(questionUUID, explanation);
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error("Error saving final explanation:", e);
+                                }
+
+                                controller.close();
+                                break;
+                            }
+
+                            // Decode and process the chunk
+                            const chunk = decoder.decode(value, { stream: true });
+                            fullContent += chunk;
+                            jsonBuffer += chunk;
+
+                            // Send each character with delay for typing effect
+                            for (const char of chunk) {
+                                controller.enqueue(encoder.encode(char));
+                                await new Promise(resolve => setTimeout(resolve, 20));
+                            }
+
+                            // Try to parse JSON incrementally and save if complete
+                            try {
+                                const parsed = JSON.parse(jsonBuffer);
+                                if (parsed.explanation) {
+                                    // Save to database immediately
+                                    await self.saveExplanation(questionUUID, parsed.explanation);
+                                    jsonBuffer = ""; // Clear buffer after successful save
+                                }
+                            } catch (e) {
+                                // JSON parsing will fail until we have complete JSON - this is normal
+                                // Continue accumulating chunks
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error("Stream processing error:", error);
+
+                        // Send error message as stream
+                        const errorMsg = "Error generating explanation. Please try again.";
+                        for (const char of errorMsg) {
+                            controller.enqueue(encoder.encode(char));
+                            await new Promise(resolve => setTimeout(resolve, 20));
+                        }
+                        controller.close();
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("Error in getStreamedExplanationForQuestion:", error);
+
+            // Return error as character-by-character stream
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                async start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    for (const char of errorMsg) {
+                        await new Promise(resolve => setTimeout(resolve, 20));
+                        controller.enqueue(encoder.encode(char));
+                    }
+                    controller.close();
+                }
+            });
+        }
+    }
+
+    private extractExplanationFromText(text: string): string | null {
+        try {
+            // Try to extract JSON from the text
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                return parsed.explanation || null;
+            }
+
+            // If no JSON found, return the raw text (might be plain text response)
+            return text.trim();
+        } catch (e) {
+            console.error("Error extracting explanation from text:", e);
+            return text.trim(); // Fallback to raw text
+        }
+    }
+
+    private textToCharacterStream(text: string): ReadableStream {
+        const encoder = new TextEncoder();
+        let position = 0;
+
+        return new ReadableStream({
+            start(controller) {
+                const sendBatch = () => {
+                    // Send characters in batches of 5
+                    const batchSize = 5;
+                    const end = Math.min(position + batchSize, text.length);
+
+                    for (let i = position; i < end; i++) {
+                        controller.enqueue(encoder.encode(text[i]));
+                    }
+                    position = end;
+
+                    if (position < text.length) {
+                        setTimeout(sendBatch, 3); // 3ms between batches
+                    } else {
+                        controller.close();
+                    }
+                };
+
+                sendBatch();
+            }
+        });
+    }
+
+    private async saveExplanation(questionUUID: string, explanation: string) {
+        try {
+            const prisma = await this.prisma$();
+            await prisma.question_log_question.update({
+                where: { uuid: questionUUID },
+                data: { explanation: explanation }
+            });
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
     private async getKeywords(questionUUID: string) {
         const prisma = await this.prisma$();
         const keywords = await prisma.question_keyword.findMany({
