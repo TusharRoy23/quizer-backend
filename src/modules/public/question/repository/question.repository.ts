@@ -364,6 +364,76 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
     public async getKeywordDetails(keywordUuid: string): Promise<QuestionKeyword> {
         try {
+            const keyword = await this.getAKeyword(keywordUuid);
+            return {
+                id: keyword.id,
+                uuid: keyword.uuid,
+                keyword: keyword.keyword,
+                explanation: keyword?.explanation || '',
+                question_id: keyword?.question_id,
+                example: keyword.example || '',
+            } as QuestionKeyword;
+
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream> {
+        try {
+            const keyword = await this.getAKeyword(keywordUuid);
+            if (!keyword.explanation) {
+                // gnerate explanation using OpenAI
+                const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
+                const prompt = `
+                    Explain the keyword "${keyword.keyword}" in the context of the quiz question "${question?.question}" (topic: ${question?.topic}).
+
+                    Requirements:
+                    1. Give a simple definition.
+                    2. Explain why it matters in this question/topic.
+                    3. Optionally add a short example or code (Markdown).
+                    4. Be concise, clear, and learner-friendly.
+                    Return only plain text.
+                `;
+                const baseStream = await this.openAIService.getChatCompletionsStream(prompt);
+                return this.wrapReadableStream(baseStream, {
+                    onComplete: async (fullText) => {
+                        await this.updateQuestionKeyword(keywordUuid, fullText);
+                    },
+                    onErrorText: "Error generating explanation. Please try again."
+                });
+            }
+            return this.textToCharacterStream(keyword.explanation);
+        } catch (error) {
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            });
+        }
+    }
+
+    private async updateQuestionKeyword(keywordUUID: string, explanation: string) {
+        try {
+            const prisma = await this.prisma$();
+            await prisma.question_keyword.update({
+                where: {
+                    uuid: keywordUUID,
+                },
+                data: {
+                    explanation: explanation,
+                }
+            });
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async getAKeyword(keywordUuid: string): Promise<any> {
+        try {
             const prisma = await this.prisma$();
             const keyword = await prisma.question_keyword.findUnique({
                 where: {
@@ -382,48 +452,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             if (!keyword) {
                 throw new NotFoundException('Keyword not found');
             }
-            if (!keyword.explanation) {
-                // gnerate explanation using OpenAI
-                const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
-                const prompt = `
-                        Generate a clear, structured explanation for the keyword "${keyword.keyword}" 
-                        in the context of the quiz question "${question?.question}" 
-                        and its topic "${question?.topic}".
-
-                        **Requirements:**
-                        1. Start with a **simple definition** of the keyword.
-                        2. Explain its **role and relevance** to the given question and topic.
-                        3. If helpful, provide a **short real-world example** or **code snippet** (use Markdown for code).
-                        4. Keep the explanation **instructive and easy to follow** — avoid jargon unless explained.
-                        5. Focus on what a learner needs to understand the keyword in this specific context.
-
-                        **Output Format (JSON):**
-                        {
-                        "explanation": "The explanation text"
-                        }
-                    `;
-                const response = await this.openAIService.getChatCompletions(prompt);
-                const parsedJSON = JSON.parse(response);
-                keyword.explanation = parsedJSON['explanation'].trim();
-                // Update the keyword with the generated explanation
-                await prisma.question_keyword.update({
-                    where: {
-                        uuid: keyword.uuid,
-                    },
-                    data: {
-                        explanation: keyword.explanation,
-                    }
-                });
-            }
-            return {
-                id: keyword.id,
-                uuid: keyword.uuid,
-                keyword: keyword.keyword,
-                explanation: keyword.explanation || '',
-                question_id: keyword.question_id,
-                example: keyword.example || '',
-            } as QuestionKeyword;
-
+            return keyword;
         } catch (error) {
             return throwException(error);
         }
@@ -569,50 +598,17 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             `;
 
             // Get the stream from DeepSeek
-            const stream = await this.openAIService.getChatCompletionsStream(prompt);
-            const encoder = new TextEncoder();
-            let fullContent = "";
+            const baseStream = await this.openAIService.getChatCompletionsStream(prompt);
 
-            // Capture 'this' reference for use inside the stream
-            const self = this;
-
-            return new ReadableStream({
-                async start(controller) {
-                    try {
-                        const reader = stream.getReader();
-                        const decoder = new TextDecoder();
-
-                        while (true) {
-                            const { done, value } = await reader.read();
-
-                            if (done) {
-                                // Save the complete explanation to database
-                                if (fullContent.trim()) {
-                                    await self.saveExplanation(questionUUID, fullContent.trim());
-                                }
-                                controller.close();
-                                break;
-                            }
-
-                            // Decode and send the chunk directly (no JSON parsing needed!)
-                            const chunk = decoder.decode(value, { stream: true });
-                            fullContent += chunk;
-                            controller.enqueue(encoder.encode(chunk));
-                        }
-
-                    } catch (error) {
-                        console.error("Stream processing error:", error);
-
-                        const errorMsg = "Error generating explanation. Please try again.";
-                        controller.enqueue(encoder.encode(errorMsg));
-                        controller.close();
-                    }
-                }
+            // Wrap it with reusable logic
+            return this.wrapReadableStream(baseStream, {
+                onComplete: async (fullText) => {
+                    await this.saveExplanation(questionUUID, fullText);
+                },
+                onErrorText: "Error generating explanation. Please try again."
             });
 
         } catch (error) {
-            console.error("Error in getStreamedExplanationForQuestion:", error);
-
             const encoder = new TextEncoder();
             return new ReadableStream({
                 start(controller) {
@@ -665,24 +661,28 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     private async getKeywords(questionUUID: string) {
-        const prisma = await this.prisma$();
-        const keywords = await prisma.question_keyword.findMany({
-            where: {
-                question_log_question: {
-                    uuid: questionUUID,
+        try {
+            const prisma = await this.prisma$();
+            const keywords = await prisma.question_keyword.findMany({
+                where: {
+                    question_log_question: {
+                        uuid: questionUUID,
+                    }
+                },
+                select: {
+                    id: true,
+                    uuid: true,
+                    keyword: true,
+                    explanation: true,
+                    question_id: true,
                 }
-            },
-            select: {
-                id: true,
-                uuid: true,
-                keyword: true,
-                explanation: true,
-                question_id: true,
-            }
-        });
+            });
 
-        if (keywords && keywords.length) {
-            return keywords as QuestionKeyword[];
+            if (keywords && keywords.length) {
+                return keywords as QuestionKeyword[];
+            }
+        } catch (error) {
+            return throwException(error);
         }
     }
 
@@ -1084,5 +1084,46 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         } catch (error) {
             return throwException(error);
         }
+    }
+
+    private wrapReadableStream(
+        baseStream: ReadableStream<Uint8Array>,
+        options?: {
+            onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
+            onErrorText?: string; // fallback message if error
+        }
+    ): ReadableStream<Uint8Array> {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        let fullContent = "";
+
+        return new ReadableStream({
+            async start(controller) {
+                try {
+                    const reader = baseStream.getReader();
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (done) {
+                            if (options?.onComplete && fullContent.trim()) {
+                                await options.onComplete(fullContent.trim());
+                            }
+                            controller.close();
+                            break;
+                        }
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        fullContent += chunk;
+
+                        controller.enqueue(encoder.encode(chunk));
+                    }
+                } catch (error) {
+                    const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            }
+        });
     }
 }
