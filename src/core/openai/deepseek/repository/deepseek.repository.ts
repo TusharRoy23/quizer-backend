@@ -30,22 +30,39 @@ export class DeepSeekRepository implements IOpenAIRepository {
 
             // Create a ReadableStream from the DeepSeek response
             const encoder = new TextEncoder();
+            const self = this;
 
             return new ReadableStream({
                 async start(controller) {
                     try {
-                        // Handle the streaming response
+                        let buffer = "";
+                        let chunkCount = 0;
+
                         for await (const chunk of response) {
+                            chunkCount++;
                             if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
                                 const content = chunk.choices[0].delta.content;
                                 if (content) {
-                                    controller.enqueue(encoder.encode(content));
+                                    buffer += content;
+
+                                    // Send content in logical segments
+                                    if (self.shouldSendBuffer(buffer)) {
+                                        controller.enqueue(encoder.encode(buffer));
+                                        buffer = "";
+                                        await new Promise(resolve => setTimeout(resolve, 0));
+                                    }
                                 }
                             }
                         }
+
+                        // Send any remaining content
+                        if (buffer.length > 0) {
+                            controller.enqueue(encoder.encode(buffer));
+                        }
+
                         controller.close();
                     } catch (error) {
-                        console.error("Stream error in DeepSeek repository:", error);
+                        console.error("Stream error:", error);
                         controller.error(error);
                     }
                 }
@@ -55,5 +72,15 @@ export class DeepSeekRepository implements IOpenAIRepository {
             console.error("DeepSeek streaming error:", error);
             throw error;
         }
+    }
+
+    private shouldSendBuffer(buffer: string): boolean {
+        // Send when we have a complete word, sentence, or reasonable chunk
+        return buffer.length >= 20 ||
+            buffer.endsWith(' ') ||
+            buffer.endsWith('.') ||
+            buffer.endsWith('!') ||
+            buffer.endsWith('?') ||
+            buffer.endsWith('\n');
     }
 }
