@@ -17,4 +17,5 @@ export interface IQuestionRepository {
     getLatestOngoingQuiz: () => Promise<QuestionLog | null>;
     checkIfParticipatedInQuiz: () => Promise<boolean>;
     getExplanationForQuestion: (questionUUID: string) => Promise<string>;
+    getStreamedExplanationForQuestion: (questionUUID: string) => Promise<ReadableStream>;
 }
