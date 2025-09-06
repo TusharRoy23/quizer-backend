@@ -460,27 +460,50 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
     public async getKeywordExample(keywordUuid: string): Promise<string> {
         try {
-            const prisma = await this.prisma$();
-            const keyword = await prisma.question_keyword.findUnique({
-                where: {
-                    uuid: keywordUuid,
-                },
-                include: {
-                    question_log_question: {
-                        select: {
-                            uuid: true,
-                            question: true,
-                            topic: true,
-                        }
-                    }
-                }
-            });
-            if (!keyword) {
-                throw new NotFoundException('Keyword not found');
-            }
+            const keyword = await this.getAKeyword(keywordUuid);
             if (!keyword.example) {
                 const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
-                const prompt = `
+                const response = await this.openAIService.getChatCompletions(this.keywordExamplePrompt(keyword, question));
+                keyword.example = JSON.parse(response).trim();
+
+                await this.updateKeywordExample(keywordUuid, keyword.example);
+            }
+            return keyword.example;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    public async getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream> {
+        try {
+            const keyword = await this.getAKeyword(keywordUUID);
+            if (keyword?.example) {
+                return this.textToCharacterStream(keyword.example);
+            }
+            const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
+            const prompt = this.keywordExamplePrompt(keyword, question);
+
+            const baseStream = await this.openAIService.getChatCompletionsStream(prompt);
+            return this.wrapReadableStream(baseStream, {
+                onComplete: async (fullText) => {
+                    await this.updateKeywordExample(keywordUUID, fullText);
+                },
+                onErrorText: "Error generating explanation. Please try again."
+            });
+        } catch (error) {
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            });
+        }
+    }
+
+    private keywordExamplePrompt(keyword: QuestionKeyword, question: Question): string {
+        return `
                     Generate a practical example that illustrates the keyword "${keyword.keyword}" 
                     in the context of the quiz question "${question?.question}" 
                     and its topic "${question?.topic}".
@@ -494,28 +517,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     4. If the keyword is conceptual, use a **real-world analogy or scenario**.
                     5. Ensure the example reinforces the explanation and helps a learner understand *why the keyword matters*.
 
-                    **Output Format (JSON):**
-                    {
-                    "example": "The example text or code"
-                    }
-                    `;
-                const response = await this.openAIService.getChatCompletions(prompt);
-                const parsedJSON = JSON.parse(response);
-                keyword.example = parsedJSON['example'].trim();
-
-                await prisma.question_keyword.update({
-                    where: {
-                        uuid: keyword.uuid,
-                    },
-                    data: {
-                        example: keyword.example,
-                    }
-                });
-            }
-            return keyword.example;
-        } catch (error: any) {
-            return throwException(error);
-        }
+                    Return plain text only
+            `;
     }
 
     public async checkIfParticipatedInQuiz(): Promise<boolean> {
@@ -617,6 +620,22 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     controller.close();
                 }
             });
+        }
+    }
+
+    private async updateKeywordExample(keywordUUID: string, example: string): Promise<void> {
+        try {
+            const prisma = await this.prisma$();
+            await prisma.question_keyword.update({
+                where: {
+                    uuid: keywordUUID,
+                },
+                data: {
+                    example: example,
+                }
+            });
+        } catch (error) {
+            return throwException(error);
         }
     }
 

@@ -179,6 +179,18 @@ export class QuestionController {
         }
     }
 
+    @httpGet("/explanation/keywords/stream/example/:keywordUUID", ValidateUUIDParam("keywordUUID"))
+    public async getStreamedKeywordExample(req: Request, res: Response) {
+        const keywordUUID = req.params.keywordUUID;
+
+        try {
+            const stream = await this.questionService.getStreamedKeywordExample(keywordUUID);
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
+    }
+
     private async streamingSuccessResponse(req: Request, res: Response, stream: ReadableStream<any>) {
         // Set headers for streaming
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -205,23 +217,32 @@ export class QuestionController {
                     // Decode the chunk
                     const textChunk = decoder.decode(value, { stream: true });
 
-                    // Send each character individually with delay
-                    for (const char of textChunk) {
-                        if (req.destroyed) {
-                            // Client disconnected, stop processing
-                            return;
-                        }
+                    if (req.destroyed) return;
 
-                        res.write(char);
+                    res.write(textChunk);
 
-                        // Add delay for typing effect (adjust timing as needed)
-                        await new Promise(resolve => setTimeout(resolve, 0));
-
-                        // Force flush the response to send immediately
-                        if (typeof (res as any).flush === 'function') {
-                            (res as any).flush();
-                        }
+                    // Force flush
+                    if (typeof (res as any).flush === 'function') {
+                        (res as any).flush();
                     }
+
+                    // Send each character individually with delay
+                    // for (const char of textChunk) {
+                    //     if (req.destroyed) {
+                    //         // Client disconnected, stop processing
+                    //         return;
+                    //     }
+
+                    //     res.write(char);
+
+                    //     // Add delay for typing effect (adjust timing as needed)
+                    //     await new Promise(resolve => setTimeout(resolve, 0));
+
+                    //     // Force flush the response to send immediately
+                    //     if (typeof (res as any).flush === 'function') {
+                    //         (res as any).flush();
+                    //     }
+                    // }
                 }
             } catch (error) {
                 console.error('Stream processing error:', error);
