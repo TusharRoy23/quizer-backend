@@ -1,8 +1,8 @@
-import { IOpenAIRepository } from "../../interface/IOpenAI.repository";
-import { deepseekConfig } from "../config";
+import { IOpenAIRepository } from "../interface/IOpenAI.repository";
+import { deepseekConfig, openAIConfig } from "../config";
 
-export class DeepSeekRepository implements IOpenAIRepository {
-    async getChatCompletions(prompt: string): Promise<any> {
+export class OpenAIRepository implements IOpenAIRepository {
+    public async getDeepSeekChatCompletions(prompt: string): Promise<any> {
         const completion = await deepseekConfig.create({
             model: "deepseek-coder",
             messages: [
@@ -16,7 +16,7 @@ export class DeepSeekRepository implements IOpenAIRepository {
         return completion.choices[0]?.message?.content;
     }
 
-    async getChatCompletionsStream(prompt: string): Promise<ReadableStream> {
+    public async getDeepSeekChatCompletionsStream(prompt: string): Promise<ReadableStream> {
         try {
             // Use the deepseekConfig with streaming enabled
             const response = await deepseekConfig.create({
@@ -71,6 +71,19 @@ export class DeepSeekRepository implements IOpenAIRepository {
         } catch (error) {
             console.error("DeepSeek streaming error:", error);
             throw error;
+        }
+    }
+
+    public async getOpenAIEmbedding(text: string): Promise<any> {
+        try {
+            const response = await openAIConfig.embeddings.create({
+                model: 'text-embedding-3-small',
+                input: text,
+                dimensions: 512
+            });
+            return response;
+        } catch (error) {
+            return [];
         }
     }
 

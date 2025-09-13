@@ -43,6 +43,7 @@ export type Question = {
     answer?: number[];
     explanation?: string;
     topic?: string; // Optional field for the topic of the question
+    sub_topic?: string; // Optional field for the sub-topic of the question
     selected_answer?: number[];
     question_type: QuestionType;
 }

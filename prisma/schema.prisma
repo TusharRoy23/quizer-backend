@@ -16,8 +16,8 @@ model department {
   created_at                         DateTime       @default(now()) @db.Timestamptz(6)
   name                               String?        @unique @db.VarChar
   uuid                               String?        @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  topic_topic_departmentTodepartment topic[]        @relation("topic_departmentTodepartment")
   question_log_question_department   question_log[] @relation("question_department")
+  topic_topic_departmentTodepartment topic[]        @relation("topic_departmentTodepartment")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -27,8 +27,8 @@ model participant {
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
   email        String         @db.VarChar
   name         String         @db.VarChar
-  google_id    String         @default("0") @db.Text
   uuid         String         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  google_id    String         @default("0")
   session_id   String?        @db.VarChar
   question_log question_log[] @relation("question_generator")
 }
@@ -41,8 +41,8 @@ model topic {
   name                                    String?              @db.VarChar
   department                              Int?                 @db.SmallInt
   uuid                                    String               @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  department_topic_departmentTodepartment department?          @relation("topic_departmentTodepartment", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
   question_logs                           question_log_topic[]
+  department_topic_departmentTodepartment department?          @relation("topic_departmentTodepartment", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
 }
 
 model user {
@@ -54,69 +54,67 @@ model user {
 }
 
 model question_log {
-  id                  Int         @id @default(autoincrement())
-  created_at          DateTime    @default(now()) @db.Timestamptz(6)
-  uuid                String      @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  department          Int
-  participant         Int
-  timer               Int
-  question_count      Int
-  difficulty          String
-  completed           Boolean     @default(false)
-  generated           Boolean     @default(true)
-  total_answers       Int         @default(0)
-  total_correct       Int         @default(0)
-  score               Int         @default(0)
-  end_time            DateTime?   @db.Timestamptz(6)
-  timezone_offset     Int?        @default(0)
-  timezone_name       String?
-  question_generator  participant @relation("question_generator", fields: [participant], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  question_department department  @relation("question_department", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
-
-  topics                question_log_topic[]
+  id                    Int                     @id @default(autoincrement())
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  uuid                  String                  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  department            Int
+  timer                 Int
+  difficulty            String
+  question_count        Int
+  participant           Int
+  completed             Boolean                 @default(false)
+  score                 Int                     @default(0)
+  total_answers         Int                     @default(0)
+  total_correct         Int                     @default(0)
+  end_time              DateTime?               @db.Timestamptz(6)
+  timezone_name         String?
+  timezone_offset       Int?                    @default(0)
+  generated             Boolean                 @default(true)
+  question_department   department              @relation("question_department", fields: [department], references: [id], onUpdate: NoAction)
+  question_generator    participant             @relation("question_generator", fields: [participant], references: [id], onUpdate: NoAction)
   question_log_question question_log_question[]
+  topics                question_log_topic[]
 }
 
 model question_log_topic {
   question_log_id Int
   topic_id        Int
-
-  question_log question_log @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
-  topic        topic        @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+  question_log    question_log @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
+  topic           topic        @relation(fields: [topic_id], references: [id], onDelete: Cascade)
 
   @@id([question_log_id, topic_id])
+}
+
+model question_log_question {
+  id               Int                    @id @default(autoincrement())
+  question_log_id  Int
+  question         String
+  options          String[]
+  answer           Int[]
+  question_type    QuestionType           @default(CHOICE)
+  created_at       DateTime               @default(now()) @db.Timestamptz(6)
+  uuid             String                 @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  selected_answer  Int[]                  @default([])
+  explanation      String?
+  topic            String?                @db.VarChar
+  sub_topic        String?                @db.VarChar
+  embedding        Unsupported("vector")?
+  question_keyword question_keyword[]
+  question_log     question_log           @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
+}
+
+model question_keyword {
+  id                    Int                   @id @default(autoincrement())
+  created_at            DateTime              @default(now()) @db.Timestamptz(6)
+  keyword               String                @db.VarChar
+  question_id           Int
+  uuid                  String                @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  explanation           String?
+  example               String?
+  question_log_question question_log_question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 }
 
 enum QuestionType {
   MULTIPLE_CHOICE
   CHOICE
-}
-
-model question_log_question {
-  id              Int          @id @default(autoincrement())
-  question_log_id Int
-  question        String       @db.Text
-  options         String[]
-  answer          Int[]
-  explanation     String?      @db.Text
-  topic           String?      @db.VarChar
-  selected_answer Int[]        @default([])
-  question_type   QuestionType @default(CHOICE)
-  created_at      DateTime     @default(now()) @db.Timestamptz(6)
-  uuid            String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  question_log     question_log       @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
-  question_keyword question_keyword[]
-}
-
-model question_keyword {
-  id          Int      @id @default(autoincrement())
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
-  keyword     String   @db.VarChar
-  question_id Int
-  uuid        String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  explanation String?  @db.Text
-  example     String?  @db.Text
-
-  question_log_question question_log_question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 }

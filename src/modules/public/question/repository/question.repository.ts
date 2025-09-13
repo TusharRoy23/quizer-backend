@@ -12,7 +12,7 @@ import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { RequestContext } from "../../../../shared/context/request-context";
 import CronJob from "node-cron";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 type QuestionLogPayloadType = {
     department: number;
@@ -395,7 +395,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     4. Be concise, clear, and learner-friendly.
                     Return only plain text.
                 `;
-                const baseStream = await this.openAIService.getChatCompletionsStream(prompt);
+                const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
                 return this.wrapReadableStream(baseStream, {
                     onComplete: async (fullText) => {
                         await this.updateQuestionKeyword(keywordUuid, fullText);
@@ -463,7 +463,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const keyword = await this.getAKeyword(keywordUuid);
             if (!keyword.example) {
                 const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
-                const response = await this.openAIService.getChatCompletions(this.keywordExamplePrompt(keyword, question));
+                const response = await this.openAIService.getDeepSeekChatCompletions(this.keywordExamplePrompt(keyword, question));
                 keyword.example = JSON.parse(response).trim();
 
                 await this.updateKeywordExample(keywordUuid, keyword.example);
@@ -483,7 +483,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
             const prompt = this.keywordExamplePrompt(keyword, question);
 
-            const baseStream = await this.openAIService.getChatCompletionsStream(prompt);
+            const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
             return this.wrapReadableStream(baseStream, {
                 onComplete: async (fullText) => {
                     await this.updateKeywordExample(keywordUUID, fullText);
@@ -561,7 +561,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 "explanation": "The explanation text"
                 }
             `;
-            const response = await this.openAIService.getChatCompletions(prompt);
+            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
             const explanation = parsedJSON['explanation'].trim();
             // Update the question with the generated explanation
@@ -569,6 +569,9 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: { uuid: questionUUID },
                 data: { explanation: explanation }
             });
+            if (question?.id) {
+                this.generateEmbeddingsForQuestions(question.id);
+            }
             return parsedJSON['explanation'].trim();
         } catch (error: any) {
             return throwException(error);
@@ -601,7 +604,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             `;
 
             // Get the stream from DeepSeek
-            const baseStream = await this.openAIService.getChatCompletionsStream(prompt);
+            const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
 
             // Wrap it with reusable logic
             return this.wrapReadableStream(baseStream, {
@@ -620,6 +623,62 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     controller.close();
                 }
             });
+        }
+    }
+
+    public async getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+
+            const queryEmbedding = await this.openAIService.getOpenAIEmbedding(query);
+            const embeddingArray = queryEmbedding.data[0].embedding;
+
+            // Convert similarity threshold to distance threshold
+            const distanceThreshold = 1 - similarityThreshold;
+
+            let sqlQuery = `
+                SELECT 
+                    q.uuid,
+                    q.question,
+                    q.options,
+                    q.answer,
+                    q.selected_answer,
+                    q.explanation,
+                    q.topic,
+                    q.question_type,
+                    1 - (q.embedding <=> $1::vector) as similarity
+                FROM question_log_question q
+                INNER JOIN question_log l ON q.question_log_id = l.id
+                WHERE q.embedding IS NOT NULL
+                AND (q.embedding <=> $1::vector) < $2  -- Use distance threshold
+                AND l.participant = $3
+                ORDER BY (q.embedding <=> $1::vector) ASC  -- Order by distance
+            `;
+
+            const params: any[] = [
+                JSON.stringify(embeddingArray),
+                distanceThreshold,  // Now using distance threshold
+                participant.id
+            ];
+
+            sqlQuery += ` LIMIT $${params.length + 1}`;
+            params.push(limit);
+
+            const questions: Question[] = await prisma.$queryRawUnsafe(sqlQuery, ...params);
+
+            return questions.map((question: Question) => ({
+                uuid: question.uuid,
+                question: question.question,
+                options: question.options,
+                answer: question.answer?.sort((a: number, b: number) => a - b), // Sort the answer indices
+                selected_answer: question.selected_answer || [],
+                question_type: question.question_type,
+                explanation: question.explanation || '', // Ensure explanation is trimmed
+            })) as Question[];
+
+        } catch (error) {
+            return throwException(error);
         }
     }
 
@@ -729,7 +788,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 }
             `;
 
-            const response = await this.openAIService.getChatCompletions(prompt);
+            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
             return parsedJSON['keywords'] || [];
         } catch (error: any) {
@@ -897,7 +956,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         // This is a placeholder function. Implement the actual logic to get the prompt questions.
         try {
             const prompt = this.getPromptForQuiz(department, topics, payload);
-            const response = await this.openAIService.getChatCompletions(prompt);
+            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
             return parsedJSON['questions'];
         } catch (error) {
@@ -918,6 +977,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 question_type: question.question_type,
                 explanation: question?.explanation || undefined, // Ensure explanation is trimmed
                 topic: question.topic || undefined, // Ensure topic is trimmed
+                sub_topic: question.sub_topic || undefined, // Ensure sub_topic is trimmed
             }));
             await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
                 const count = await tx.question_log_question.createMany({
@@ -933,10 +993,91 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     where: { id: questionLogId },
                     data: { generated: true }
                 });
+                this.generateEmbeddingsForQuestions(questionLogId);
             });
+
         } catch (error: any) {
             this.deleteGeneratedQuestion(questionLogId);
             return throwException(error);
+        }
+    }
+
+    private async generateEmbeddingsForQuestions(questionLogId: number): Promise<void> {
+        try {
+            const prisma = await this.prisma$();
+
+            const questions = await prisma.$queryRaw<
+                { id: number; question: string; topic: string; sub_topic: string; options: any }[]
+            >`SELECT id, question, topic, sub_topic, options, explanation
+            FROM question_log_question WHERE question_log_id = ${questionLogId}`;
+
+            if (questions.length === 0) return;
+
+            const embeddingResponse = await this.openAIService.getOpenAIEmbedding(
+                questions.map((q: Question) => {
+                    return `
+                        Topic: ${q.topic}. 
+                        Sub Topic: ${q.sub_topic}.
+                        Question: ${q.question}.
+                        Options: ${q.options.map((option: string, index: number) => `${index + 1}. ${option}`)}.
+                        explanation: ${q.explanation || ''}
+                    `
+                })
+            );
+
+            // Batch updates with individual error handling
+            const updateResults = await Promise.allSettled(
+                questions.map((question: any, index: number) =>
+                    this.updateWithRetry(
+                        prisma,
+                        question.id,
+                        embeddingResponse.data[index].embedding
+                    )
+                )
+            );
+
+            // Check for failures
+            const failedUpdates = updateResults.filter(
+                (result): result is PromiseRejectedResult => result.status === 'rejected'
+            );
+
+            if (failedUpdates.length > 0) {
+                console.error(`${failedUpdates.length} embeddings failed to save:`, failedUpdates);
+                // Implement retry logic for failed updates here
+
+            }
+
+            const successfulCount = updateResults.length - failedUpdates.length;
+            console.log(`Successfully generated embeddings for ${successfulCount}/${questions.length} questions`);
+
+        } catch (error) {
+            console.error('Error generating embeddings:', error);
+        }
+    }
+
+    // Retry function for individual updates
+    private async updateWithRetry(
+        prisma: PrismaClient,
+        questionId: number,
+        embedding: number[],
+        maxRetries: number = 2
+    ): Promise<void> {
+        let attempt = 0;
+
+        while (attempt <= maxRetries) {
+            try {
+                await prisma.$executeRawUnsafe(`
+                UPDATE question_log_question 
+                SET embedding = '${JSON.stringify(embedding)}'::vector
+                WHERE id = ${questionId}
+            `);
+                return;
+            } catch (error) {
+                attempt++;
+                if (attempt > maxRetries) throw error;
+                console.warn(`Retrying update for question ${questionId} (attempt ${attempt})`);
+                await new Promise(r => setTimeout(r, 500 * attempt));
+            }
         }
     }
 
@@ -1002,9 +1143,43 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
               "options": ["A", "B", "C", "D"],
               "answer": [index],
               "question_type": "CHOICE" | "MULTIPLE_CHOICE",
-              "topic": "topic name"
+              "topic": "topic name",
+              "sub_topic": "subtopic name"
             }
           ]
+        }
+        
+        ** Example **
+        {
+            "questions": [
+                {
+                    "question": "What is the purpose of Angular’s FormGroup?",
+                    "options": ["Option A", "Option B", "Option C", "Option D"],
+                    "answer": [1],
+                    "question_type": "CHOICE",
+                    "topic": "Angular",
+                    "sub_topic": "Forms & Validation"
+                }
+            ]
+        }
+
+        ** One More Example **
+        {
+            "questions": [
+                {
+                    "question": "What is the main advantage of conducting employee satisfaction surveys?",
+                    "options": [
+                        "To reduce recruitment costs",
+                        "To identify employee concerns and improve engagement",
+                        "To measure market competition",
+                        "To evaluate technical skill levels"
+                    ],
+                    "answer": [1],
+                    "question_type": "CHOICE",
+                    "topic": "Human Resources",
+                    "sub_topic": "Employee Engagement"
+                }
+            ]
         }
 
         Generate questions now.

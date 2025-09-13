@@ -79,4 +79,8 @@ export class QuestionService implements IQuestionService {
     public getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream> {
         return this.questionRepository.getStreamedKeywordExample(keywordUUID);
     }
+
+    public getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]> {
+        return this.questionRepository.getQuestionsByQuery(query, limit, similarityThreshold);
+    }
 }
