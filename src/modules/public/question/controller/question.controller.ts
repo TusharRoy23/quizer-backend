@@ -10,6 +10,7 @@ import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middlew
 import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
 import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
 import { SessionMiddleware } from "../../../../middlewares/session.middleware";
+import { QuestionSearchPayloadDto, QuestionSearchPayloadType } from "../dto/question-search-payload";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
@@ -32,6 +33,14 @@ export class QuestionController {
     ) {
         const questionLogUUID = req.params.questionLogUUID;
         const result = await this.questionService.saveAnswerForQuestion(questionLogUUID, payload);
+        return res.status(200).json({ data: result });
+    }
+
+    @httpPost("/list/search", DtoValidationMiddleware(QuestionSearchPayloadDto))
+    public async getQuestionsByQuery(
+        @requestBody() payload: QuestionSearchPayloadType, req: Request, res: Response
+    ) {
+        const result = await this.questionService.getQuestionsByQuery(payload['query'], 10, 0.3);
         return res.status(200).json({ data: result });
     }
 
