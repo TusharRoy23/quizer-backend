@@ -10,6 +10,7 @@ import { ValidateUUIDParam } from "../../../../middlewares/validate-uuid.middlew
 import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
 import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
 import { SessionMiddleware } from "../../../../middlewares/session.middleware";
+import { QuestionSearchPayloadDto, QuestionSearchPayloadType } from "../dto/question-search-payload";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
@@ -32,6 +33,14 @@ export class QuestionController {
     ) {
         const questionLogUUID = req.params.questionLogUUID;
         const result = await this.questionService.saveAnswerForQuestion(questionLogUUID, payload);
+        return res.status(200).json({ data: result });
+    }
+
+    @httpPost("/list/search", DtoValidationMiddleware(QuestionSearchPayloadDto))
+    public async getQuestionsByQuery(
+        @requestBody() payload: QuestionSearchPayloadType, req: Request, res: Response
+    ) {
+        const result = await this.questionService.getQuestionsByQuery(payload['query'], 10, 0.3);
         return res.status(200).json({ data: result });
     }
 
@@ -109,6 +118,15 @@ export class QuestionController {
         return res.status(200).json({ data });
     }
 
+    @httpGet("/explanation/:questionUUID", ValidateUUIDParam("questionUUID"))
+    public async getExplanationForQuestion(
+        req: Request, res: Response
+    ) {
+        const questionUUID = req.params.questionUUID;
+        const data = await this.questionService.getExplanationForQuestion(questionUUID);
+        return res.status(200).json({ data });
+    }
+
     @httpGet("/keywords/:questionUUID", ValidateUUIDParam("questionUUID"))
     public async getQuestionKeywords(
         req: Request, res: Response
@@ -134,5 +152,138 @@ export class QuestionController {
         const keywordUuid = req.params.keywordUuid;
         const data = await this.questionService.getKeywordExample(keywordUuid);
         return res.status(200).json({ data });
+    }
+
+    @httpGet("/participated")
+    public async checkIfParticipatedInQuiz(
+        req: Request, res: Response
+    ) {
+        const hasQuizzes = await this.questionService.checkIfParticipatedInQuiz();
+        return res.status(200).json({ data: hasQuizzes });
+    }
+
+    @httpGet("/explanation/stream/:questionUUID", ValidateUUIDParam("questionUUID"))
+    public async getStreamedExplanationForQuestion(
+        req: Request, res: Response
+    ) {
+        const questionUUID = req.params.questionUUID;
+
+        try {
+            const stream = await this.questionService.getStreamedExplanationForQuestion(questionUUID);
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
+    }
+
+    @httpGet("/explanation/keywords/stream/:keywordUUID", ValidateUUIDParam("keywordUUID"))
+    public async getStreamExplanationForKeyword(req: Request, res: Response) {
+        const keywordUUID = req.params.keywordUUID;
+
+        try {
+            const stream = await this.questionService.getStreamedKeywordExplanation(keywordUUID);
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
+    }
+
+    @httpGet("/explanation/keywords/stream/example/:keywordUUID", ValidateUUIDParam("keywordUUID"))
+    public async getStreamedKeywordExample(req: Request, res: Response) {
+        const keywordUUID = req.params.keywordUUID;
+
+        try {
+            const stream = await this.questionService.getStreamedKeywordExample(keywordUUID);
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
+    }
+
+    private async streamingSuccessResponse(req: Request, res: Response, stream: ReadableStream<any>) {
+        // Set headers for streaming
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no'); // Disable buffering in Nginx
+
+        // Flush headers immediately
+        res.flushHeaders();
+
+        const reader = stream.getReader();
+        const decoder = new TextDecoder();
+
+        const processStream = async () => {
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+
+                    if (done) {
+                        res.end();
+                        return;
+                    }
+
+                    // Decode the chunk
+                    const textChunk = decoder.decode(value, { stream: true });
+
+                    if (req.destroyed) return;
+
+                    res.write(textChunk);
+
+                    // Force flush
+                    if (typeof (res as any).flush === 'function') {
+                        (res as any).flush();
+                    }
+
+                    // Send each character individually with delay
+                    // for (const char of textChunk) {
+                    //     if (req.destroyed) {
+                    //         // Client disconnected, stop processing
+                    //         return;
+                    //     }
+
+                    //     res.write(char);
+
+                    //     // Add delay for typing effect (adjust timing as needed)
+                    //     await new Promise(resolve => setTimeout(resolve, 0));
+
+                    //     // Force flush the response to send immediately
+                    //     if (typeof (res as any).flush === 'function') {
+                    //         (res as any).flush();
+                    //     }
+                    // }
+                }
+            } catch (error) {
+                console.error('Stream processing error:', error);
+                if (!res.headersSent) {
+                    res.status(500).end();
+                } else {
+                    res.end();
+                }
+            }
+        };
+
+        // Start processing the stream
+        processStream();
+
+        // Handle client disconnect
+        req.on('close', () => {
+            reader.cancel().catch(() => { });
+            console.log('Client disconnected from explanation stream');
+        });
+    }
+
+    private async streamingErrorResponse(res: Response, error: any) {
+        console.error("Stream initialization error:", error);
+
+        if (!res.headersSent) {
+            return res.status(500).json({
+                error: "Failed to initialize explanation stream",
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        } else {
+            // If headers were sent but error occurred later
+            res.end();
+        }
     }
 }

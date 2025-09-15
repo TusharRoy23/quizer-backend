@@ -59,4 +59,28 @@ export class QuestionService implements IQuestionService {
     public getLatestOngoingQuiz(): Promise<QuestionLog | null> {
         return this.questionRepository.getLatestOngoingQuiz();
     }
+
+    public checkIfParticipatedInQuiz(): Promise<boolean> {
+        return this.questionRepository.checkIfParticipatedInQuiz();
+    }
+
+    public getExplanationForQuestion(questionUUID: string): Promise<string> {
+        return this.questionRepository.getExplanationForQuestion(questionUUID);
+    }
+
+    public getStreamedExplanationForQuestion(questionUUID: string): Promise<ReadableStream> {
+        return this.questionRepository.getStreamedExplanationForQuestion(questionUUID);
+    }
+
+    public getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream> {
+        return this.questionRepository.getStreamedKeywordExplanation(keywordUuid);
+    }
+
+    public getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream> {
+        return this.questionRepository.getStreamedKeywordExample(keywordUUID);
+    }
+
+    public getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]> {
+        return this.questionRepository.getQuestionsByQuery(query, limit, similarityThreshold);
+    }
 }

@@ -43,6 +43,7 @@ export type Question = {
     answer?: number[];
     explanation?: string;
     topic?: string; // Optional field for the topic of the question
+    sub_topic?: string; // Optional field for the sub-topic of the question
     selected_answer?: number[];
     question_type: QuestionType;
 }
@@ -56,7 +57,7 @@ export type QuestionLog = {
     question_count: number;
     participant?: Participant;
     completed: boolean;
-    score: boolean;
+    score: number;
     total_answers: number;
     total_correct: number;
     end_time?: Date;

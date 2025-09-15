@@ -1,4 +1,4 @@
-import { id, inject, injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
@@ -12,6 +12,7 @@ import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { RequestContext } from "../../../../shared/context/request-context";
 import CronJob from "node-cron";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 type QuestionLogPayloadType = {
     department: number;
@@ -33,13 +34,17 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     }
 
     private cronJob() {
-        CronJob.schedule('*/5 * * * *', async () => this.updateQuizesTimer());
+        CronJob.schedule('*/30 * * * *', async () => this.updateQuizesTimer());
     }
 
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
         try {
             const participant = this.getParticipant();
-            await this.checkOngoingQuiz();
+            await this.checkPromptInProgress();
+            const questionLog = await this.getOngoingQuiz();
+            if (questionLog) {
+                return questionLog.uuid; // Return existing ongoing quiz UUID
+            }
             const department = await this.departmentService.getDepartmentByUUID(payload.department);
             if (!department) {
                 throw new NotFoundException('Department not found');
@@ -57,12 +62,16 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 question_count: payload.question_count,
                 difficulty: payload.difficulty,
             };
+            const prisma = await this.prisma$();
+            const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const savedQuestionLog = await this.saveQuestionLog(questionPayload, tx);
+                await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id, tx);
+                return savedQuestionLog;
+            });
             const promptResponse = await this.getPromptQuestions(payload, department, topics);
-            const savedQuestionLog = await this.saveQuestionLog(questionPayload);
-            await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id);
-            await this.saveQuestions(promptResponse, savedQuestionLog.id);
+            await this.saveQuestions(promptResponse, result.id);
 
-            return savedQuestionLog.uuid; // Return the UUID of the question log
+            return result.uuid; // Return the UUID of the question log
         } catch (error: any) {
             return throwException(error);
         }
@@ -81,6 +90,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 question: question.question,
                 options: question.options,
                 question_type: question.question_type,
+                selected_answer: question.selected_answer || [],
             }));
             return data;
         } catch (error: any) {
@@ -160,7 +170,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const questionLogUpdate = await prisma.question_log.update({
                 where: {
                     uuid: questionLogUUID,
-                    completed: false, // Ensure the question log is not completed
+                    completed: false,
                 },
                 data: {
                     completed: true, // Mark the question log as completed,
@@ -183,11 +193,14 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     public async getQuizResult(questionLogUUID: string): Promise<QuestionLog> {
         try {
             const questionLog = await this.getQuestionLogByUUID(questionLogUUID, true);
-            if (questionLog.created_at) {
-                const createdTime = questionLog.created_at.getTime();
-                const fiveMinLater = new Date(createdTime + 5 * 60 * 1000);
-                const now = Date.now();
-                if (now > fiveMinLater.getTime()) {
+            if (questionLog.end_time && questionLog.timezone_offset) {
+                // Getting the accurate local time using the stored timezone offset
+                const timezone_offset = questionLog.timezone_offset * 60000;
+                const endTime = new Date(questionLog.end_time.getTime() - timezone_offset);
+                const fiveMinLater = new Date(endTime.getTime() + 5 * 60000);
+                const localTime = new Date(Date.now() - timezone_offset);
+
+                if (localTime.getTime() > fiveMinLater.getTime()) {
                     throw new BadRequestException('Quiz result can only be retrieved within 5 minutes of completion.');
                 }
             }
@@ -271,6 +284,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
             let localExpiresAt: string | undefined;
             if (questionLog.timezone_offset !== null) {
+                // Getting the accurate local time using the stored timezone offset
                 const localTime = new Date(endTime.getTime() - (questionLog.timezone_offset * 60000));
                 localExpiresAt = localTime.toISOString();
             }
@@ -336,6 +350,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     participant: participant?.id,
                     completed: false, // Ensure the question log is not completed
+                    generated: true
                 }
             });
             if (!questionLog) {
@@ -349,56 +364,13 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
     public async getKeywordDetails(keywordUuid: string): Promise<QuestionKeyword> {
         try {
-            const prisma = await this.prisma$();
-            const keyword = await prisma.question_keyword.findUnique({
-                where: {
-                    uuid: keywordUuid,
-                },
-                include: {
-                    question_log_question: {
-                        select: {
-                            uuid: true,
-                            question: true,
-                            topic: true,
-                        }
-                    }
-                }
-            });
-            if (!keyword) {
-                throw new NotFoundException('Keyword not found');
-            }
-            if (!keyword.explanation) {
-                // gnerate explanation using OpenAI
-                const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
-                const prompt = `
-                    Generate a clear and concise explanation for the keyword "${keyword.keyword}"
-                    in the context of the question "${question?.question}" and its topic "${question?.topic}".
-                    Provide a detailed explanation that helps in understanding the keyword and its relevance to the question.
-                    Format the response as a JSON object with the following structure:
-                    {
-                        "explanation": "The explanation text"
-                    }
-                    if the explanation has code then it should be in markdown format.
-                `
-                const response = await this.openAIService.getChatCompletions(prompt);
-                const parsedJSON = JSON.parse(response);
-                keyword.explanation = parsedJSON['explanation'].trim();
-                // Update the keyword with the generated explanation
-                await prisma.question_keyword.update({
-                    where: {
-                        uuid: keyword.uuid,
-                    },
-                    data: {
-                        explanation: keyword.explanation,
-                    }
-                });
-            }
+            const keyword = await this.getAKeyword(keywordUuid);
             return {
                 id: keyword.id,
                 uuid: keyword.uuid,
                 keyword: keyword.keyword,
-                explanation: keyword.explanation || '',
-                question_id: keyword.question_id,
+                explanation: keyword?.explanation || '',
+                question_id: keyword?.question_id,
                 example: keyword.example || '',
             } as QuestionKeyword;
 
@@ -407,7 +379,60 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    public async getKeywordExample(keywordUuid: string): Promise<string> {
+    public async getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream> {
+        try {
+            const keyword = await this.getAKeyword(keywordUuid);
+            if (!keyword.explanation) {
+                // gnerate explanation using OpenAI
+                const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
+                const prompt = `
+                    Explain the keyword "${keyword.keyword}" in the context of the quiz question "${question?.question}" (topic: ${question?.topic}).
+
+                    Requirements:
+                    1. Give a simple definition.
+                    2. Explain why it matters in this question/topic.
+                    3. Optionally add a short example or code (Markdown).
+                    4. Be concise, clear, and learner-friendly.
+                    Return only plain text.
+                `;
+                const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
+                return this.wrapReadableStream(baseStream, {
+                    onComplete: async (fullText) => {
+                        await this.updateQuestionKeyword(keywordUuid, fullText);
+                    },
+                    onErrorText: "Error generating explanation. Please try again."
+                });
+            }
+            return this.textToCharacterStream(keyword.explanation);
+        } catch (error) {
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            });
+        }
+    }
+
+    private async updateQuestionKeyword(keywordUUID: string, explanation: string) {
+        try {
+            const prisma = await this.prisma$();
+            await prisma.question_keyword.update({
+                where: {
+                    uuid: keywordUUID,
+                },
+                data: {
+                    explanation: explanation,
+                }
+            });
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async getAKeyword(keywordUuid: string): Promise<any> {
         try {
             const prisma = await this.prisma$();
             const keyword = await prisma.question_keyword.findUnique({
@@ -427,30 +452,21 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             if (!keyword) {
                 throw new NotFoundException('Keyword not found');
             }
+            return keyword;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getKeywordExample(keywordUuid: string): Promise<string> {
+        try {
+            const keyword = await this.getAKeyword(keywordUuid);
             if (!keyword.example) {
                 const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
-                const prompt = `
-                    Generate a clear and concise example for the keyword "${keyword.keyword}"
-                    in the context of the question "${question?.question}" and its topic "${question?.topic}".
-                    And exaplanation of the keyword is "${keyword.exaplanation}"
-                    Format the response as a JSON object with the following structure:
-                    {
-                        "example": "The example text/code"
-                    }
-                    if the example has code then it should be in markdown format.
-                `;
-                const response = await this.openAIService.getChatCompletions(prompt);
-                const parsedJSON = JSON.parse(response);
-                keyword.example = parsedJSON['example'].trim();
+                const response = await this.openAIService.getDeepSeekChatCompletions(this.keywordExamplePrompt(keyword, question));
+                keyword.example = JSON.parse(response).trim();
 
-                await prisma.question_keyword.update({
-                    where: {
-                        uuid: keyword.uuid,
-                    },
-                    data: {
-                        example: keyword.example,
-                    }
-                });
+                await this.updateKeywordExample(keywordUuid, keyword.example);
             }
             return keyword.example;
         } catch (error: any) {
@@ -458,46 +474,321 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async getKeywords(questionUUID: string) {
-        const prisma = await this.prisma$();
-        const keywords = await prisma.question_keyword.findMany({
-            where: {
-                question_log_question: {
-                    uuid: questionUUID,
+    public async getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream> {
+        try {
+            const keyword = await this.getAKeyword(keywordUUID);
+            if (keyword?.example) {
+                return this.textToCharacterStream(keyword.example);
+            }
+            const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
+            const prompt = this.keywordExamplePrompt(keyword, question);
+
+            const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
+            return this.wrapReadableStream(baseStream, {
+                onComplete: async (fullText) => {
+                    await this.updateKeywordExample(keywordUUID, fullText);
+                },
+                onErrorText: "Error generating explanation. Please try again."
+            });
+        } catch (error) {
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
                 }
-            },
-            select: {
-                id: true,
-                uuid: true,
-                keyword: true,
-                explanation: true,
-                question_id: true,
+            });
+        }
+    }
+
+    private keywordExamplePrompt(keyword: QuestionKeyword, question: Question): string {
+        return `
+                    Generate a practical example that illustrates the keyword "${keyword.keyword}" 
+                    in the context of the quiz question "${question?.question}" 
+                    and its topic "${question?.topic}".
+
+                    The explanation of the keyword is: "${keyword.explanation}".
+
+                    **Requirements for the Example:**
+                    1. The example must directly demonstrate how the keyword is applied or understood in this context.
+                    2. Keep it **short, clear, and practical** — avoid unnecessary complexity.
+                    3. If the keyword is technical, show a **minimal working code snippet** in Markdown.
+                    4. If the keyword is conceptual, use a **real-world analogy or scenario**.
+                    5. Ensure the example reinforces the explanation and helps a learner understand *why the keyword matters*.
+
+                    Return plain text only
+            `;
+    }
+
+    public async checkIfParticipatedInQuiz(): Promise<boolean> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            const count = await prisma.question_log.count({
+                where: {
+                    participant: participant?.id,
+                }
+            });
+            return count > 0;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    public async getExplanationForQuestion(questionUUID: string) {
+        try {
+            const prisma = await this.prisma$();
+            const question: Question = await this.getQuestionDetails(questionUUID);
+            if (question?.explanation) {
+                return question.explanation;
+            }
+
+            const prompt = `
+                Provide a clear, concise explanation for the following quiz question:
+                Question: ${question?.question}
+                Topic: ${question?.topic}
+                Options: ${question?.options.join(', ')}
+                Answer: ${(question?.answer && question?.answer?.length > 0) ? question?.answer?.map((index: number) => question?.options[index]).join(', ') : ''}
+                **Requirements:**
+                1. Start with a brief definition of the core concept.
+                2. Explain why the correct answer is right and why the other options are wrong.
+                3. Use simple language and avoid jargon.
+                4. Keep it concise (2-3 sentences).
+                5. If the explanation has code, use Markdown formatting.
+                **Output Format (JSON):**
+                {
+                "explanation": "The explanation text"
+                }
+            `;
+            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
+            const parsedJSON = JSON.parse(response);
+            const explanation = parsedJSON['explanation'].trim();
+            // Update the question with the generated explanation
+            await prisma.question_log_question.update({
+                where: { uuid: questionUUID },
+                data: { explanation: explanation }
+            });
+            if (question?.id) {
+                this.generateEmbeddingsForQuestions(question.id);
+            }
+            return parsedJSON['explanation'].trim();
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    public async getStreamedExplanationForQuestion(questionUUID: string): Promise<ReadableStream> {
+        try {
+            const question: Question = await this.getQuestionDetails(questionUUID);
+
+            // Return existing explanation as character-by-character stream
+            if (question?.explanation) {
+                return this.textToCharacterStream(question.explanation);
+            }
+
+            const prompt = `
+                Provide a clear, concise explanation for the following quiz question:
+                Question: ${question?.question}
+                Topic: ${question?.topic}
+                Options: ${question?.options.join(', ')}
+                Answer: ${(question?.answer && question?.answer?.length > 0) ? question?.answer?.map((index: number) => question?.options[index]).join(', ') : ''}
+                **Requirements:**
+                1. Start with a brief definition of the core concept.
+                2. Explain why the correct answer is right and why the other options are wrong.
+                3. Use simple language and avoid jargon.
+                4. Keep it concise (2-3 sentences).
+                5. If the explanation has code, use Markdown formatting.
+                **Important: Return only the explanation text without any JSON formatting.**
+                Do not wrap the response in JSON or any other structure.
+            `;
+
+            // Get the stream from DeepSeek
+            const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
+
+            // Wrap it with reusable logic
+            return this.wrapReadableStream(baseStream, {
+                onComplete: async (fullText) => {
+                    await this.saveExplanation(questionUUID, fullText);
+                },
+                onErrorText: "Error generating explanation. Please try again."
+            });
+
+        } catch (error) {
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            });
+        }
+    }
+
+    public async getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+
+            const queryEmbedding = await this.openAIService.getOpenAIEmbedding(query);
+            const embeddingArray = queryEmbedding.data[0].embedding;
+
+            // Convert similarity threshold to distance threshold
+            const distanceThreshold = 1 - similarityThreshold;
+
+            let sqlQuery = `
+                SELECT 
+                    q.uuid,
+                    q.question,
+                    q.options,
+                    q.answer,
+                    q.selected_answer,
+                    q.explanation,
+                    q.topic,
+                    q.question_type,
+                    1 - (q.embedding <=> $1::vector) as similarity
+                FROM question_log_question q
+                INNER JOIN question_log l ON q.question_log_id = l.id
+                WHERE q.embedding IS NOT NULL
+                AND (q.embedding <=> $1::vector) < $2  -- Use distance threshold
+                AND l.participant = $3
+                ORDER BY (q.embedding <=> $1::vector) ASC  -- Order by distance
+            `;
+
+            const params: any[] = [
+                JSON.stringify(embeddingArray),
+                distanceThreshold,  // Now using distance threshold
+                participant.id
+            ];
+
+            sqlQuery += ` LIMIT $${params.length + 1}`;
+            params.push(limit);
+
+            const questions: Question[] = await prisma.$queryRawUnsafe(sqlQuery, ...params);
+
+            return questions.map((question: Question) => ({
+                uuid: question.uuid,
+                question: question.question,
+                options: question.options,
+                answer: question.answer?.sort((a: number, b: number) => a - b), // Sort the answer indices
+                selected_answer: question.selected_answer || [],
+                question_type: question.question_type,
+                explanation: question.explanation || '', // Ensure explanation is trimmed
+            })) as Question[];
+
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async updateKeywordExample(keywordUUID: string, example: string): Promise<void> {
+        try {
+            const prisma = await this.prisma$();
+            await prisma.question_keyword.update({
+                where: {
+                    uuid: keywordUUID,
+                },
+                data: {
+                    example: example,
+                }
+            });
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private textToCharacterStream(text: string): ReadableStream {
+        const encoder = new TextEncoder();
+        let position = 0;
+
+        return new ReadableStream({
+            start(controller) {
+                const sendBatch = () => {
+                    // Send characters in batches of 5
+                    const batchSize = 5;
+                    const end = Math.min(position + batchSize, text.length);
+
+                    for (let i = position; i < end; i++) {
+                        controller.enqueue(encoder.encode(text[i]));
+                    }
+                    position = end;
+
+                    if (position < text.length) {
+                        setTimeout(sendBatch, 3); // 3ms between batches
+                    } else {
+                        controller.close();
+                    }
+                };
+
+                sendBatch();
             }
         });
+    }
 
-        if (keywords && keywords.length) {
-            return keywords as QuestionKeyword[];
+    private async saveExplanation(questionUUID: string, explanation: string) {
+        try {
+            const prisma = await this.prisma$();
+            await prisma.question_log_question.update({
+                where: { uuid: questionUUID },
+                data: { explanation: explanation }
+            });
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async getKeywords(questionUUID: string) {
+        try {
+            const prisma = await this.prisma$();
+            const keywords = await prisma.question_keyword.findMany({
+                where: {
+                    question_log_question: {
+                        uuid: questionUUID,
+                    }
+                },
+                select: {
+                    id: true,
+                    uuid: true,
+                    keyword: true,
+                    explanation: true,
+                    question_id: true,
+                }
+            });
+
+            if (keywords && keywords.length) {
+                return keywords as QuestionKeyword[];
+            }
+        } catch (error) {
+            return throwException(error);
         }
     }
 
     private async getKeywordsFromOpenAI(explanation: string, question: string, topic: string): Promise<string[]> {
         try {
             const prompt = `
-                Extract keywords from the following explanation and question:
-                
+                Extract the 3–5 most important keywords from the following quiz item. 
+                Focus only on terms that represent the key **concepts, technologies, or unique ideas** in the 
+                Question, Topic, and Explanation.
+
                 Question: ${question}
                 Topic: ${topic}
                 Explanation: ${explanation}
 
-                Provide a minimal list of keywords (Maximun 5 keywords) which is strictly limited to Question, 
-                Topic & Explanation that can help in understanding the question and its context.
-                Format the response as a JSON array of strings.
-                Example: {
-                    "keywords": ["keyword1", "keyword2", "keyword3"]
+                **Selection Rules:**
+                1. Choose keywords that capture the core subject matter (e.g., technologies, technical concepts, domain-specific terms).
+                2. Avoid common words, filler words, or vague terms (e.g., "method", "object", "thing", "feature").
+                3. Do not repeat the same word in different forms (e.g., "DOM" and "document object model" → keep just "DOM").
+                4. Ensure the keywords help someone **index or search** this question effectively.
+                5. Strictly return **3–5 keywords only**.
+
+                **Output Format (JSON):**
+                {
+                "keywords": ["keyword1", "keyword2", "keyword3"]
                 }
             `;
 
-            const response = await this.openAIService.getChatCompletions(prompt);
+            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
             return parsedJSON['keywords'] || [];
         } catch (error: any) {
@@ -505,7 +796,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async getQuestionDetails(questionUUID: string): Promise<Question | undefined> {
+    private async getQuestionDetails(questionUUID: string): Promise<Question> {
         try {
             const prisma = await this.prisma$();
             const question = await prisma.question_log_question.findUnique({
@@ -551,7 +842,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 data: {
                     end_time: expiresAtUTC, // Store as UTC
                     timezone_offset: timezoneOffset,
-                    timezone_name: timezoneName
+                    timezone_name: timezoneName,
+                    generated: true
                 }
             });
             return questionUpdatedLog;
@@ -596,6 +888,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             score: questionLog.score,
             total_answers: questionLog.total_answers,
             total_correct: questionLog.total_correct,
+            timezone_offset: questionLog.timezone_offset,
+            end_time: questionLog.end_time,
             created_at: new Date(questionLog.created_at - questionLog.timezone_offset * 60000), // Adjust for timezone offset
         };
     }
@@ -640,13 +934,16 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async saveQuestionLog(payload: QuestionLogPayloadType) {
+    private async saveQuestionLog(payload: QuestionLogPayloadType, tx: Prisma.TransactionClient): Promise<QuestionLog> {
         // Save the question log to the database
         // This is a placeholder function. Implement the actual logic to save the question log.
         try {
-            const prisma = await this.prisma$();
-            const questionLog = await prisma.question_log.create({
-                data: payload
+            const questionLog = await tx.question_log.create({
+                data: {
+                    ...payload,
+                    completed: false,
+                    generated: false
+                }
             });
             return questionLog;
         } catch (error: any) {
@@ -659,7 +956,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         // This is a placeholder function. Implement the actual logic to get the prompt questions.
         try {
             const prompt = this.getPromptForQuiz(department, topics, payload);
-            const response = await this.openAIService.getChatCompletions(prompt);
+            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
             return parsedJSON['questions'];
         } catch (error) {
@@ -678,32 +975,142 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 options: question.options, // Ensure options are trimmed
                 answer: question?.answer?.sort((a, b) => a - b), // Sort the answer indices
                 question_type: question.question_type,
-                explanation: question.explanation, // Ensure explanation is trimmed
-                topic: question.topic || '', // Ensure topic is trimmed
+                explanation: question?.explanation || undefined, // Ensure explanation is trimmed
+                topic: question.topic || undefined, // Ensure topic is trimmed
+                sub_topic: question.sub_topic || undefined, // Ensure sub_topic is trimmed
             }));
-            const count = await prisma.question_log_question.createMany({
-                data: questionData,
-                skipDuplicates: true, // Skip duplicates if any
+            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const count = await tx.question_log_question.createMany({
+                    data: questionData,
+                    skipDuplicates: true, // Skip duplicates if any
+                });
+
+                if (count.count === 0) {
+                    throw new NotFoundException('No questions were saved');
+                }
+
+                await tx.question_log.update({
+                    where: { id: questionLogId },
+                    data: { generated: true }
+                });
+                this.generateEmbeddingsForQuestions(questionLogId);
             });
 
-            if (count.count === 0) {
-                throw new NotFoundException('No questions were saved');
-            }
         } catch (error: any) {
+            this.deleteGeneratedQuestion(questionLogId);
             return throwException(error);
         }
     }
 
-    private async connectTopicsWithQuestionLog(topics: Topic[], questionLogId: number): Promise<number> {
+    private async generateEmbeddingsForQuestions(questionLogId: number): Promise<void> {
+        try {
+            const prisma = await this.prisma$();
+
+            const questions = await prisma.$queryRaw<
+                { id: number; question: string; topic: string; sub_topic: string; options: any }[]
+            >`SELECT id, question, topic, sub_topic, options, explanation
+            FROM question_log_question WHERE question_log_id = ${questionLogId}`;
+
+            if (questions.length === 0) return;
+
+            const embeddingResponse = await this.openAIService.getOpenAIEmbedding(
+                questions.map((q: Question) => {
+                    return `
+                        Topic: ${q.topic}. 
+                        Sub Topic: ${q.sub_topic}.
+                        Question: ${q.question}.
+                        Options: ${q.options.map((option: string, index: number) => `${index + 1}. ${option}`)}.
+                        explanation: ${q.explanation || ''}
+                    `
+                })
+            );
+
+            // Batch updates with individual error handling
+            const updateResults = await Promise.allSettled(
+                questions.map((question: any, index: number) =>
+                    this.updateWithRetry(
+                        prisma,
+                        question.id,
+                        embeddingResponse.data[index].embedding
+                    )
+                )
+            );
+
+            // Check for failures
+            const failedUpdates = updateResults.filter(
+                (result): result is PromiseRejectedResult => result.status === 'rejected'
+            );
+
+            if (failedUpdates.length > 0) {
+                console.error(`${failedUpdates.length} embeddings failed to save:`, failedUpdates);
+                // Implement retry logic for failed updates here
+
+            }
+
+            const successfulCount = updateResults.length - failedUpdates.length;
+            console.log(`Successfully generated embeddings for ${successfulCount}/${questions.length} questions`);
+
+        } catch (error) {
+            console.error('Error generating embeddings:', error);
+        }
+    }
+
+    // Retry function for individual updates
+    private async updateWithRetry(
+        prisma: PrismaClient,
+        questionId: number,
+        embedding: number[],
+        maxRetries: number = 2
+    ): Promise<void> {
+        let attempt = 0;
+
+        while (attempt <= maxRetries) {
+            try {
+                await prisma.$executeRawUnsafe(`
+                UPDATE question_log_question 
+                SET embedding = '${JSON.stringify(embedding)}'::vector
+                WHERE id = ${questionId}
+            `);
+                return;
+            } catch (error) {
+                attempt++;
+                if (attempt > maxRetries) throw error;
+                console.warn(`Retrying update for question ${questionId} (attempt ${attempt})`);
+                await new Promise(r => setTimeout(r, 500 * attempt));
+            }
+        }
+    }
+
+    private async deleteGeneratedQuestion(questionLogId: number) {
+        try {
+            const prisma = await this.prisma$();
+            // delete quesstion log & connected data
+            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                await tx.question_log_topic.deleteMany({
+                    where: {
+                        question_log_id: questionLogId,
+                    }
+                });
+                await tx.question_log.delete({
+                    where: {
+                        id: questionLogId,
+                    }
+                });
+            });
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async connectTopicsWithQuestionLog(topics: Topic[], questionLogId: number, tx: Prisma.TransactionClient): Promise<number> {
         // Connect the topics with the question log
         // This is a placeholder function. Implement the actual logic to connect the topics with the question log.
         try {
-            const prisma = await this.prisma$();
             const payload = topics.map(topic => ({
                 question_log_id: questionLogId,
                 topic_id: topic.id,
             }));
-            const count = await prisma.question_log_topic.createMany({
+            const count = await tx.question_log_topic.createMany({
                 data: payload,
                 skipDuplicates: true, // Skip duplicates if any
             });
@@ -716,62 +1123,72 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
 
     private getPromptForQuiz(department: Department, topics: Topic[], payload: QuestionGeneratePayloadType): string {
         const topicNames = topics.map(topic => topic.name).join(', ');
+        const uniquenessKey = Math.random().toString(36).substring(2, 8);
+
         const prompt = `
-            Generate ${payload.question_count} UNIQUE ${payload.difficulty}-level multiple choice quiz 
-            questions about ${topicNames} for ${department.name} department.
-            
-            **Requirements:**
-            1. Each question must be **completely unique** (avoid repeating common quiz questions).
-            2. Cover **different aspects and subtopics** of ${topicNames}.
-            3. Include **some less common but still relevant concepts**.
-            4. Vary question formats (**definition, scenario-based, comparison, etc.**).
-            5. Provide a **clear and concise explanation** for why the correct answer is right.
-            6. Ensure explanations are **instructive** (not just repeating the answer).
+        Generate ${payload.question_count} ${payload.difficulty} MCQ questions about ${topicNames} for ${department.name}.
+        Session: ${uniquenessKey}. Ensure novelty and avoid textbook repeats.
 
-            **Response Format (JSON):**
+        **Requirements:**
+        - Cover different subtopics of ${topicNames} (balanced coverage)
+        - Include: 1 scenario question, 1 misconception question, 1 advanced question
+        - Vary question formats (definition, scenario, comparison, case-study, applied problem).
+        - If the question or options has code, use Markdown formatting.
+
+        **Format (JSON):**
+        {
+          "questions": [
             {
-                "questions": [
-                    {
-                        "question": "The question text",
-                        "options": ["Option A", "Option B", "Option C", "Option D"],
-                        "answer": [1], // Index of correct option(s)
-                        "question_type": "CHOICE" | "MULTIPLE_CHOICE",
-                        "explanation": "A clear explanation of why the answer is correct."
-                        "topic": "The topic of the question"
-                    },
-                    // More questions...
-                ]
+              "question": "text",
+              "options": ["A", "B", "C", "D"],
+              "answer": [index],
+              "question_type": "CHOICE" | "MULTIPLE_CHOICE",
+              "topic": "topic name",
+              "sub_topic": "subtopic name"
             }
+          ]
+        }
+        
+        ** Example **
+        {
+            "questions": [
+                {
+                    "question": "What is the purpose of Angular’s FormGroup?",
+                    "options": ["Option A", "Option B", "Option C", "Option D"],
+                    "answer": [1],
+                    "question_type": "CHOICE",
+                    "topic": "Angular",
+                    "sub_topic": "Forms & Validation"
+                }
+            ]
+        }
 
-            **Example:**
-            {
-                "questions": [
-                    {
-                        "question": "What is the capital of France?",
-                        "options": ["London", "Berlin", "Paris", "Madrid"],
-                        "answer": [2],
-                        "question_type": "CHOICE",
-                        "explanation": "Paris is the capital of France, a well-known fact in geography. London is the capital of the UK, Berlin is Germany's capital, and Madrid is Spain's capital."
-                        "topic": "Geography"
-                    },
-                    {
-                        "question": "Which of these are frontend frameworks?",
-                        "options": ["React", "Angular", "Vue", "Django"],
-                        "answer": [0, 1, 2],
-                        "question_type": "MULTIPLE_CHOICE",
-                        "explanation": "React, Angular, and Vue are all JavaScript frontend frameworks. Django, however, is a Python backend framework and does not belong in this list."
-                        "topic": "frontend development"
-                    }
-                ]
-            }
+        ** One More Example **
+        {
+            "questions": [
+                {
+                    "question": "What is the main advantage of conducting employee satisfaction surveys?",
+                    "options": [
+                        "To reduce recruitment costs",
+                        "To identify employee concerns and improve engagement",
+                        "To measure market competition",
+                        "To evaluate technical skill levels"
+                    ],
+                    "answer": [1],
+                    "question_type": "CHOICE",
+                    "topic": "Human Resources",
+                    "sub_topic": "Employee Engagement"
+                }
+            ]
+        }
 
-            **Now generate the requested questions about ${topicNames}:**
-        `;
+        Generate questions now.
+    `;
+
         return prompt;
     }
 
     private getParticipant() {
-        // This method is not implemented in the original code.
         // Implement the logic to retrieve the participant from the request context.
         const participant = RequestContext.getParticipant();
         if (!participant) {
@@ -783,60 +1200,124 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
     private async updateQuizesTimer() {
         try {
             const prisma = await this.prisma$();
-            const logs = await prisma.question_log.findMany({
-                where: {
-                    completed: false, // Only update incomplete logs
-                },
-                select: {
-                    uuid: true,
-                    end_time: true,
-                    timezone_offset: true
+            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const logs = await tx.question_log.findMany({
+                    where: {
+                        completed: false, // Only update incomplete logs
+                        generated: true,
+                        end_time: { not: null },
+                        timezone_offset: { not: null }
+                    },
+                    select: {
+                        uuid: true,
+                        end_time: true,
+                        timezone_offset: true
+                    }
+                });
+
+                for (const questionLog of logs) {
+                    if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
+
+                    const now = new Date();
+                    const endTime = new Date(questionLog.end_time);
+
+                    // Calculate remaining time in seconds
+                    const remainingMs = endTime.getTime() - now.getTime();
+                    if (remainingMs <= 0) {
+                        // If the timer has expired, mark the question log as completed
+                        await tx.question_log.updateMany({
+                            where: {
+                                uuid: questionLog.uuid,
+                                completed: false
+                            },
+                            data: {
+                                completed: true
+                            }
+                        });
+                    }
                 }
             });
 
-            for (const questionLog of logs) {
-                if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
-
-                const now = new Date();
-                const endTime = new Date(questionLog.end_time);
-
-                // Calculate remaining time in seconds
-                const remainingMs = endTime.getTime() - now.getTime();
-                if (remainingMs <= 0) {
-                    // If the timer has expired, mark the question log as completed
-                    await prisma.question_log.updateMany({
-                        where: {
-                            uuid: questionLog.uuid,
-                            completed: false
-                        },
-                        data: {
-                            completed: true
-                        }
-                    });
-                }
-            }
         } catch (error: any) {
             return throwException(error);
 
         }
     }
 
-    private async checkOngoingQuiz(): Promise<boolean> {
+    private async getOngoingQuiz(): Promise<QuestionLog | null> {
         try {
             const prisma = await this.prisma$();
             const participant = this.getParticipant();
             const questionLog = await prisma.question_log.findFirst({
                 where: {
                     participant: participant?.id,
-                    completed: false, // Ensure the participant does not have an ongoing quiz
+                    completed: false, // Ensure the participant does not have an ongoing quiz,
+                    generated: true
+                }
+            });
+            return questionLog || null;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async checkPromptInProgress(): Promise<boolean> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            const questionLog = await prisma.question_log.findFirst({
+                where: {
+                    participant: participant?.id,
+                    generated: false, // Ensure the participant does not have a quiz in generation process
                 }
             });
             if (questionLog) {
-                throw new BadRequestException('You already have an ongoing quiz. Please complete it before starting a new one.');
+                throw new BadRequestException('Your previous quiz is still being generated. \nPlease wait a moment before starting a new one.');
             }
             return false;
         } catch (error) {
             return throwException(error);
         }
+    }
+
+    private wrapReadableStream(
+        baseStream: ReadableStream<Uint8Array>,
+        options?: {
+            onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
+            onErrorText?: string; // fallback message if error
+        }
+    ): ReadableStream<Uint8Array> {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        let fullContent = "";
+
+        return new ReadableStream({
+            async start(controller) {
+                try {
+                    const reader = baseStream.getReader();
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (done) {
+                            if (options?.onComplete && fullContent.trim()) {
+                                await options.onComplete(fullContent.trim());
+                            }
+                            controller.close();
+                            break;
+                        }
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        fullContent += chunk;
+
+                        controller.enqueue(encoder.encode(chunk));
+                    }
+                } catch (error) {
+                    const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            }
+        });
     }
 }

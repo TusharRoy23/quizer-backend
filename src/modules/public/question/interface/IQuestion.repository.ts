@@ -15,4 +15,10 @@ export interface IQuestionRepository {
     getKeywordDetails: (keywordUuid: string) => Promise<QuestionKeyword>;
     getKeywordExample: (keywordUuid: string) => Promise<string>;
     getLatestOngoingQuiz: () => Promise<QuestionLog | null>;
+    checkIfParticipatedInQuiz: () => Promise<boolean>;
+    getExplanationForQuestion: (questionUUID: string) => Promise<string>;
+    getStreamedExplanationForQuestion: (questionUUID: string) => Promise<ReadableStream>;
+    getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream>;
+    getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream>;
+    getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]>;
 }

@@ -18,7 +18,10 @@ export class UserController {
 
     @httpGet("/auth/google")
     public googleAuth(req: any, res: any, next: any) {
-        passport.authenticate("google", { scope: ['profile', 'email'] })(req, res, next);
+        passport.authenticate("google", {
+            scope: ['profile', 'email'],
+            prompt: "select_account"
+        })(req, res, next);
     }
 
     @httpGet("/auth/check", SessionMiddleware)
