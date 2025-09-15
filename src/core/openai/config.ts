@@ -5,3 +5,6 @@ export const deepseekConfig = new OpenAI({
     apiKey: process.env.DEEPSEEK_API_KEY
 }).chat.completions;
 
+export const openAIConfig = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
