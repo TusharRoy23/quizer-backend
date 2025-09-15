@@ -20,4 +20,5 @@ export interface IQuestionService {
     getStreamedExplanationForQuestion: (questionUUID: string) => Promise<ReadableStream>;
     getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream>;
     getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream>;
+    getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]>;
 }
