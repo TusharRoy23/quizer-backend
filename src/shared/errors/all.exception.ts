@@ -64,5 +64,5 @@ export const throwException = (error: any) => {
     else if (error instanceof MethodNotAllowedException) throw new MethodNotAllowedException(`${error.message}`);
     else if (error instanceof RequestTimeoutException) throw new RequestTimeoutException(`${error.message}`);
     else if (error instanceof TooManyRequestsException) throw new TooManyRequestsException(`${error.message}`);
-    throw new InternalServerErrorException(`${error.message}`);
+    throw new InternalServerErrorException(process.env.NODE_ENV === 'development' ? `${error.message}` : "Something went wrong");
 }

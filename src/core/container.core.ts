@@ -11,10 +11,10 @@ import { QuestionRepository } from '../modules/public/question/repository/questi
 import { IQuestionService } from '../modules/public/question/interface/IQuestion.service';
 import { QuestionService } from '../modules/public/question/service/question.service';
 import { IOpenAIService } from './openai/interface/IOpenAI.service';
-import { DeepSeekService } from './openai/deepseek/service/deepseek.service';
+import { OpenAIService } from './openai/service/openAI.service';
 import { DepartmentService } from '../modules/public/department/service/department.service';
 import { IOpenAIRepository } from './openai/interface/IOpenAI.repository';
-import { DeepSeekRepository } from './openai/deepseek/repository/deepseek.repository';
+import { OpenAIRepository } from './openai/repository/openAI.repository';
 import { IUserRepository } from '../modules/public/user/interface/IUser.repository';
 import { IUserService } from '../modules/public/user/interface/IUser.service';
 import { UserRepository } from '../modules/public/user/repository/user.repository';
@@ -25,10 +25,10 @@ import { SessionMiddleware } from '../middlewares/session.middleware';
 const container = new Container();
 
 //? Database Module
-container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService);
+container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService).inSingletonScope();
 //? OpenAI Module
-container.bind<IOpenAIService>(TYPES.IOpenAIService).to(DeepSeekService);
-container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(DeepSeekRepository);
+container.bind<IOpenAIService>(TYPES.IOpenAIService).to(OpenAIService);
+container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(OpenAIRepository);
 
 container.bind<RequestContextMiddleware>(RequestContextMiddleware).toSelf();
 container.bind<SessionMiddleware>(SessionMiddleware).toSelf();

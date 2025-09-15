@@ -7,16 +7,28 @@ import container from "../../core/container.core";
 
 const JWT_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET || "your_secret";
 
+const getEnvironmentSpecificExtractors = () => {
+    const extractors = [];
+
+    if (process.env.NODE_ENV === 'development') {
+        // Development: prefer bearer token, then cookie
+        extractors.push(ExtractJwt.fromAuthHeaderAsBearerToken());
+        extractors.push(cookieExtractor);
+    } else {
+        // Production: prefer cookie, then bearer token as fallback
+        extractors.push(cookieExtractor);
+    }
+
+    return extractors;
+};
+
 // ✅ Custom cookie extractor
 const cookieExtractor = (req: Request): string | null => {
     return req?.cookies?.accessToken || null;
 };
 
 const opts = {
-    jwtFromRequest: ExtractJwt.fromExtractors([
-        ExtractJwt.fromAuthHeaderAsBearerToken(), // Bearer token
-        cookieExtractor                            // Cookie-based token
-    ]),
+    jwtFromRequest: ExtractJwt.fromExtractors(getEnvironmentSpecificExtractors()),
     secretOrKey: JWT_SECRET,
 };
 
