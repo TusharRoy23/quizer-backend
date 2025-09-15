@@ -11,8 +11,23 @@ const refreshTokenExtractor = (req: Request): string | null => {
     return req.cookies?.refreshToken || null;
 };
 
+const getEnvironmentSpecificExtractors = () => {
+    const extractors = [];
+
+    if (process.env.NODE_ENV === 'development') {
+        // Development: prefer bearer token, then cookie
+        extractors.push(ExtractJwt.fromAuthHeaderAsBearerToken());
+        extractors.push(refreshTokenExtractor);
+    } else {
+        // Production: prefer cookie, then bearer token as fallback
+        extractors.push(refreshTokenExtractor);
+    }
+
+    return extractors;
+};
+
 const opts = {
-    jwtFromRequest: ExtractJwt.fromExtractors([refreshTokenExtractor]),
+    jwtFromRequest: ExtractJwt.fromExtractors(getEnvironmentSpecificExtractors()),
     secretOrKey: JWT_REFRESH_SECRET,
     passReqToCallback: true as const, // Explicitly set to true for correct type
 };
