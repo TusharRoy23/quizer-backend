@@ -1,15 +1,14 @@
+/*
+  Warnings:
+
+  - You are about to drop the `Document` table. If the table is not empty, all the data it contains will be lost.
+
+*/
 -- CreateEnum
-CREATE TYPE "public"."QuestionType" AS ENUM ('MULTIPLE_CHOICE', 'CHOICE');
+CREATE TYPE "public"."QuestionType" AS ENUM ('MULTIPLE_CHOICE', 'CHOICE', 'VERBAL');
 
--- CreateTable
-CREATE TABLE "public"."department" (
-    "id" SMALLSERIAL NOT NULL,
-    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "name" VARCHAR,
-    "uuid" UUID DEFAULT gen_random_uuid(),
-
-    CONSTRAINT "department_pkey" PRIMARY KEY ("id")
-);
+-- DropTable
+DROP TABLE "public"."Document";
 
 -- CreateTable
 CREATE TABLE "public"."participant" (
@@ -81,15 +80,20 @@ CREATE TABLE "public"."question_log_question" (
     "id" SERIAL NOT NULL,
     "question_log_id" INTEGER NOT NULL,
     "question" TEXT NOT NULL,
-    "options" TEXT[],
-    "answer" INTEGER[],
+    "options" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "answer" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "verbal_answer" TEXT,
     "question_type" "public"."QuestionType" NOT NULL DEFAULT 'CHOICE',
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "uuid" UUID NOT NULL DEFAULT gen_random_uuid(),
     "selected_answer" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "verbal_response" TEXT,
+    "verbal_end_time" TIMESTAMPTZ(6),
     "explanation" TEXT,
     "topic" VARCHAR,
     "sub_topic" VARCHAR,
+    "is_verbally_correct" BOOLEAN DEFAULT false,
+    "is_verbal" BOOLEAN NOT NULL DEFAULT false,
     "embedding" vector,
 
     CONSTRAINT "question_log_question_pkey" PRIMARY KEY ("id")
@@ -107,12 +111,6 @@ CREATE TABLE "public"."question_keyword" (
 
     CONSTRAINT "question_keyword_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "department_name_key" ON "public"."department"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "department_uuid_key" ON "public"."department"("uuid");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "participant_uuid_key" ON "public"."participant"("uuid");
