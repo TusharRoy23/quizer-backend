@@ -19,7 +19,7 @@ export const QuestionGeneratePayloadDto = z.object({
     timer: number({
         required_error: 'Timer is required',
         invalid_type_error: 'Timer must be a number',
-    }).min(1, { message: 'Timer must be at least 1 second' }),
+    }).min(1, { message: 'Timer must be at least 1 minute' }),
 });
 
 export type QuestionGeneratePayloadType = z.infer<typeof QuestionGeneratePayloadDto>;

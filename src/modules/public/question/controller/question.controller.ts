@@ -11,11 +11,13 @@ import AuthStrategy from "../../../../shared/strategy/access-token.strategy";
 import { RequestContextMiddleware } from "../../../../middlewares/request-context.middleware";
 import { SessionMiddleware } from "../../../../middlewares/session.middleware";
 import { QuestionSearchPayloadDto, QuestionSearchPayloadType } from "../dto/question-search-payload";
+import { IVerbalQuestionService } from "../interface/IVerbalQuestion.service";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
     constructor(
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service
+        @inject(TYPES.IVerbalQuestionService) private readonly verbalQuestionService: IVerbalQuestionService, // Replace 'any' with the actual type of your service
     ) { }
 
     @httpGet("/quiz/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
@@ -198,6 +200,31 @@ export class QuestionController {
         } catch (error) {
             this.streamingErrorResponse(res, error);
         }
+    }
+    @httpPost("/verbal/generate", DtoValidationMiddleware(QuestionGeneratePayloadDto))
+    public async generateVerbalQuestions(
+        @requestBody() payload: QuestionGeneratePayloadType, req: Request, res: Response
+    ) {
+        const result = await this.verbalQuestionService.generateVerbalQuestion(payload);
+        return res.status(201).json({ data: result });
+    }
+
+    @httpGet("/verbal/quiz/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
+    public async getGeneratedVerbalQuestions(
+        req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const data = await this.verbalQuestionService.getGeneratedVerbalQuestions(questionLogUUID);
+        return res.status(200).json(data);
+    }
+
+    @httpGet("/verbal/quiz/:questionUUID/timer", ValidateUUIDParam("questionUUID"))
+    public async getVerbalQuizTimerByUUID(
+        req: Request, res: Response
+    ) {
+        const questionUUID = req.params.questionUUID;
+        const timer = await this.verbalQuestionService.getVerbalQuizTimerByUUID(questionUUID);
+        return res.status(200).json({ data: { ...timer } });
     }
 
     private async streamingSuccessResponse(req: Request, res: Response, stream: ReadableStream<any>) {
