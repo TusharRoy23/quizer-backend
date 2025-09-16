@@ -48,6 +48,17 @@ export type Question = {
     question_type: QuestionType;
 }
 
+export type OralQuestion = {
+    id?: number;
+    uuid: string;
+    question: string;
+    topic?: string; // Optional field for the topic of the question
+    sub_topic?: string; // Optional field for the sub-topic of the question
+    expected_points?: string[]; // AI verbal expected points
+    oral_timer: number; // Timer in minutes
+    oral_end_time?: Date; // End time in UTC
+}
+
 export type QuestionLog = {
     id: number;
     uuid: string;

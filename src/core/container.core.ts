@@ -21,6 +21,10 @@ import { UserRepository } from '../modules/public/user/repository/user.repositor
 import { UserService } from '../modules/public/user/service/user.service';
 import { RequestContextMiddleware } from '../middlewares/request-context.middleware';
 import { SessionMiddleware } from '../middlewares/session.middleware';
+import { VerbalQuestionRepository } from '../modules/public/question/repository/verbal-question.repository';
+import { VerbalQuestionService } from '../modules/public/question/service/verbal-question.service';
+import { IVerbalQuestionRepository } from '../modules/public/question/interface/IVerbalQuestion.repository';
+import { IVerbalQuestionService } from '../modules/public/question/interface/IVerbalQuestion.service';
 
 const container = new Container();
 
@@ -40,6 +44,10 @@ container.bind<IDepartmentService>(TYPES.IDepartmentService).to(DepartmentServic
 //? Question Module
 container.bind<IQuestionRepository>(TYPES.IQuestionRepository).to(QuestionRepository);
 container.bind<IQuestionService>(TYPES.IQuestionService).to(QuestionService);
+
+//? Verbal Question Module
+container.bind<IVerbalQuestionRepository>(TYPES.IVerbalQuestionRepository).to(VerbalQuestionRepository);
+container.bind<IVerbalQuestionService>(TYPES.IVerbalQuestionService).to(VerbalQuestionService);
 
 //? User Module
 container.bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository);
