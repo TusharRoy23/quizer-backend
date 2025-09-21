@@ -25,17 +25,23 @@ import { VerbalQuestionRepository } from '../modules/public/question/repository/
 import { VerbalQuestionService } from '../modules/public/question/service/verbal-question.service';
 import { IVerbalQuestionRepository } from '../modules/public/question/interface/IVerbalQuestion.repository';
 import { IVerbalQuestionService } from '../modules/public/question/interface/IVerbalQuestion.service';
+import { VerbalUploadMiddleware } from '../middlewares/verbal-upload.middleware';
+import { IS3Service } from './interface/IS3.service';
+import { S3Service } from './service/s3.service';
 
 const container = new Container();
 
 //? Database Module
 container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService).inSingletonScope();
+//? S3 Module
+container.bind<IS3Service>(TYPES.IS3Service).to(S3Service).inSingletonScope();
 //? OpenAI Module
 container.bind<IOpenAIService>(TYPES.IOpenAIService).to(OpenAIService);
 container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(OpenAIRepository);
 
 container.bind<RequestContextMiddleware>(RequestContextMiddleware).toSelf();
 container.bind<SessionMiddleware>(SessionMiddleware).toSelf();
+container.bind<VerbalUploadMiddleware>(VerbalUploadMiddleware).toSelf();
 
 //? Department Module
 container.bind<IDepartmentRepository>(TYPES.IDepartmentRepository).to(DepartmentRepository);

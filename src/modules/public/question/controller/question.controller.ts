@@ -12,6 +12,8 @@ import { RequestContextMiddleware } from "../../../../middlewares/request-contex
 import { SessionMiddleware } from "../../../../middlewares/session.middleware";
 import { QuestionSearchPayloadDto, QuestionSearchPayloadType } from "../dto/question-search-payload";
 import { IVerbalQuestionService } from "../interface/IVerbalQuestion.service";
+import { VerbalUploadMiddleware } from "../../../../middlewares/verbal-upload.middleware";
+import { VerbalQuestionGeneratePayloadDto, VerbalQuestionGeneratePayloadType } from "../dto/verbal-question-generate-payload.dto";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
@@ -201,9 +203,9 @@ export class QuestionController {
             this.streamingErrorResponse(res, error);
         }
     }
-    @httpPost("/verbal/generate", DtoValidationMiddleware(QuestionGeneratePayloadDto))
+    @httpPost("/verbal/generate", DtoValidationMiddleware(VerbalQuestionGeneratePayloadDto))
     public async generateVerbalQuestions(
-        @requestBody() payload: QuestionGeneratePayloadType, req: Request, res: Response
+        @requestBody() payload: VerbalQuestionGeneratePayloadType, req: Request, res: Response
     ) {
         const result = await this.verbalQuestionService.generateVerbalQuestion(payload);
         return res.status(201).json({ data: result });
@@ -225,6 +227,64 @@ export class QuestionController {
         const questionUUID = req.params.questionUUID;
         const timer = await this.verbalQuestionService.getVerbalQuizTimerByUUID(questionUUID);
         return res.status(200).json({ data: { ...timer } });
+    }
+
+    @httpGet("/verbal/quiz/:questionLogUUID/audio", ValidateUUIDParam("questionLogUUID"))
+    public async getVerbalQuizAudio(
+        req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const audio = await this.verbalQuestionService.getVerbalQuizAudio(questionLogUUID);
+        return res.status(200).json({ data: { url: audio } });
+    }
+
+    @httpPost("/verbal/quiz/:questionUUID/answer", ValidateUUIDParam("questionUUID"), VerbalUploadMiddleware)
+    public async uploadVerbalAnswer(req: Request, res: Response) {
+        const questionUUID = req.params.questionUUID;
+        if (!req.file) return res.status(400).json({ error: "No audio uploaded" });
+
+        const isTranscribed = await this.verbalQuestionService.transcribeAudio(req.file, questionUUID);
+        return res.status(200).json({ message: isTranscribed ? "Transcribed" : "Not transcribed" });
+    }
+
+    @httpPost("/verbal/quiz/:questionLogUUID/submit", ValidateUUIDParam("questionLogUUID"))
+    public async submitVerbalQuestionLog(
+        req: Request, res: Response
+    ) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const result = await this.verbalQuestionService.submitVerbalLog(questionLogUUID);
+        return res.status(200).json({ data: result });
+    }
+
+    @httpGet("/verbal/quiz/:questionLogUUID/feedback", ValidateUUIDParam("questionLogUUID"))
+    public async feedbackForVerbalQuestion(req: Request, res: Response) {
+        const questionLogUUID = req.params.questionLogUUID;
+        const data = await this.verbalQuestionService.feedbackForVerbalQuestion(questionLogUUID);
+        return res.status(200).json({ data });
+    }
+
+    @httpGet("/verbal/logs")
+    public async getVerbalQuestionLogs(req: Request, res: Response) {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        const validatedPage = Math.max(1, page);
+        const validatedLimit = Math.min(Math.max(1, limit), 100); // Cap at 100 items per page
+
+        const skip = (validatedPage - 1) * validatedLimit;
+
+        const data = await this.verbalQuestionService.getVerbalQuestionLogs({ skip, take: validatedLimit });
+        return res.status(200).json({
+            data: data.data,
+            meta: {
+                page: validatedPage,
+                limit: validatedLimit,
+                totalItems: data.total,
+                totalPages: Math.ceil(data.total / validatedLimit),
+                hasNextPage: validatedPage * validatedLimit < data.total,
+                hasPreviousPage: validatedPage > 1
+            }
+        });
     }
 
     private async streamingSuccessResponse(req: Request, res: Response, stream: ReadableStream<any>) {
