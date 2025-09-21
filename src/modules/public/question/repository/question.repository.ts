@@ -2,7 +2,6 @@ import { inject, injectable } from "inversify";
 import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
-import { BaseRepository } from "../../../../core/repository/base.repository";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
@@ -13,9 +12,10 @@ import { BadRequestException, NotFoundException, throwException } from "../../..
 import CronJob from "node-cron";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
+import { BaseQuestionRepository } from "./base-question.repository";
 
 @injectable()
-export class QuestionRepository extends BaseRepository implements IQuestionRepository {
+export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
@@ -98,6 +98,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
+                    is_oral: false
                 }
             });
 
@@ -111,6 +112,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     uuid: payload.uuid,
                     question_log: {
                         completed: false, // Ensure the question log is not completed
+                        is_oral: false
                     }
                 },
                 data: {
@@ -134,6 +136,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const questions = await prisma.question_log_question.findMany({
                 where: {
                     question_log_id: questionLog.id,
+                    is_oral: false
                 },
             });
 
@@ -164,6 +167,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     uuid: questionLogUUID,
                     completed: false,
+                    is_oral: false
                 },
                 data: {
                     completed: true, // Mark the question log as completed,
@@ -212,6 +216,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const condition = {
                 participant: participant?.id,
                 completed: true,
+                is_oral: false
             }
             // Get total count for pagination metadata
             const total = await prisma.question_log.count({
@@ -253,6 +258,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
                     participant: participant?.id,
+                    is_oral: false
                 },
                 select: {
                     end_time: true,
@@ -738,6 +744,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     question_log_question: {
                         uuid: questionUUID,
+                        is_oral: false
                     }
                 },
                 select: {
@@ -795,6 +802,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const question = await prisma.question_log_question.findUnique({
                 where: {
                     uuid: questionUUID,
+                    is_oral: false
                 },
             });
             if (!question) {
@@ -816,7 +824,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     uuid: questionLogUUID,
                     completed: isCompleted, // Ensure the question log is not completed
-                    participant: participant?.id
+                    participant: participant?.id,
+                    is_oral: false
                 },
                 include: {
                     question_department: true,
@@ -845,6 +854,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             total_correct: questionLog.total_correct,
             timezone_offset: questionLog.timezone_offset,
             end_time: questionLog.end_time,
+            is_oral: questionLog.is_oral,
             created_at: new Date(questionLog.created_at - questionLog.timezone_offset * 60000), // Adjust for timezone offset
         };
     }
@@ -865,7 +875,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     question_log: {
                         uuid: questionLogUUID,
                         completed: isCompleted,
-                        participant: participant?.id // Ensure the question log belongs to the participant
+                        participant: participant?.id, // Ensure the question log belongs to the participant
+                        is_oral: false
                     }
                 },
                 orderBy: {

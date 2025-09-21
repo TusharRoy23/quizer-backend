@@ -1,29 +1,32 @@
 import { inject, injectable } from "inversify";
 import { IVerbalQuestionRepository } from "../interface/IVerbalQuestion.repository";
-import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
 import { TYPES } from "../../../../core/type.core";
-import { BaseRepository } from "../../../../core/repository/base.repository";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { Prisma } from "@prisma/client";
-import { Department, OralQuestion, QuizTimer, Topic } from "../../types/public.type";
+import { Department, OralQuestion, PaginationParams, PaginationResponse, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
+import { IS3Service } from "../../../../core/interface/IS3.service";
+import { VerbalQuestionGeneratePayloadType } from "../dto/verbal-question-generate-payload.dto";
+import { BaseQuestionRepository } from "./base-question.repository";
 
 @injectable()
-export class VerbalQuestionRepository extends BaseRepository implements IVerbalQuestionRepository {
+export class VerbalQuestionRepository extends BaseQuestionRepository implements IVerbalQuestionRepository {
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
         @inject(TYPES.IDepartmentService) readonly departmentService: IDepartmentService,
+        @inject(TYPES.IS3Service) private readonly s3Service: IS3Service
     ) {
         super(databaseService);
     }
 
-    public async generateVerbalQuestion(payload: QuestionGeneratePayloadType): Promise<string> {
+    public async generateVerbalQuestion(payload: VerbalQuestionGeneratePayloadType): Promise<string> {
         try {
             const participant = this.getParticipant();
+            await this.isMoreQuizAllowed(true);
             await this.checkPromptInProgress();
             const questionLog = await this.getOngoingQuiz();
             if (questionLog) {
@@ -40,11 +43,19 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
                 throw new NotFoundException('Topics not found');
             }
 
+            /*
+                Default value for timer & question_count payload
+                timer: 1
+                question_count: 5
+            */
+            const timer = 1;
+            const question_count = 5;
+
             const questionPayload: QuestionLogPayloadType = {
                 department: department?.id,
                 participant: participant?.id,
-                timer: payload.timer * payload.question_count,
-                question_count: payload.question_count,
+                timer: timer * question_count,
+                question_count: question_count,
                 difficulty: payload.difficulty,
                 is_oral: true
             };
@@ -54,8 +65,8 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
                 await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id, tx);
                 return savedQuestionLog;
             });
-            const promptResponse = await this.getPromptQuestions(payload, department, topics);
-            await this.saveQuestions(promptResponse, result.id, payload.timer);
+            const promptResponse = await this.getPromptQuestions(payload, department, topics, question_count);
+            await this.saveQuestions(promptResponse, result.id, timer);
             return result.uuid; // Return the UUID of the question log
         } catch (error) {
             return throwException(error);
@@ -71,13 +82,18 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
                     question_log: {
                         uuid: questionLogUUID,
                         completed: false,
-                        participant: participant?.id // Ensure the question log belongs to the participant
+                        participant: participant?.id,
+                        is_oral: true
                     }
                 },
                 orderBy: {
                     id: 'desc'
                 }
             });
+
+            if (!questions || questions.length === 0) {
+                throw new NotFoundException('Questions not found');
+            }
 
             return questions.map((question: OralQuestion) => ({
                 uuid: question.uuid,
@@ -91,7 +107,7 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
         }
     }
 
-    public async getVerbalQuizTimerByUUID(questionUUID: string): Promise<QuizTimer> {
+    public async getVerbalQuizTimerByUUID(questionUUID: string): Promise<QuizTimer | null> {
         try {
             // setup the endtimer for the quiz
             const participant = this.getParticipant();
@@ -103,7 +119,8 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
                         participant: participant?.id,
                         is_oral: true
                     },
-                    uuid: questionUUID
+                    uuid: questionUUID,
+                    is_transcribed: false
                 },
                 include: {
                     question_log: true
@@ -111,7 +128,7 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
             });
 
             if (!question) {
-                throw new NotFoundException('Question not found');
+                return null;
             }
 
             let questionLog = question.question_log;
@@ -147,6 +164,213 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
                 timezoneOffset: questionLog.timezone_offset, // Offset in minutes from UTC
                 timezoneName: questionLog.timezone_name // Timezone name
             };
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async transcribeAudio(audio: Express.Multer.File, questionUUID: string): Promise<boolean> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+            const question = await prisma.question_log_question.findUnique({
+                where: {
+                    uuid: questionUUID,
+                    is_transcribed: false,
+                    is_oral: true,
+                    audio_url: {
+                        not: null
+                    },
+                    question_log: {
+                        participant: participant?.id,
+                        completed: false,
+                        is_oral: true
+                    }
+                }
+            });
+            if (!question) {
+                throw new NotFoundException('Question already transcribed or not found');
+            }
+            const transcription = await this.openAIService.getOpenAIAudioTranscription(audio);
+            await prisma.question_log_question.update({
+                where: { uuid: questionUUID },
+                data: {
+                    is_transcribed: true,
+                    oral_response: transcription
+                }
+            });
+            //? Need to evalute the answer later
+            if (question.audio_key) {
+                this.deleteQuizAudioFromS3(question.audio_key || '');
+            }
+
+            return true;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async deleteQuizAudioFromS3(audioKey: string): Promise<void> {
+        try {
+            await this.s3Service.deleteAudioFile(audioKey);
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getVerbalQuizAudio(questionUUID: string): Promise<string | null> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+            const question = await prisma.question_log_question.findUnique({
+                where: {
+                    uuid: questionUUID,
+                    is_transcribed: false,
+                    is_oral: true,
+                    question_log: {
+                        participant: participant?.id,
+                        completed: false,
+                        is_oral: true
+                    }
+                },
+                include: {
+                    question_log: true
+                }
+            });
+            if (!question) {
+                return null;
+            }
+            const audio = await this.openAIService.getOpenAITextToSpeech(question.question || '');
+            const audioKey = this.s3Service.generateAudioKey(question.question_log.uuid);
+            const url = await this.uploadToS3(audio as Buffer, audioKey, 'audio/mpeg');
+            // await new Promise(resolve => setTimeout(resolve, 5000)); // wait for 30 sec.
+
+            // const url = "https://nomro-dev-s3-01.s3.ap-southeast-2.amazonaws.com/1758396014540.mp3";
+
+            // update URL in DB
+            await prisma.question_log_question.update({
+                where: { uuid: questionUUID },
+                data: {
+                    audio_url: url,
+                    audio_key: 'audioKey'
+                }
+            });
+
+            return url;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async submitVerbalLog(questionLogUUID: string): Promise<string> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+            const questionLog: QuestionLog = await prisma.question_log.findUnique({
+                where: {
+                    uuid: questionLogUUID,
+                    participant: participant?.id,
+                    completed: false,
+                    generated: true,
+                    is_oral: true
+                }
+            });
+            if (!questionLog) {
+                throw new NotFoundException('Question log not found or already submitted');
+            }
+            await prisma.question_log.update({
+                where: {
+                    uuid: questionLogUUID,
+                    participant: participant?.id,
+                    completed: false,
+                    generated: true,
+                    is_oral: true
+                },
+                data: {
+                    completed: true
+                }
+            });
+            if (!questionLog) {
+                throw new NotFoundException('Question log not found or already submitted');
+            }
+            return questionLog.uuid;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async feedbackForVerbalQuestion(questionLogUUID: string): Promise<OralQuestion[] | null> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            const questions = await prisma.question_log_question.findMany({
+                where: {
+                    question_log: {
+                        uuid: questionLogUUID,
+                        completed: true,
+                        participant: participant?.id,
+                        is_oral: true
+                    },
+                    // is_transcribed: true,
+                },
+            });
+            return questions.map((question: any) => ({
+                uuid: question.uuid,
+                question: question.question,
+                oral_response: question.oral_response || undefined,
+                topic: question.topic || undefined,
+                sub_topic: question.sub_topic || undefined,
+                expected_points: question.oral_expected_points || undefined,
+            })) || [];
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getVerbalQuestionLogs(paginationParams: PaginationParams): Promise<PaginationResponse<QuestionLog>> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = this.getParticipant();
+            const { skip, take } = paginationParams;
+            const condition = {
+                participant: participant?.id,
+                completed: true,
+                is_oral: true
+            }
+            // Get total count for pagination metadata
+            const total = await prisma.question_log.count({
+                where: condition,
+            });
+            const questionLogs = await prisma.question_log.findMany({
+                where: condition,
+                orderBy: {
+                    id: 'desc' // Order by ID in descending order
+                },
+                skip: skip,
+                take: take,
+            });
+
+            const logs = questionLogs.map((questionLog: any) => ({
+                department: questionLog.question_department,
+                uuid: questionLog.uuid,
+                difficulty: questionLog.difficulty,
+                question_count: questionLog.question_count,
+                created_at: questionLog.created_at,
+            })) as QuestionLog[];
+
+            return {
+                data: logs,
+                total: total
+            }
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async uploadToS3(buffer: Buffer, key: string, mimeType: string): Promise<string> {
+        try {
+            const result = await this.s3Service.uploadAudioFile(buffer, key, mimeType);
+            return await this.s3Service.getSignedAudioUrl(result);
         } catch (error) {
             return throwException(error);
         }
@@ -211,11 +435,11 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
         }
     }
 
-    private async getPromptQuestions(payload: QuestionGeneratePayloadType, department: Department, topics: Topic[]): Promise<OralQuestion[]> {
+    private async getPromptQuestions(payload: VerbalQuestionGeneratePayloadType, department: Department, topics: Topic[], question_count: number): Promise<OralQuestion[]> {
         // Get the prompt questions from the DeepSeek
         // This is a placeholder function. Implement the actual logic to get the prompt questions.
         try {
-            const prompt = this.getPromptForOralInterview(department, topics, payload);
+            const prompt = this.getPromptForOralInterview(department, topics, payload, question_count);
             const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
             const parsedJSON = JSON.parse(response);
             return parsedJSON['questions'];
@@ -227,13 +451,14 @@ export class VerbalQuestionRepository extends BaseRepository implements IVerbalQ
     private getPromptForOralInterview(
         department: Department,
         topics: Topic[],
-        payload: QuestionGeneratePayloadType
+        payload: VerbalQuestionGeneratePayloadType,
+        question_count: number
     ): string {
         const topicNames = topics.map((topic) => topic.name).join(", ");
         const uniquenessKey = Math.random().toString(36).substring(2, 8);
 
         const prompt = `
-            Generate ${payload.question_count} ${payload.difficulty} open-ended oral interview questions
+            Generate ${question_count} ${payload.difficulty} open-ended oral interview questions
             for ${department.name}, focusing on the following topics: ${topicNames}.
             Session ID: ${uniquenessKey}. Ensure originality and avoid repeating generic textbook questions.
 

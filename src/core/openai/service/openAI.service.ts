@@ -20,4 +20,16 @@ export class OpenAIService implements IOpenAIService {
     async getOpenAIEmbedding(text: string): Promise<any> {
         return this.openAIRepository.getOpenAIEmbedding(text);
     }
+
+    async getOpenAIAudioTranscription(
+        audio: Express.Multer.File
+    ): Promise<string> {
+        return this.openAIRepository.getOpenAIAudioTranscription(audio);
+    }
+
+    async getOpenAITextToSpeech(
+        text: string
+    ): Promise<Buffer<ArrayBuffer> | null> {
+        return this.openAIRepository.getOpenAITextToSpeech(text);
+    }
 }
