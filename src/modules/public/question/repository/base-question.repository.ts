@@ -171,7 +171,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
             });
 
             const now = new Date();
-            const timezoneOffset = questionLog.timezone_offset ? questionLog.timezone_offset : now.getTimezoneOffset(); // Minutes from UTC
+            const timezoneOffset = questionLog?.timezone_offset ? questionLog.timezone_offset : now.getTimezoneOffset(); // Minutes from UTC
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000 + (timezoneOffset * 60 * 1000));
 
             const quizCount = await prisma.question_log.count({
