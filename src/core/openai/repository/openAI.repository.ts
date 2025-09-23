@@ -1,6 +1,9 @@
 import { IOpenAIRepository } from "../interface/IOpenAI.repository";
 import { deepseekConfig, openAIConfig } from "../config";
+import { File } from 'formdata-node';
+import { injectable } from "inversify";
 
+@injectable()
 export class OpenAIRepository implements IOpenAIRepository {
     public async getDeepSeekChatCompletions(prompt: string): Promise<any> {
         const completion = await deepseekConfig.create({
@@ -84,6 +87,40 @@ export class OpenAIRepository implements IOpenAIRepository {
             return response;
         } catch (error) {
             return [];
+        }
+    }
+
+    public async getOpenAIAudioTranscription(multerFile: Express.Multer.File): Promise<string> {
+        try {
+            const file = new File(
+                [multerFile.buffer],
+                multerFile.originalname,
+                { type: multerFile.mimetype }
+            );
+            const response = await openAIConfig.audio.transcriptions.create({
+                file,
+                model: 'whisper-1',
+                language: 'en'
+            });
+            return response.text;
+        } catch (error) {
+            console.error("OpenAI transcription error:", error);
+            return '';
+        }
+    }
+
+    public async getOpenAITextToSpeech(text: string): Promise<Buffer<ArrayBuffer> | null> {
+        try {
+            const response = await openAIConfig.audio.speech.create({
+                model: 'gpt-4o-mini-tts',
+                voice: 'shimmer',
+                input: text,
+            });
+            const buffer = Buffer.from(await response.arrayBuffer());
+            return buffer;
+        } catch (error) {
+            console.error("OpenAI text-to-speech error:", error);
+            return null;
         }
     }
 

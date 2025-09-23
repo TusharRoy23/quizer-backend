@@ -10,4 +10,12 @@ export interface IOpenAIRepository {
     getOpenAIEmbedding: (
         text: string
     ) => Promise<any>;
+
+    getOpenAIAudioTranscription: (
+        audio: Express.Multer.File
+    ) => Promise<string>;
+
+    getOpenAITextToSpeech: (
+        text: string
+    ) => Promise<Buffer<ArrayBuffer> | null>;
 }
