@@ -28,6 +28,8 @@ export type Participant = {
     email: string;
     created_at: Date;
     session_id?: string;
+    oral_quiz_restriction_count?: number;
+    quiz_restriction_count?: number;
 }
 
 enum QuestionType {
@@ -48,6 +50,19 @@ export type Question = {
     question_type: QuestionType;
 }
 
+export type OralQuestion = {
+    id?: number;
+    uuid: string;
+    question: string;
+    topic?: string; // Optional field for the topic of the question
+    sub_topic?: string; // Optional field for the sub-topic of the question
+    expected_points?: string[]; // AI verbal expected points
+    oral_timer: number; // Timer in minutes
+    oral_end_time?: Date; // End time in UTC
+    is_transcribed?: boolean;
+    oral_response?: string
+}
+
 export type QuestionLog = {
     id: number;
     uuid: string;
@@ -63,6 +78,7 @@ export type QuestionLog = {
     end_time?: Date;
     timezone_offset?: number;
     timezone_name?: string;
+    is_oral?: boolean;
     created_at: Date;
 }
 

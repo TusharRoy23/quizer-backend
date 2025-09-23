@@ -2,7 +2,6 @@ import { inject, injectable } from "inversify";
 import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
-import { BaseRepository } from "../../../../core/repository/base.repository";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
@@ -10,19 +9,13 @@ import { IUserService } from "../../user/interface/IUser.service";
 import { Department, PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
-import { RequestContext } from "../../../../shared/context/request-context";
 import CronJob from "node-cron";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { QuestionLogPayloadType } from "../../../../shared/utils/types";
+import { BaseQuestionRepository } from "./base-question.repository";
 
-type QuestionLogPayloadType = {
-    department: number;
-    participant: number | undefined;
-    timer: number;
-    question_count: number;
-    difficulty: string;
-}
 @injectable()
-export class QuestionRepository extends BaseRepository implements IQuestionRepository {
+export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
@@ -105,6 +98,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
+                    is_oral: false
                 }
             });
 
@@ -118,6 +112,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     uuid: payload.uuid,
                     question_log: {
                         completed: false, // Ensure the question log is not completed
+                        is_oral: false
                     }
                 },
                 data: {
@@ -141,6 +136,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const questions = await prisma.question_log_question.findMany({
                 where: {
                     question_log_id: questionLog.id,
+                    is_oral: false
                 },
             });
 
@@ -171,6 +167,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     uuid: questionLogUUID,
                     completed: false,
+                    is_oral: false
                 },
                 data: {
                     completed: true, // Mark the question log as completed,
@@ -219,6 +216,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const condition = {
                 participant: participant?.id,
                 completed: true,
+                is_oral: false
             }
             // Get total count for pagination metadata
             const total = await prisma.question_log.count({
@@ -260,6 +258,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
                     participant: participant?.id,
+                    is_oral: false
                 },
                 select: {
                     end_time: true,
@@ -745,6 +744,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     question_log_question: {
                         uuid: questionUUID,
+                        is_oral: false
                     }
                 },
                 select: {
@@ -802,6 +802,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             const question = await prisma.question_log_question.findUnique({
                 where: {
                     uuid: questionUUID,
+                    is_oral: false
                 },
             });
             if (!question) {
@@ -814,44 +815,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async updateQuizTimer(questionLogUUID: string): Promise<QuestionLog | undefined> {
-        try {
-            const prisma = await this.prisma$();
-            const questionLog: QuestionLog = await prisma.question_log.findUnique({
-                where: {
-                    uuid: questionLogUUID,
-                    completed: false, // Ensure the question log is not completed
-                }
-            });
-
-            if (!questionLog) {
-                return;
-            }
-
-            // Calculate end time in UTC
-            const now = new Date();
-            const timezoneOffset = now.getTimezoneOffset(); // Minutes from UTC
-            const timezoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-            // Calculate end time in pure UTC (without local timezone conversion)
-            const expiresAt = new Date(Date.now() + questionLog.timer * 60 * 1000);
-            const expiresAtUTC = new Date(expiresAt.toISOString());
-
-            const questionUpdatedLog = await prisma.question_log.update({
-                where: { uuid: questionLogUUID },
-                data: {
-                    end_time: expiresAtUTC, // Store as UTC
-                    timezone_offset: timezoneOffset,
-                    timezone_name: timezoneName,
-                    generated: true
-                }
-            });
-            return questionUpdatedLog;
-        } catch (error: any) {
-            return throwException(error);
-        }
-    }
-
     private async getQuestionLogByUUID(questionLogUUID: string, isCompleted: boolean = true): Promise<QuestionLog> {
         try {
             const participant = this.getParticipant();
@@ -861,7 +824,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 where: {
                     uuid: questionLogUUID,
                     completed: isCompleted, // Ensure the question log is not completed
-                    participant: participant?.id
+                    participant: participant?.id,
+                    is_oral: false
                 },
                 include: {
                     question_department: true,
@@ -890,6 +854,7 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
             total_correct: questionLog.total_correct,
             timezone_offset: questionLog.timezone_offset,
             end_time: questionLog.end_time,
+            is_oral: questionLog.is_oral,
             created_at: new Date(questionLog.created_at - questionLog.timezone_offset * 60000), // Adjust for timezone offset
         };
     }
@@ -910,7 +875,8 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                     question_log: {
                         uuid: questionLogUUID,
                         completed: isCompleted,
-                        participant: participant?.id // Ensure the question log belongs to the participant
+                        participant: participant?.id, // Ensure the question log belongs to the participant
+                        is_oral: false
                     }
                 },
                 orderBy: {
@@ -929,23 +895,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
                 question_type: question.question_type,
                 explanation: question.explanation || '', // Ensure explanation is trimmed
             })) as Question[];
-        } catch (error: any) {
-            return throwException(error);
-        }
-    }
-
-    private async saveQuestionLog(payload: QuestionLogPayloadType, tx: Prisma.TransactionClient): Promise<QuestionLog> {
-        // Save the question log to the database
-        // This is a placeholder function. Implement the actual logic to save the question log.
-        try {
-            const questionLog = await tx.question_log.create({
-                data: {
-                    ...payload,
-                    completed: false,
-                    generated: false
-                }
-            });
-            return questionLog;
         } catch (error: any) {
             return throwException(error);
         }
@@ -1081,46 +1030,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         }
     }
 
-    private async deleteGeneratedQuestion(questionLogId: number) {
-        try {
-            const prisma = await this.prisma$();
-            // delete quesstion log & connected data
-            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-                await tx.question_log_topic.deleteMany({
-                    where: {
-                        question_log_id: questionLogId,
-                    }
-                });
-                await tx.question_log.delete({
-                    where: {
-                        id: questionLogId,
-                    }
-                });
-            });
-        } catch (error) {
-            return throwException(error);
-        }
-    }
-
-    private async connectTopicsWithQuestionLog(topics: Topic[], questionLogId: number, tx: Prisma.TransactionClient): Promise<number> {
-        // Connect the topics with the question log
-        // This is a placeholder function. Implement the actual logic to connect the topics with the question log.
-        try {
-            const payload = topics.map(topic => ({
-                question_log_id: questionLogId,
-                topic_id: topic.id,
-            }));
-            const count = await tx.question_log_topic.createMany({
-                data: payload,
-                skipDuplicates: true, // Skip duplicates if any
-            });
-
-            return count.count; // Return the number of connected topics
-        } catch (error: any) {
-            return throwException(error);
-        }
-    }
-
     private getPromptForQuiz(department: Department, topics: Topic[], payload: QuestionGeneratePayloadType): string {
         const topicNames = topics.map(topic => topic.name).join(', ');
         const uniquenessKey = Math.random().toString(36).substring(2, 8);
@@ -1188,15 +1097,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         return prompt;
     }
 
-    private getParticipant() {
-        // Implement the logic to retrieve the participant from the request context.
-        const participant = RequestContext.getParticipant();
-        if (!participant) {
-            throw new NotFoundException('Participant not found');
-        }
-        return participant;
-    }
-
     private async updateQuizesTimer() {
         try {
             const prisma = await this.prisma$();
@@ -1241,42 +1141,6 @@ export class QuestionRepository extends BaseRepository implements IQuestionRepos
         } catch (error: any) {
             return throwException(error);
 
-        }
-    }
-
-    private async getOngoingQuiz(): Promise<QuestionLog | null> {
-        try {
-            const prisma = await this.prisma$();
-            const participant = this.getParticipant();
-            const questionLog = await prisma.question_log.findFirst({
-                where: {
-                    participant: participant?.id,
-                    completed: false, // Ensure the participant does not have an ongoing quiz,
-                    generated: true
-                }
-            });
-            return questionLog || null;
-        } catch (error) {
-            return throwException(error);
-        }
-    }
-
-    private async checkPromptInProgress(): Promise<boolean> {
-        try {
-            const prisma = await this.prisma$();
-            const participant = this.getParticipant();
-            const questionLog = await prisma.question_log.findFirst({
-                where: {
-                    participant: participant?.id,
-                    generated: false, // Ensure the participant does not have a quiz in generation process
-                }
-            });
-            if (questionLog) {
-                throw new BadRequestException('Your previous quiz is still being generated. \nPlease wait a moment before starting a new one.');
-            }
-            return false;
-        } catch (error) {
-            return throwException(error);
         }
     }
 

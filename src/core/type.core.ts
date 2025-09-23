@@ -8,4 +8,7 @@ export const TYPES = {
     IOpenAIRepository: Symbol.for("IOpenAIRepository"),
     IUserService: Symbol.for("IUserService"),
     IUserRepository: Symbol.for("IUserRepository"),
+    IVerbalQuestionRepository: Symbol.for("IVerbalQuestionRepository"),
+    IVerbalQuestionService: Symbol.for("IVerbalQuestionService"),
+    IS3Service: Symbol.for("IS3Service"),
 }
