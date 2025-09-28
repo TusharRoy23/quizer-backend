@@ -60,8 +60,8 @@ export class QuestionService implements IQuestionService {
         return this.questionRepository.getLatestOngoingQuiz();
     }
 
-    public checkIfParticipatedInQuiz(): Promise<boolean> {
-        return this.questionRepository.checkIfParticipatedInQuiz();
+    public checkIfParticipatedInQuiz(isVerbal: boolean): Promise<boolean> {
+        return this.questionRepository.checkIfParticipatedInQuiz(isVerbal);
     }
 
     public getExplanationForQuestion(questionUUID: string): Promise<string> {

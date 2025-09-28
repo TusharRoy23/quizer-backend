@@ -28,6 +28,10 @@ import { IVerbalQuestionService } from '../modules/public/question/interface/IVe
 import { VerbalUploadMiddleware } from '../middlewares/verbal-upload.middleware';
 import { IS3Service } from './interface/IS3.service';
 import { S3Service } from './service/s3.service';
+import { ILangChainRepository } from './openai/interface/ILangChain.repository';
+import { LangChainRepository } from './openai/repository/langChain.repository';
+import { LangChainService } from './openai/service/langChain.service';
+import { ILangChainService } from './openai/interface/ILangChain.service';
 
 const container = new Container();
 
@@ -38,6 +42,10 @@ container.bind<IS3Service>(TYPES.IS3Service).to(S3Service).inSingletonScope();
 //? OpenAI Module
 container.bind<IOpenAIService>(TYPES.IOpenAIService).to(OpenAIService);
 container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(OpenAIRepository);
+
+//? LangChain
+container.bind<ILangChainRepository>(TYPES.ILangChainRepository).to(LangChainRepository);
+container.bind<ILangChainService>(TYPES.ILangChainService).to(LangChainService);
 
 container.bind<RequestContextMiddleware>(RequestContextMiddleware).toSelf();
 container.bind<SessionMiddleware>(SessionMiddleware).toSelf();

@@ -14,6 +14,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.890.0",
     "@aws-sdk/s3-request-presigner": "^3.890.0",
+    "@langchain/core": "^0.3.77",
+    "@langchain/deepseek": "^0.0.2",
+    "@langchain/openai": "^0.6.13",
     "@prisma/client": "^6.15.0",
     "@supabase/supabase-js": "^2.57.2",
     "@types/multer": "^2.0.0",
@@ -27,6 +30,7 @@
     "inversify": "^6.2.2",
     "inversify-express-utils": "^6.4.6",
     "jsonwebtoken": "^9.0.2",
+    "langchain": "^0.3.34",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "openai": "^4.98.0",
