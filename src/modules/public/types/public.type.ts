@@ -32,9 +32,10 @@ export type Participant = {
     quiz_restriction_count?: number;
 }
 
-enum QuestionType {
+export enum QuestionType {
     MULTIPLE_CHOICE,
-    CHOICE
+    CHOICE,
+    ORAL,
 }
 
 export type Question = {

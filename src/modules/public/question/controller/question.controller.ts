@@ -14,6 +14,7 @@ import { QuestionSearchPayloadDto, QuestionSearchPayloadType } from "../dto/ques
 import { IVerbalQuestionService } from "../interface/IVerbalQuestion.service";
 import { VerbalUploadMiddleware } from "../../../../middlewares/verbal-upload.middleware";
 import { VerbalQuestionGeneratePayloadDto, VerbalQuestionGeneratePayloadType } from "../dto/verbal-question-generate-payload.dto";
+import { ValidateQuizType } from "../../../../middlewares/validate-quiz-type.middleware";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
@@ -158,11 +159,12 @@ export class QuestionController {
         return res.status(200).json({ data });
     }
 
-    @httpGet("/participated")
+    @httpGet("/participated", ValidateQuizType)
     public async checkIfParticipatedInQuiz(
         req: Request, res: Response
     ) {
-        const hasQuizzes = await this.questionService.checkIfParticipatedInQuiz();
+        const quizType = (req.query.quiz_type as string) || 'MCQ';
+        const hasQuizzes = await this.questionService.checkIfParticipatedInQuiz(quizType !== 'MCQ');
         return res.status(200).json({ data: hasQuizzes });
     }
 

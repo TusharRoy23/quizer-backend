@@ -4,8 +4,6 @@ import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
-import { IDepartmentService } from "../../department/interface/IDepartment.service";
-import { IUserService } from "../../user/interface/IUser.service";
 import { Department, PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
@@ -13,14 +11,14 @@ import CronJob from "node-cron";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { BaseQuestionRepository } from "./base-question.repository";
+import { ILangChainService } from "../../../../core/openai/interface/ILangChain.service";
 
 @injectable()
 export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
-        @inject(TYPES.IDepartmentService) readonly departmentService: IDepartmentService,
-        @inject(TYPES.IUserService) readonly userService: IUserService,
+        @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService
     ) {
         super(databaseService);
         this.cronJob(); // Schedule the cron job to update quiz timers
@@ -38,15 +36,9 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             if (questionLog) {
                 return questionLog.uuid; // Return existing ongoing quiz UUID
             }
-            const department = await this.departmentService.getDepartmentByUUID(payload.department);
-            if (!department) {
-                throw new NotFoundException('Department not found');
-            }
-
-            const topics = await this.departmentService.getTopicsByUUIDsAndDepartmentUUID(payload.topics, payload.department);
-            if (!topics || topics.length === 0) {
-                throw new NotFoundException('Topics not found');
-            }
+            const department = await this.getDepartmentByUUID(payload.department);
+            const topics = await this.getTopicsByUUIDsAndDepartmentUUID(payload.topics, payload.department);
+            if (!department || !topics) return '';
 
             const questionPayload: QuestionLogPayloadType = {
                 department: department?.id,
@@ -61,8 +53,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id, tx);
                 return savedQuestionLog;
             });
-            const promptResponse = await this.getPromptQuestions(payload, department, topics);
-            await this.saveQuestions(promptResponse, result.id);
+            const questions = await this.langChainService.generatedQuestions(department, topics, payload);
+            await this.saveQuestions(questions, result.id);
 
             return result.uuid; // Return the UUID of the question log
         } catch (error: any) {
@@ -316,11 +308,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 4) Save the keywords to the database
             */
             const question = await this.getQuestionDetails(questionUUID);
-            const generatedKeywords = await this.getKeywordsFromOpenAI(
-                question?.explanation || '',
-                question?.question || '',
-                question?.topic || ''
-            )
+            const generatedKeywords = await this.langChainService.generateQuestionKeywords(question);
             if (generatedKeywords && generatedKeywords.length > 0) {
                 const keywordData = generatedKeywords.map((keyword: string) => ({
                     question_id: question?.id,
@@ -382,19 +370,21 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         try {
             const keyword = await this.getAKeyword(keywordUuid);
             if (!keyword.explanation) {
-                // gnerate explanation using OpenAI
                 const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
                 const prompt = `
-                    Explain the keyword "${keyword.keyword}" in the context of the quiz question "${question?.question}" (topic: ${question?.topic}).
+                    Explain the keyword "${keyword.keyword}" in the context of the quiz.
+                    Question: ${question?.question}
+                    Topic: ${question?.topic}
+                    Sub Topic: ${question?.sub_topic}
 
-                    Requirements:
+                    CRITICAL RULES:
                     1. Give a simple definition.
                     2. Explain why it matters in this question/topic.
                     3. Optionally add a short example or code (Markdown).
                     4. Be concise, clear, and learner-friendly.
-                    Return only plain text.
                 `;
-                const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
+                // const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
+                const baseStream = await this.langChainService.generatedStreamedExplanation(prompt);
                 return this.wrapReadableStream(baseStream, {
                     onComplete: async (fullText) => {
                         await this.updateQuestionKeyword(keywordUuid, fullText);
@@ -482,7 +472,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             const question = await this.getQuestionDetails(keyword.question_log_question.uuid);
             const prompt = this.keywordExamplePrompt(keyword, question);
 
-            const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
+            const baseStream = await this.langChainService.generatedStreamedExplanation(prompt);
             return this.wrapReadableStream(baseStream, {
                 onComplete: async (fullText) => {
                     await this.updateKeywordExample(keywordUUID, fullText);
@@ -503,30 +493,29 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private keywordExamplePrompt(keyword: QuestionKeyword, question: Question): string {
         return `
-                    Generate a practical example that illustrates the keyword "${keyword.keyword}" 
-                    in the context of the quiz question "${question?.question}" 
-                    and its topic "${question?.topic}".
+                Generate a practical example that illustrates the keyword "${keyword.keyword}".
+                Question: ${question?.question}
+                Topic: ${question?.topic}
+                Sub-Topic: ${question?.sub_topic}
+                Explanation: ${keyword.explanation}
 
-                    The explanation of the keyword is: "${keyword.explanation}".
-
-                    **Requirements for the Example:**
-                    1. The example must directly demonstrate how the keyword is applied or understood in this context.
-                    2. Keep it **short, clear, and practical** — avoid unnecessary complexity.
-                    3. If the keyword is technical, show a **minimal working code snippet** in Markdown.
-                    4. If the keyword is conceptual, use a **real-world analogy or scenario**.
-                    5. Ensure the example reinforces the explanation and helps a learner understand *why the keyword matters*.
-
-                    Return plain text only
+                CRITICAL RULES:
+                - The example must directly demonstrate how the keyword is applied or understood in this context.
+                - Keep it short, clear, and practical. Avoid unnecessary complexity.
+                - If the keyword is technical, show a minimal working code snippet in Markdown.
+                - If the keyword is conceptual, use a real-world analogy or scenario.
+                - Ensure the example reinforces the explanation and helps a learner understand - why the keyword matters.
             `;
     }
 
-    public async checkIfParticipatedInQuiz(): Promise<boolean> {
+    public async checkIfParticipatedInQuiz(isVerbal: boolean = false): Promise<boolean> {
         try {
             const prisma = await this.prisma$();
             const participant = this.getParticipant();
             const count = await prisma.question_log.count({
                 where: {
                     participant: participant?.id,
+                    is_oral: isVerbal
                 }
             });
             return count > 0;
@@ -598,12 +587,10 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 3. Use simple language and avoid jargon.
                 4. Keep it concise (2-3 sentences).
                 5. If the explanation has code, use Markdown formatting.
-                **Important: Return only the explanation text without any JSON formatting.**
-                Do not wrap the response in JSON or any other structure.
             `;
 
-            // Get the stream from DeepSeek
-            const baseStream = await this.openAIService.getDeepSeekChatCompletionsStream(prompt);
+            // Get the stream from LangChain
+            const baseStream = await this.langChainService.generatedStreamedExplanation(prompt);
 
             // Wrap it with reusable logic
             return this.wrapReadableStream(baseStream, {
@@ -764,38 +751,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
-    private async getKeywordsFromOpenAI(explanation: string, question: string, topic: string): Promise<string[]> {
-        try {
-            const prompt = `
-                Extract the 3–5 most important keywords from the following quiz item. 
-                Focus only on terms that represent the key **concepts, technologies, or unique ideas** in the 
-                Question, Topic, and Explanation.
-
-                Question: ${question}
-                Topic: ${topic}
-                Explanation: ${explanation}
-
-                **Selection Rules:**
-                1. Choose keywords that capture the core subject matter (e.g., technologies, technical concepts, domain-specific terms).
-                2. Avoid common words, filler words, or vague terms (e.g., "method", "object", "thing", "feature").
-                3. Do not repeat the same word in different forms (e.g., "DOM" and "document object model" → keep just "DOM").
-                4. Ensure the keywords help someone **index or search** this question effectively.
-                5. Strictly return **3–5 keywords only**.
-
-                **Output Format (JSON):**
-                {
-                "keywords": ["keyword1", "keyword2", "keyword3"]
-                }
-            `;
-
-            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
-            const parsedJSON = JSON.parse(response);
-            return parsedJSON['keywords'] || [];
-        } catch (error: any) {
-            return throwException(error);
-        }
-    }
-
     private async getQuestionDetails(questionUUID: string): Promise<Question> {
         try {
             const prisma = await this.prisma$();
@@ -896,19 +851,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 explanation: question.explanation || '', // Ensure explanation is trimmed
             })) as Question[];
         } catch (error: any) {
-            return throwException(error);
-        }
-    }
-
-    private async getPromptQuestions(payload: QuestionGeneratePayloadType, department: Department, topics: Topic[]): Promise<Question[]> {
-        // Get the prompt questions from the DeepSeek
-        // This is a placeholder function. Implement the actual logic to get the prompt questions.
-        try {
-            const prompt = this.getPromptForQuiz(department, topics, payload);
-            const response = await this.openAIService.getDeepSeekChatCompletions(prompt);
-            const parsedJSON = JSON.parse(response);
-            return parsedJSON['questions'];
-        } catch (error) {
             return throwException(error);
         }
     }
@@ -1028,73 +970,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 await new Promise(r => setTimeout(r, 500 * attempt));
             }
         }
-    }
-
-    private getPromptForQuiz(department: Department, topics: Topic[], payload: QuestionGeneratePayloadType): string {
-        const topicNames = topics.map(topic => topic.name).join(', ');
-        const uniquenessKey = Math.random().toString(36).substring(2, 8);
-
-        const prompt = `
-        Generate ${payload.question_count} ${payload.difficulty} MCQ questions about ${topicNames} for ${department.name}.
-        Session: ${uniquenessKey}. Ensure novelty and avoid textbook repeats.
-
-        **Requirements:**
-        - Cover different subtopics of ${topicNames} (balanced coverage)
-        - Include: 1 scenario question, 1 misconception question, 1 advanced question
-        - Vary question formats (definition, scenario, comparison, case-study, applied problem).
-        - If the question or options has code, use Markdown formatting.
-
-        **Format (JSON):**
-        {
-          "questions": [
-            {
-              "question": "text",
-              "options": ["A", "B", "C", "D"],
-              "answer": [index],
-              "question_type": "CHOICE" | "MULTIPLE_CHOICE",
-              "topic": "topic name",
-              "sub_topic": "subtopic name"
-            }
-          ]
-        }
-        
-        ** Example **
-        {
-            "questions": [
-                {
-                    "question": "What is the purpose of Angular’s FormGroup?",
-                    "options": ["Option A", "Option B", "Option C", "Option D"],
-                    "answer": [1],
-                    "question_type": "CHOICE",
-                    "topic": "Angular",
-                    "sub_topic": "Forms & Validation"
-                }
-            ]
-        }
-
-        ** One More Example **
-        {
-            "questions": [
-                {
-                    "question": "What is the main advantage of conducting employee satisfaction surveys?",
-                    "options": [
-                        "To reduce recruitment costs",
-                        "To identify employee concerns and improve engagement",
-                        "To measure market competition",
-                        "To evaluate technical skill levels"
-                    ],
-                    "answer": [1],
-                    "question_type": "CHOICE",
-                    "topic": "Human Resources",
-                    "sub_topic": "Employee Engagement"
-                }
-            ]
-        }
-
-        Generate questions now.
-    `;
-
-        return prompt;
     }
 
     private async updateQuizesTimer() {
