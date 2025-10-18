@@ -12,13 +12,16 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { BaseQuestionRepository } from "./base-question.repository";
 import { ILangChainService } from "../../../../core/openai/interface/ILangChain.service";
+import { IQuestionDiscussionService } from "../../../../core/langgraph/interface/IQuestionDiscussion.service";
+import { QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
 
 @injectable()
 export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
-        @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService
+        @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService,
+        @inject(TYPES.IQuestionDiscussionService) readonly questionDiscussionService: IQuestionDiscussionService
     ) {
         super(databaseService);
         this.cronJob(); // Schedule the cron job to update quiz timers
@@ -491,6 +494,25 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
+    public async getExplanationsFromAgent(questionUUID: string): Promise<string[]> {
+        try {
+            const result = await this.questionDiscussionService.startNewSession(questionUUID);
+            // console.log('QQQ result: ', result);
+            return [];
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getExplanationFromAgent(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<string | null> {
+        try {
+            const result = await this.questionDiscussionService.handleUserMessage(questionUUID, payload.question);
+            return result || null;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
     private keywordExamplePrompt(keyword: QuestionKeyword, question: Question): string {
         return `
                 Generate a practical example that illustrates the keyword "${keyword.keyword}".
@@ -748,25 +770,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             }
         } catch (error) {
             return throwException(error);
-        }
-    }
-
-    private async getQuestionDetails(questionUUID: string): Promise<Question> {
-        try {
-            const prisma = await this.prisma$();
-            const question = await prisma.question_log_question.findUnique({
-                where: {
-                    uuid: questionUUID,
-                    is_oral: false
-                },
-            });
-            if (!question) {
-                throw new NotFoundException('Question not found');
-            }
-            return question as Question;
-        } catch (error: any) {
-            return throwException(error);
-
         }
     }
 
