@@ -15,6 +15,7 @@ import { IVerbalQuestionService } from "../interface/IVerbalQuestion.service";
 import { VerbalUploadMiddleware } from "../../../../middlewares/verbal-upload.middleware";
 import { VerbalQuestionGeneratePayloadDto, VerbalQuestionGeneratePayloadType } from "../dto/verbal-question-generate-payload.dto";
 import { ValidateQuizType } from "../../../../middlewares/validate-quiz-type.middleware";
+import { QuestionExplanationPayloadDto, QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
@@ -205,6 +206,22 @@ export class QuestionController {
             this.streamingErrorResponse(res, error);
         }
     }
+
+    @httpGet("/explanation/agent/:questionUUID", ValidateUUIDParam("questionUUID"))
+    public async getExplanationsFromAgent(req: Request, res: Response) {
+        const questionUUID = req.params.questionUUID;
+        const result = await this.questionService.getExplanationsFromAgent(questionUUID);
+        return res.status(200).json({ data: result });
+    }
+
+    @httpPost("/explanation/agent/:questionUUID", ValidateUUIDParam("questionUUID"), DtoValidationMiddleware(QuestionExplanationPayloadDto))
+    public async getExplanationFromAgent(
+        @requestBody() payload: QuestionExplanationPayloadType, req: Request, res: Response) {
+        const questionUUID = req.params.questionUUID;
+        const result = await this.questionService.getExplanationFromAgent(questionUUID, payload);
+        return res.status(201).json({ data: result });
+    }
+
     @httpPost("/verbal/generate", DtoValidationMiddleware(VerbalQuestionGeneratePayloadDto))
     public async generateVerbalQuestions(
         @requestBody() payload: VerbalQuestionGeneratePayloadType, req: Request, res: Response

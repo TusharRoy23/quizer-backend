@@ -1,4 +1,5 @@
 import { PaginationParams, PaginationResponse, Participant, Question, QuestionKeyword, QuestionLog, QuizTimer } from "../../types/public.type";
+import { QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 
@@ -21,4 +22,6 @@ export interface IQuestionRepository {
     getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream>;
     getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream>;
     getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]>;
+    getExplanationFromAgent(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<string | null>;
+    getExplanationsFromAgent(questionUUID: string): Promise<string[]>;
 }
