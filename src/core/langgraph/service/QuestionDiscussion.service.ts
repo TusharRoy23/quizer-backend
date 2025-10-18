@@ -13,6 +13,10 @@ export class QuestionDiscussionService implements IQuestionDiscussionService {
         return this.questionDiscussionRespository.handleUserMessage(questionUUID, userMessage);
     }
 
+    public async handleStreamUserMessage(questionUUID: string, userMessage: string): Promise<ReadableStream> {
+        return this.questionDiscussionRespository.handleStreamUserMessage(questionUUID, userMessage);
+    }
+
     public async startNewSession(questionUUID: string): Promise<any> {
         return this.questionDiscussionRespository.startNewSession(questionUUID);
     }

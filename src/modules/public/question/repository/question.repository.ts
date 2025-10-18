@@ -513,6 +513,27 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
+    public async getExplanationFromAgentStream(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<ReadableStream> {
+        try {
+            const stream = await this.questionDiscussionService.handleStreamUserMessage(questionUUID, payload.question);
+            return this.wrapReadableStream(stream, {
+                onComplete: async (fullText) => {
+                    console.log('fullText question repo: ', fullText);
+                },
+                onErrorText: "Error generating explanation. Please try again."
+            });
+        } catch (error) {
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            });
+        }
+    }
+
     private keywordExamplePrompt(keyword: QuestionKeyword, question: Question): string {
         return `
                 Generate a practical example that illustrates the keyword "${keyword.keyword}".
@@ -1022,44 +1043,44 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
-    private wrapReadableStream(
-        baseStream: ReadableStream<Uint8Array>,
-        options?: {
-            onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
-            onErrorText?: string; // fallback message if error
-        }
-    ): ReadableStream<Uint8Array> {
-        const encoder = new TextEncoder();
-        const decoder = new TextDecoder();
-        let fullContent = "";
+    // private wrapReadableStream(
+    //     baseStream: ReadableStream<Uint8Array>,
+    //     options?: {
+    //         onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
+    //         onErrorText?: string; // fallback message if error
+    //     }
+    // ): ReadableStream<Uint8Array> {
+    //     const encoder = new TextEncoder();
+    //     const decoder = new TextDecoder();
+    //     let fullContent = "";
 
-        return new ReadableStream({
-            async start(controller) {
-                try {
-                    const reader = baseStream.getReader();
+    //     return new ReadableStream({
+    //         async start(controller) {
+    //             try {
+    //                 const reader = baseStream.getReader();
 
-                    while (true) {
-                        const { done, value } = await reader.read();
+    //                 while (true) {
+    //                     const { done, value } = await reader.read();
 
-                        if (done) {
-                            if (options?.onComplete && fullContent.trim()) {
-                                await options.onComplete(fullContent.trim());
-                            }
-                            controller.close();
-                            break;
-                        }
+    //                     if (done) {
+    //                         if (options?.onComplete && fullContent.trim()) {
+    //                             await options.onComplete(fullContent.trim());
+    //                         }
+    //                         controller.close();
+    //                         break;
+    //                     }
 
-                        const chunk = decoder.decode(value, { stream: true });
-                        fullContent += chunk;
+    //                     const chunk = decoder.decode(value, { stream: true });
+    //                     fullContent += chunk;
 
-                        controller.enqueue(encoder.encode(chunk));
-                    }
-                } catch (error) {
-                    const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
-                    controller.enqueue(encoder.encode(errorMsg));
-                    controller.close();
-                }
-            }
-        });
-    }
+    //                     controller.enqueue(encoder.encode(chunk));
+    //                 }
+    //             } catch (error) {
+    //                 const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
+    //                 controller.enqueue(encoder.encode(errorMsg));
+    //                 controller.close();
+    //             }
+    //         }
+    //     });
+    // }
 }
