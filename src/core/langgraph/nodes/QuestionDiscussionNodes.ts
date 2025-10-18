@@ -47,8 +47,6 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             user message: {lastUserMessage}
         `;
 
-        console.log(state.questionContext);
-
         const promptTemplate = await ChatPromptTemplate.fromMessages([
             ["system", systemPrompt],
             ["user", userPrompt]
@@ -59,7 +57,6 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             lastUserMessage: state.messages?.at(-1)?.content || ""
         })
         const intent = result?.currentIntent?.trim()?.toLowerCase();
-        console.log('intent: ', intent);
 
         return {
             currentIntent: intent

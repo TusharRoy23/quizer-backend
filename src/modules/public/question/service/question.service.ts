@@ -92,4 +92,8 @@ export class QuestionService implements IQuestionService {
     public getExplanationsFromAgent(questionUUID: string): Promise<string[]> {
         return this.questionRepository.getExplanationsFromAgent(questionUUID);
     }
+
+    public getExplanationFromAgentStream(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<ReadableStream> {
+        return this.questionRepository.getExplanationFromAgentStream(questionUUID, payload);
+    }
 }

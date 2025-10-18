@@ -297,4 +297,45 @@ export abstract class BaseQuestionRepository extends BaseRepository {
             return throwException(error);
         }
     }
+
+    protected wrapReadableStream(
+        baseStream: ReadableStream<Uint8Array>,
+        options?: {
+            onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
+            onErrorText?: string; // fallback message if error
+        }
+    ): ReadableStream<Uint8Array> {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        let fullContent = "";
+
+        return new ReadableStream({
+            async start(controller) {
+                try {
+                    const reader = baseStream.getReader();
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (done) {
+                            if (options?.onComplete && fullContent.trim()) {
+                                await options.onComplete(fullContent.trim());
+                            }
+                            controller.close();
+                            break;
+                        }
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        fullContent += chunk;
+
+                        controller.enqueue(encoder.encode(chunk));
+                    }
+                } catch (error) {
+                    const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            }
+        });
+    }
 }

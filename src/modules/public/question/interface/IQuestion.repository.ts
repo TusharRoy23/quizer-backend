@@ -24,4 +24,5 @@ export interface IQuestionRepository {
     getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]>;
     getExplanationFromAgent(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<string | null>;
     getExplanationsFromAgent(questionUUID: string): Promise<string[]>;
+    getExplanationFromAgentStream(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<ReadableStream>;
 }

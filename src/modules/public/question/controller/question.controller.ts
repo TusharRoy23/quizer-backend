@@ -16,12 +16,14 @@ import { VerbalUploadMiddleware } from "../../../../middlewares/verbal-upload.mi
 import { VerbalQuestionGeneratePayloadDto, VerbalQuestionGeneratePayloadType } from "../dto/verbal-question-generate-payload.dto";
 import { ValidateQuizType } from "../../../../middlewares/validate-quiz-type.middleware";
 import { QuestionExplanationPayloadDto, QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
+import { IQuestionDiscussionService } from "../../../../core/langgraph/interface/IQuestionDiscussion.service";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
     constructor(
         @inject(TYPES.IQuestionService) private readonly questionService: IQuestionService, // Replace 'any' with the actual type of your service
         @inject(TYPES.IVerbalQuestionService) private readonly verbalQuestionService: IVerbalQuestionService, // Replace 'any' with the actual type of your service
+        @inject(TYPES.IQuestionDiscussionService) private readonly questionDiscussionService: IQuestionDiscussionService
     ) { }
 
     @httpGet("/quiz/:questionLogUUID", ValidateUUIDParam("questionLogUUID"))
@@ -215,11 +217,16 @@ export class QuestionController {
     }
 
     @httpPost("/explanation/agent/:questionUUID", ValidateUUIDParam("questionUUID"), DtoValidationMiddleware(QuestionExplanationPayloadDto))
-    public async getExplanationFromAgent(
-        @requestBody() payload: QuestionExplanationPayloadType, req: Request, res: Response) {
+    public async getExplanationFromAgentStream(
+        @requestBody() payload: QuestionExplanationPayloadType, req: Request, res: Response
+    ) {
         const questionUUID = req.params.questionUUID;
-        const result = await this.questionService.getExplanationFromAgent(questionUUID, payload);
-        return res.status(201).json({ data: result });
+        try {
+            const stream = await this.questionService.getExplanationFromAgentStream(questionUUID, payload);
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
     }
 
     @httpPost("/verbal/generate", DtoValidationMiddleware(VerbalQuestionGeneratePayloadDto))
@@ -329,11 +336,13 @@ export class QuestionController {
                         return;
                     }
 
+                    if (res.writableEnded || res.destroyed) {
+                        console.log("⚠️ Response closed early");
+                        break;
+                    }
+
                     // Decode the chunk
                     const textChunk = decoder.decode(value, { stream: true });
-
-                    if (req.destroyed) return;
-
                     res.write(textChunk);
 
                     // Force flush
@@ -373,7 +382,7 @@ export class QuestionController {
         processStream();
 
         // Handle client disconnect
-        req.on('close', () => {
+        res.on('close', () => {
             reader.cancel().catch(() => { });
             console.log('Client disconnected from explanation stream');
         });
