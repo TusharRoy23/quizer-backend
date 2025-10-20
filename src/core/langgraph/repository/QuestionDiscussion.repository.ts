@@ -6,6 +6,8 @@ import { throwException } from "../../../shared/errors/all.exception";
 import { BaseQuestionRepository } from "../../../modules/public/question/repository/base-question.repository";
 import { IDatabaseService } from "../../interface/IDatabase.service";
 import { AIMessageChunk } from "@langchain/core/messages";
+import { AgenticRole } from "../../../shared/utils/enum";
+import { QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
 
 export class QuestionDiscussionRepository extends BaseQuestionRepository implements IQuestionDiscussionRepository {
     private graph: any;
@@ -48,6 +50,7 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
     public async handleStreamUserMessage(questionUUID: string, userMessage: string): Promise<ReadableStream> {
         try {
             const questionLog = await this.getQuestionLogByQuestionUUID(questionUUID);
+            const lastAssistantMessage = await this.getLastAssistantMessage(questionUUID);
             const stream = await this.graph.stream({
                 messages: [
                     { role: 'user', content: userMessage, timestamp: Date.now() }
@@ -64,6 +67,7 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
                     department: questionLog?.question_log?.department?.name,
                     questionLogTopics: questionLog?.question_log?.topics?.map(topic => topic.name) || [],
                 },
+                lastAssistantMessage: lastAssistantMessage
             },
                 {
                     configurable: { thread_id: questionUUID },
@@ -111,6 +115,60 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
             }, { configurable: { thread_id: questionUUID } });
             console.log('result: ', result);
             return result;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async saveQuestionDiscussionMessage(questionUUID: string, message: string, role: AgenticRole): Promise<string> {
+        try {
+            const questionDetails = await this.getQuestionDetails(questionUUID)
+            const payload = {
+                question_id: questionDetails.id,
+                message: message,
+                role: role
+            };
+            const prisma = await this.prisma$();
+            await prisma.question_discussion.create({
+                data: payload
+            });
+            return "Message saved successfully.";
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getQuestionDiscussionMessages(questionUUID: string): Promise<QuestionDiscussionMessage[]> {
+        try {
+            const prisma = await this.prisma$();
+            const messages = await prisma.question_discussion.findMany({
+                where: {
+                    question_log_question: {
+                        uuid: questionUUID
+                    }
+                }
+            });
+            return messages?.length ? messages : [];
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    private async getLastAssistantMessage(questionUUID: string): Promise<string | null> {
+        try {
+            const prisma = await this.prisma$();
+            const lastMessage = await prisma.question_discussion.findFirst({
+                where: {
+                    question_log_question: {
+                        uuid: questionUUID
+                    },
+                    role: AgenticRole.ASSISTANT
+                },
+                orderBy: {
+                    created_at: 'desc'
+                }
+            });
+            return lastMessage ? lastMessage.message : null;
         } catch (error) {
             return throwException(error);
         }

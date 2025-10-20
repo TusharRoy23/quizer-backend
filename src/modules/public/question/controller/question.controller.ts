@@ -229,6 +229,13 @@ export class QuestionController {
         }
     }
 
+    @httpGet("/discussion/messages/:questionUUID", ValidateUUIDParam("questionUUID"))
+    public async getQuestionDiscussionMessages(req: Request, res: Response) {
+        const questionUUID = req.params.questionUUID;
+        const messages = await this.questionDiscussionService.getQuestionDiscussionMessages(questionUUID);
+        return res.status(200).json({ data: messages });
+    }
+
     @httpPost("/verbal/generate", DtoValidationMiddleware(VerbalQuestionGeneratePayloadDto))
     public async generateVerbalQuestions(
         @requestBody() payload: VerbalQuestionGeneratePayloadType, req: Request, res: Response
