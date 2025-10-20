@@ -20,6 +20,8 @@ export class GraphBuilder implements IGraphBuilder {
             .addNode("give_background", (state) => this.questionDiscussionNodes.giveBackgroundContext(state))
             .addNode("general_clarification", (state) => this.questionDiscussionNodes.generalClarification(state))
             .addNode("clarify_term", (state) => this.questionDiscussionNodes.clarifyTerm(state))
+            .addNode("analyze_code_relevance", (state) => this.questionDiscussionNodes.analyzeCodeRelevance(state))
+            .addNode("avoid_unnecessary_content", (state) => this.questionDiscussionNodes.avoidUnnecessaryContent(state))
 
             // Edges configuration
             .addEdge(START, "initialize_discussion")
@@ -31,7 +33,9 @@ export class GraphBuilder implements IGraphBuilder {
                     'explain_incorrect': 'explain_incorrect',
                     'give_background': 'give_background',
                     'general_clarification': 'general_clarification',
-                    'clarify_term': 'clarify_term'
+                    'clarify_term': 'clarify_term',
+                    'analyze_code_relevance': 'analyze_code_relevance',
+                    'avoid_unnecessary_content': 'avoid_unnecessary_content',
                 },
 
             )
@@ -39,7 +43,10 @@ export class GraphBuilder implements IGraphBuilder {
             .addEdge("provide_examples", END)
             .addEdge("explain_incorrect", END)
             .addEdge("give_background", END)
-            .addEdge("general_clarification", END);
+            .addEdge("general_clarification", END)
+            .addEdge("clarify_term", END)
+            .addEdge("analyze_code_relevance", END)
+            .addEdge("avoid_unnecessary_content", END);
 
         const checkpointer = new MemorySaver();
 

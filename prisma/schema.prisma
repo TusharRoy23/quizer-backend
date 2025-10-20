@@ -112,6 +112,7 @@ model question_log_question {
   embedding            Unsupported("vector")?
   question_keyword     question_keyword[]
   question_log         question_log           @relation(fields: [question_log_id], references: [id], onDelete: Cascade)
+  question_discussion  question_discussion[]
 }
 
 model question_keyword {
@@ -125,8 +126,24 @@ model question_keyword {
   question_log_question question_log_question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 }
 
+model question_discussion {
+  id                    Int                   @id @default(autoincrement())
+  created_at            DateTime              @default(now()) @db.Timestamptz(6)
+  question_id           Int
+  message               String                @db.Text
+  role                  AgenticRole           @default(ASSISTANT)
+  uuid                  String                @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  question_log_question question_log_question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+}
+
 enum QuestionType {
   MULTIPLE_CHOICE
   CHOICE
   ORAL
+}
+
+enum AgenticRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

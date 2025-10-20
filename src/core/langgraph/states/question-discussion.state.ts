@@ -30,5 +30,8 @@ export const QuestionDiscussionState = Annotation.Root({
     }),
     discussedTopics: Annotation<string[]>({
         reducer: (x, y) => x ? x.concat(y) : []
-    })
+    }),
+    lastAssistantMessage: Annotation<string>({
+        reducer: (x, y) => (y ?? x),
+    }),
 });

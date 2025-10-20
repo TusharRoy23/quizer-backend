@@ -4,7 +4,7 @@ import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
-import { Department, PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
+import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import CronJob from "node-cron";
@@ -14,6 +14,7 @@ import { BaseQuestionRepository } from "./base-question.repository";
 import { ILangChainService } from "../../../../core/openai/interface/ILangChain.service";
 import { IQuestionDiscussionService } from "../../../../core/langgraph/interface/IQuestionDiscussion.service";
 import { QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
+import { AgenticRole } from "../../../../shared/utils/enum";
 
 @injectable()
 export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
@@ -518,7 +519,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             const stream = await this.questionDiscussionService.handleStreamUserMessage(questionUUID, payload.question);
             return this.wrapReadableStream(stream, {
                 onComplete: async (fullText) => {
-                    console.log('fullText question repo: ', fullText);
+                    await this.questionDiscussionService.saveQuestionDiscussionMessage(questionUUID, payload.question, AgenticRole.USER);
+                    await this.questionDiscussionService.saveQuestionDiscussionMessage(questionUUID, fullText, AgenticRole.ASSISTANT);
                 },
                 onErrorText: "Error generating explanation. Please try again."
             });

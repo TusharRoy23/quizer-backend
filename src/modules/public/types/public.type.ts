@@ -114,3 +114,11 @@ export type QuestionLogQuestion = {
     question_log: QuestionLog;
     question: Question;
 }
+
+export type QuestionDiscussionMessage = {
+    id: number;
+    uuid: string;
+    role: 'user' | 'assistant';
+    message: string;
+    created_at: Date;
+}

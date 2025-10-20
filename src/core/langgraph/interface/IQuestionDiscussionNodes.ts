@@ -8,4 +8,6 @@ export interface IQuestionDiscussionNodes {
     giveBackgroundContext(state: typeof QuestionDiscussionState.State): any;
     generalClarification(state: typeof QuestionDiscussionState.State): any;
     clarifyTerm(state: typeof QuestionDiscussionState.State): any;
+    analyzeCodeRelevance(state: typeof QuestionDiscussionState.State): any;
+    avoidUnnecessaryContent(state: typeof QuestionDiscussionState.State): any;
 }
