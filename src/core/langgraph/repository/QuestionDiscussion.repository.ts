@@ -1,4 +1,4 @@
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { IGraphBuilder } from "../interface/IGraphBuilder";
 import { IQuestionDiscussionRepository } from "../interface/IQuestionDiscussion.repository";
 import { TYPES } from "../../type.core";
@@ -9,6 +9,7 @@ import { AIMessageChunk } from "@langchain/core/messages";
 import { AgenticRole } from "../../../shared/utils/enum";
 import { QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
 
+@injectable()
 export class QuestionDiscussionRepository extends BaseQuestionRepository implements IQuestionDiscussionRepository {
     private graph: any;
 

@@ -8,7 +8,7 @@ import { IGraphBuilder } from "./interface/IGraphBuilder";
 @injectable()
 export class GraphBuilder implements IGraphBuilder {
     constructor(
-        @inject(TYPES.IQuestionDiscussion) private questionDiscussionNodes: IQuestionDiscussionNodes
+        @inject(TYPES.IQuestionDiscussionNode) private questionDiscussionNodes: IQuestionDiscussionNodes
     ) { }
 
     buildQuestionDiscussionGraph() {

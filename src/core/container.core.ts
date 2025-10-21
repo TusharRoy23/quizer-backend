@@ -57,7 +57,7 @@ container.bind<ILangChainService>(TYPES.ILangChainService).to(LangChainService);
 
 //? LangGraph
 container.bind<IGraphBuilder>(TYPES.IGraphBuilder).to(GraphBuilder);
-container.bind<IQuestionDiscussionNodes>(TYPES.IQuestionDiscussion).to(QuestionDiscussionNodes);
+container.bind<IQuestionDiscussionNodes>(TYPES.IQuestionDiscussionNode).to(QuestionDiscussionNodes);
 container.bind<IQuestionDiscussionService>(TYPES.IQuestionDiscussionService).to(QuestionDiscussionService);
 container.bind<IQuestionDiscussionRepository>(TYPES.IQuestionDiscussionRepository).to(QuestionDiscussionRepository);
 
