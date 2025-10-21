@@ -55,4 +55,4 @@ USER app
 EXPOSE 8000
 
 # Start compiled app
-CMD ["node", "--max-old-space-size=4096", "dist/main.js"]
+CMD ["node", "dist/main.js"]

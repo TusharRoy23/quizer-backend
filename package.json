@@ -40,7 +40,7 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.76"
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.9",
