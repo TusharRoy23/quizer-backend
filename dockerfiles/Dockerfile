@@ -27,6 +27,7 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NODE_OPTIONS=--max-old-space-size=4096
 
 # Install tzdata for timezone support
 RUN apk add --no-cache tzdata \
