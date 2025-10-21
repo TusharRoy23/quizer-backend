@@ -11,7 +11,7 @@ RUN apk add --no-cache tzdata python3 make g++
 COPY package.json package-lock.json ./
 
 # Install all dependencies (including dev, needed for build + prisma)
-RUN npm ci
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm ci
 
 # Copy source code
 COPY . .
