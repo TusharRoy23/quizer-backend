@@ -2,7 +2,7 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-ENV NODE_OPTIONS=--max-old-space-size=4096
+# ENV NODE_OPTIONS=--max-old-space-size=4096
 
 # Install system deps for build (incl. prisma generation)
 RUN apk add --no-cache tzdata python3 make g++
@@ -11,7 +11,7 @@ RUN apk add --no-cache tzdata python3 make g++
 COPY package.json package-lock.json ./
 
 # Install all dependencies (including dev, needed for build + prisma)
-RUN NODE_OPTIONS="--max-old-space-size=4096" npm ci
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -55,4 +55,4 @@ USER app
 EXPOSE 8000
 
 # Start compiled app
-CMD ["node", "dist/main.js"]
+CMD ["node", "--max-old-space-size=4096", "dist/main.js"]
