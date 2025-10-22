@@ -14,9 +14,10 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.890.0",
     "@aws-sdk/s3-request-presigner": "^3.890.0",
-    "@langchain/core": "^0.3.77",
+    "@langchain/core": "^0.3.78",
     "@langchain/deepseek": "^0.0.2",
-    "@langchain/openai": "^0.6.13",
+    "@langchain/langgraph": "^0.4.9",
+    "@langchain/openai": "^0.6.14",
     "@prisma/client": "^6.15.0",
     "@supabase/supabase-js": "^2.57.2",
     "@types/multer": "^2.0.0",
@@ -39,7 +40,7 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "uuid": "^11.1.0",
-    "zod": "^3.24.3"
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.9",

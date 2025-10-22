@@ -13,4 +13,8 @@ export const TYPES = {
     IS3Service: Symbol.for("IS3Service"),
     ILangChainRepository: Symbol.for("ILangChainRepository"),
     ILangChainService: Symbol.for("ILangChainService"),
+    IQuestionDiscussionNode: Symbol.for("IQuestionDiscussionNode"),
+    IGraphBuilder: Symbol.for("IGraphBuilder"),
+    IQuestionDiscussionService: Symbol.for("IQuestionDiscussionService"),
+    IQuestionDiscussionRepository: Symbol.for("IQuestionDiscussionRepository")
 }

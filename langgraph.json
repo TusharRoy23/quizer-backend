@@ -1,0 +1,7 @@
+{
+    "$schema": "https://langgra.ph/schema.json",
+    "graphs": {
+        "question-discussion": "./src/core/langgraph/graph-export.ts:graph"
+    },
+    "env": "./.env"
+}

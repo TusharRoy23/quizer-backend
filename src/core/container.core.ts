@@ -32,6 +32,14 @@ import { ILangChainRepository } from './openai/interface/ILangChain.repository';
 import { LangChainRepository } from './openai/repository/langChain.repository';
 import { LangChainService } from './openai/service/langChain.service';
 import { ILangChainService } from './openai/interface/ILangChain.service';
+import { IQuestionDiscussionNodes } from './langgraph/interface/IQuestionDiscussionNodes';
+import { QuestionDiscussionNodes } from './langgraph/nodes/QuestionDiscussionNodes';
+import { IGraphBuilder } from './langgraph/interface/IGraphBuilder';
+import { GraphBuilder } from './langgraph/graph-builder';
+import { IQuestionDiscussionService } from './langgraph/interface/IQuestionDiscussion.service';
+import { QuestionDiscussionService } from './langgraph/service/QuestionDiscussion.service';
+import { IQuestionDiscussionRepository } from './langgraph/interface/IQuestionDiscussion.repository';
+import { QuestionDiscussionRepository } from './langgraph/repository/QuestionDiscussion.repository';
 
 const container = new Container();
 
@@ -46,6 +54,12 @@ container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(OpenAIRepository);
 //? LangChain
 container.bind<ILangChainRepository>(TYPES.ILangChainRepository).to(LangChainRepository);
 container.bind<ILangChainService>(TYPES.ILangChainService).to(LangChainService);
+
+//? LangGraph
+container.bind<IGraphBuilder>(TYPES.IGraphBuilder).to(GraphBuilder);
+container.bind<IQuestionDiscussionNodes>(TYPES.IQuestionDiscussionNode).to(QuestionDiscussionNodes);
+container.bind<IQuestionDiscussionService>(TYPES.IQuestionDiscussionService).to(QuestionDiscussionService);
+container.bind<IQuestionDiscussionRepository>(TYPES.IQuestionDiscussionRepository).to(QuestionDiscussionRepository);
 
 container.bind<RequestContextMiddleware>(RequestContextMiddleware).toSelf();
 container.bind<SessionMiddleware>(SessionMiddleware).toSelf();

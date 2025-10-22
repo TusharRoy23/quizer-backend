@@ -4,7 +4,7 @@ import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
-import { Department, PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic } from "../../types/public.type";
+import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import CronJob from "node-cron";
@@ -12,13 +12,17 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { BaseQuestionRepository } from "./base-question.repository";
 import { ILangChainService } from "../../../../core/openai/interface/ILangChain.service";
+import { IQuestionDiscussionService } from "../../../../core/langgraph/interface/IQuestionDiscussion.service";
+import { QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
+import { AgenticRole } from "../../../../shared/utils/enum";
 
 @injectable()
 export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
-        @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService
+        @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService,
+        @inject(TYPES.IQuestionDiscussionService) readonly questionDiscussionService: IQuestionDiscussionService
     ) {
         super(databaseService);
         this.cronJob(); // Schedule the cron job to update quiz timers
@@ -491,6 +495,47 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
+    public async getExplanationsFromAgent(questionUUID: string): Promise<string[]> {
+        try {
+            const result = await this.questionDiscussionService.startNewSession(questionUUID);
+            // console.log('QQQ result: ', result);
+            return [];
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getExplanationFromAgent(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<string | null> {
+        try {
+            const result = await this.questionDiscussionService.handleUserMessage(questionUUID, payload.question);
+            return result || null;
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async getExplanationFromAgentStream(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<ReadableStream> {
+        try {
+            const stream = await this.questionDiscussionService.handleStreamUserMessage(questionUUID, payload.question);
+            return this.wrapReadableStream(stream, {
+                onComplete: async (fullText) => {
+                    await this.questionDiscussionService.saveQuestionDiscussionMessage(questionUUID, payload.question, AgenticRole.USER);
+                    await this.questionDiscussionService.saveQuestionDiscussionMessage(questionUUID, fullText, AgenticRole.ASSISTANT);
+                },
+                onErrorText: "Error generating explanation. Please try again."
+            });
+        } catch (error) {
+            const encoder = new TextEncoder();
+            return new ReadableStream({
+                start(controller) {
+                    const errorMsg = "Error: Unable to generate explanation at this time.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            });
+        }
+    }
+
     private keywordExamplePrompt(keyword: QuestionKeyword, question: Question): string {
         return `
                 Generate a practical example that illustrates the keyword "${keyword.keyword}".
@@ -751,25 +796,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
-    private async getQuestionDetails(questionUUID: string): Promise<Question> {
-        try {
-            const prisma = await this.prisma$();
-            const question = await prisma.question_log_question.findUnique({
-                where: {
-                    uuid: questionUUID,
-                    is_oral: false
-                },
-            });
-            if (!question) {
-                throw new NotFoundException('Question not found');
-            }
-            return question as Question;
-        } catch (error: any) {
-            return throwException(error);
-
-        }
-    }
-
     private async getQuestionLogByUUID(questionLogUUID: string, isCompleted: boolean = true): Promise<QuestionLog> {
         try {
             const participant = this.getParticipant();
@@ -1019,44 +1045,44 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
-    private wrapReadableStream(
-        baseStream: ReadableStream<Uint8Array>,
-        options?: {
-            onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
-            onErrorText?: string; // fallback message if error
-        }
-    ): ReadableStream<Uint8Array> {
-        const encoder = new TextEncoder();
-        const decoder = new TextDecoder();
-        let fullContent = "";
+    // private wrapReadableStream(
+    //     baseStream: ReadableStream<Uint8Array>,
+    //     options?: {
+    //         onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
+    //         onErrorText?: string; // fallback message if error
+    //     }
+    // ): ReadableStream<Uint8Array> {
+    //     const encoder = new TextEncoder();
+    //     const decoder = new TextDecoder();
+    //     let fullContent = "";
 
-        return new ReadableStream({
-            async start(controller) {
-                try {
-                    const reader = baseStream.getReader();
+    //     return new ReadableStream({
+    //         async start(controller) {
+    //             try {
+    //                 const reader = baseStream.getReader();
 
-                    while (true) {
-                        const { done, value } = await reader.read();
+    //                 while (true) {
+    //                     const { done, value } = await reader.read();
 
-                        if (done) {
-                            if (options?.onComplete && fullContent.trim()) {
-                                await options.onComplete(fullContent.trim());
-                            }
-                            controller.close();
-                            break;
-                        }
+    //                     if (done) {
+    //                         if (options?.onComplete && fullContent.trim()) {
+    //                             await options.onComplete(fullContent.trim());
+    //                         }
+    //                         controller.close();
+    //                         break;
+    //                     }
 
-                        const chunk = decoder.decode(value, { stream: true });
-                        fullContent += chunk;
+    //                     const chunk = decoder.decode(value, { stream: true });
+    //                     fullContent += chunk;
 
-                        controller.enqueue(encoder.encode(chunk));
-                    }
-                } catch (error) {
-                    const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
-                    controller.enqueue(encoder.encode(errorMsg));
-                    controller.close();
-                }
-            }
-        });
-    }
+    //                     controller.enqueue(encoder.encode(chunk));
+    //                 }
+    //             } catch (error) {
+    //                 const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
+    //                 controller.enqueue(encoder.encode(errorMsg));
+    //                 controller.close();
+    //             }
+    //         }
+    //     });
+    // }
 }
