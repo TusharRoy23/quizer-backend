@@ -11,7 +11,7 @@ services:
       dockerfile: ./dockerfiles/Dockerfile-dev
     volumes:
       - .:/app
-      - node_modules:/app/node_modules   # <-- use named volume
+      - node_modules:/app/node_modules
     ports:
       - "8000:8000"
       - "9229:9229"
@@ -19,8 +19,32 @@ services:
     networks:
       - quiz_api
 
+  langgraph-studio:
+    container_name: quizer-langgraph-studio
+    image: node:20-alpine
+    working_dir: /app
+    env_file:
+      - ./.envs/.local/.env
+      - ./.envs/.utils/.env
+      - ./.envs/.db/.env
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "2024:2024"
+    networks:
+      - quiz_api
+    command: >
+      sh -c "
+        cd /app &&
+        npm install -g @langchain/langgraph-cli &&
+        npx @langchain/langgraph-cli dev --port 2024 --host 0.0.0.0
+      "
+    depends_on:
+      - dev
+
 volumes:
-  node_modules:   # <-- declare named volume here
+  node_modules:
 
 networks:
   quiz_api:

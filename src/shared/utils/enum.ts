@@ -13,3 +13,9 @@ export enum HttpStatusCode {
     INTERNAL_SERVER = 500,
     TOO_MANY_REQUESTS = 429,
 }
+
+export enum AgenticRole {
+    USER = 'USER',
+    ASSISTANT = 'ASSISTANT',
+    SYSTEM = 'SYSTEM'
+}
