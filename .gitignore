@@ -44,3 +44,6 @@ jspm_packages/
 
 generated/
 /src/generated/prisma
+
+# LangGraph API
+.langgraph_api
