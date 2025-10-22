@@ -68,6 +68,7 @@ export type QuestionLog = {
     id: number;
     uuid: string;
     department: Department;
+    topics?: Topic[];
     timer: number;
     difficulty: string;
     question_count: number;
@@ -107,4 +108,17 @@ export type QuestionKeyword = {
     uuid: string;
     explanation?: string;
     example?: string;
+}
+
+export type QuestionLogQuestion = {
+    question_log: QuestionLog;
+    question: Question;
+}
+
+export type QuestionDiscussionMessage = {
+    id: number;
+    uuid: string;
+    role: 'user' | 'assistant';
+    message: string;
+    created_at: Date;
 }

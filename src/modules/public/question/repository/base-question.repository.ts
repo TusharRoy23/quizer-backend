@@ -3,7 +3,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
-import { Department, QuestionLog, Topic } from "../../types/public.type";
+import { Department, Question, QuestionLog, QuestionLogQuestion, Topic } from "../../types/public.type";
 import { BaseRepository } from "../../../../core/repository/base.repository";
 import { TYPES } from "../../../../core/type.core";
 
@@ -243,5 +243,99 @@ export abstract class BaseQuestionRepository extends BaseRepository {
         } catch (error) {
             return throwException(error);
         }
+    }
+
+    protected async getQuestionDetails(questionUUID: string): Promise<Question> {
+        try {
+            const prisma = await this.prisma$();
+            const question = await prisma.question_log_question.findUnique({
+                where: {
+                    uuid: questionUUID,
+                    is_oral: false
+                },
+            });
+            if (!question) {
+                throw new NotFoundException('Question not found');
+            }
+            return question as Question;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    protected async getQuestionLogByQuestionUUID(questionUUID: string): Promise<QuestionLogQuestion | null> {
+        try {
+            const prisma = await this.prisma$();
+            const questionLog = await prisma.question_log_question.findUnique({
+                where: {
+                    uuid: questionUUID,
+                    is_oral: false
+                },
+                include: {
+                    question_log: {
+                        include: {
+                            topics: {
+                                select: {
+                                    topic: true
+                                }
+                            },
+                            question_department: true
+                        }
+                    }
+                }
+            });
+
+            return {
+                question_log: {
+                    ...questionLog.question_log,
+                    department: questionLog?.question_log?.question_department as Department,
+                    topics: questionLog?.question_log?.topics?.map((t: any) => t?.topic) as Topic[]
+                },
+                question: { ...questionLog }
+            } as QuestionLogQuestion;
+        } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    protected wrapReadableStream(
+        baseStream: ReadableStream<Uint8Array>,
+        options?: {
+            onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
+            onErrorText?: string; // fallback message if error
+        }
+    ): ReadableStream<Uint8Array> {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        let fullContent = "";
+
+        return new ReadableStream({
+            async start(controller) {
+                try {
+                    const reader = baseStream.getReader();
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (done) {
+                            if (options?.onComplete && fullContent.trim()) {
+                                await options.onComplete(fullContent.trim());
+                            }
+                            controller.close();
+                            break;
+                        }
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        fullContent += chunk;
+
+                        controller.enqueue(encoder.encode(chunk));
+                    }
+                } catch (error) {
+                    const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
+                    controller.enqueue(encoder.encode(errorMsg));
+                    controller.close();
+                }
+            }
+        });
     }
 }

@@ -5,6 +5,7 @@ import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dt
 import { TYPES } from "../../../../core/type.core";
 import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
+import { QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
 
 @injectable()
 export class QuestionService implements IQuestionService {
@@ -82,5 +83,17 @@ export class QuestionService implements IQuestionService {
 
     public getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]> {
         return this.questionRepository.getQuestionsByQuery(query, limit, similarityThreshold);
+    }
+
+    public getExplanationFromAgent(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<string | null> {
+        return this.questionRepository.getExplanationFromAgent(questionUUID, payload);
+    }
+
+    public getExplanationsFromAgent(questionUUID: string): Promise<string[]> {
+        return this.questionRepository.getExplanationsFromAgent(questionUUID);
+    }
+
+    public getExplanationFromAgentStream(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<ReadableStream> {
+        return this.questionRepository.getExplanationFromAgentStream(questionUUID, payload);
     }
 }
