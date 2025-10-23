@@ -122,3 +122,12 @@ export type QuestionDiscussionMessage = {
     message: string;
     created_at: Date;
 }
+
+export type TopicScore = {
+    id: number;
+    uuid: string;
+    participant_id: number;
+    topic_id: number;
+    score: number;
+    topic?: Topic
+}

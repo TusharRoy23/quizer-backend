@@ -3,7 +3,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { inject, injectable } from "inversify";
 import { z } from "zod";
 import { ILangChainRepository } from "../interface/ILangChain.repository";
-import { Department, Question, QuestionType, Topic } from "../../../modules/public/types/public.type";
+import { Department, Question, QuestionType, Topic, TopicScore } from "../../../modules/public/types/public.type";
 import { QuestionGeneratePayloadType } from "../../../modules/public/question/dto/question-generate-payload.dto";
 import { throwException } from "../../../shared/errors/all.exception";
 import { IDatabaseService } from "../../interface/IDatabase.service";
@@ -45,6 +45,7 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
     public async generatedQuestions(
         department: Department,
         topics: Topic[],
+        topicScores: TopicScore[],
         payload: QuestionGeneratePayloadType
     ): Promise<Question[]> {
         try {
@@ -59,17 +60,22 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
                     
                     CRITICAL RULES:
                     - You MUST generate exactly {question_count} questions, no more no less
-                    - Every question MUST be directly related to {topicNames}
+                    - Every question MUST be directly related to "{topicNames}" topics. 
+                      But don't create a question with mixed topics. 1 question 1 topic.
                     - Include variety: scenario-based, definition, application, problem-solving
                     - For CHOICE questions: exactly 4 options, single answer [0-3]
                     - For MULTIPLE_CHOICE questions: 4 options, multiple answers
+                    - Highest Difficulity Level is 100% & Lowest is 0. 
+                      If given level is more than 100 or lower than 0, please keep within range (0 to 100)
+                    - To Return Topic value, stay within these "{topicNames}" names only 
                     - Return valid JSON only, no additional text`
                 ],
                 [
                     "user",
-                    `Generate {question_count} {difficulty} difficulty questions for {departmentName}.
+                    `Generate {question_count} questions for {departmentName}.
                     
                     TOPICS TO COVER: {topicNames}
+                    DIFFICULTY LEVEL FOR TOPICS: {difficulty_level}
 
                     Question distribution requirements:
                     - {scenarioCount} scenario-based questions
@@ -86,12 +92,19 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
             const misconceptionCount = Math.max(1, Math.floor(totalQuestions * 0.2));
             const advancedCount = Math.max(1, Math.floor(totalQuestions * 0.2));
 
+            const difficultyLevel: string[] = [];
+            // Difficulty Level
+            topics.forEach(topic => {
+                const topicScore = topicScores.find(ts => ts.topic_id === topic.id);
+                difficultyLevel.push(`${topic.name}:` + (topicScore && topicScore.id ? ` ${topicScore.score + 5}` : 5) + "%")
+            });
+
             // Build runnable chain (ensure parser is in the chain)
             const chain = promptTemplate.pipe(modelWithSchema);
 
             const response = await chain.invoke({
                 question_count: payload.question_count,
-                difficulty: payload.difficulty,
+                difficulty_level: difficultyLevel.join(','),
                 topicNames: topicNames,
                 departmentName: department.name,
                 uniquenessKey: uniquenessKey,
