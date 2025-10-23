@@ -15,7 +15,6 @@ export const QuestionGeneratePayloadDto = z.object({
     }).refine((val) => [5, 10, 15].includes(val), {
         message: 'Question count must be one of 5, 10, or 15',
     }),
-    difficulty: enum_(['easy', 'medium', 'hard'], { errorMap: () => ({ message: 'Difficulty must be easy, medium, or hard' }) }),
     timer: number({
         required_error: 'Timer is required',
         invalid_type_error: 'Timer must be a number',
