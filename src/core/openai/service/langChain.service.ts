@@ -3,7 +3,7 @@ import { ILangChainService } from "../interface/ILangChain.service";
 import { TYPES } from "../../type.core";
 import { ILangChainRepository } from "../interface/ILangChain.repository";
 import { QuestionGeneratePayloadType } from "../../../modules/public/question/dto/question-generate-payload.dto";
-import { Department, Question, Topic } from "../../../modules/public/types/public.type";
+import { Department, Question, Topic, TopicScore } from "../../../modules/public/types/public.type";
 
 @injectable()
 export class LangChainService implements ILangChainService {
@@ -11,10 +11,13 @@ export class LangChainService implements ILangChainService {
         @inject(TYPES.ILangChainRepository) private readonly langChainRepository: ILangChainRepository
     ) { }
 
-    generatedQuestions(department: Department,
+    generatedQuestions(
+        department: Department,
         topics: Topic[],
-        payload: QuestionGeneratePayloadType): Promise<Question[]> {
-        return this.langChainRepository.generatedQuestions(department, topics, payload);
+        topicScores: TopicScore[],
+        payload: QuestionGeneratePayloadType
+    ): Promise<Question[]> {
+        return this.langChainRepository.generatedQuestions(department, topics, topicScores, payload);
     }
 
     generatedStreamedExplanation(prompt: string): Promise<ReadableStream> {

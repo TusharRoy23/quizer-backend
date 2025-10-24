@@ -3,6 +3,6 @@ export type QuestionLogPayloadType = {
     participant: number | undefined;
     timer: number;
     question_count: number;
-    difficulty: string;
+    difficulty?: string;
     is_oral?: boolean;
 }

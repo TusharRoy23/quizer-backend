@@ -33,6 +33,7 @@ model participant {
   oral_quiz_restriction_count Int?           @default(2)
   quiz_restriction_count      Int?           @default(10)
   question_log                question_log[] @relation("question_generator")
+  topic_score                 topic_score[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -45,6 +46,7 @@ model topic {
   uuid                                    String               @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   question_logs                           question_log_topic[]
   department_topic_departmentTodepartment department?          @relation("topic_departmentTodepartment", fields: [department], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  topic_score                             topic_score[]
 }
 
 model user {
@@ -61,7 +63,7 @@ model question_log {
   uuid                  String                  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   department            Int
   timer                 Int
-  difficulty            String
+  difficulty            String                  @default("EASY")
   question_count        Int
   participant           Int
   completed             Boolean                 @default(false)
@@ -134,6 +136,19 @@ model question_discussion {
   role                  AgenticRole           @default(ASSISTANT)
   uuid                  String                @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   question_log_question question_log_question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+}
+
+model topic_score {
+  id             Int         @id @default(autoincrement())
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  participant_id Int
+  topic_id       Int
+  score          Int         @default(0)
+  uuid           String      @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  topic          topic       @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+  participant    participant @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+
+  @@unique([participant_id, topic_id], name: "participant_topic_unique")
 }
 
 enum QuestionType {
