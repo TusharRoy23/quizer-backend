@@ -3,7 +3,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
-import { Department, Question, QuestionLog, QuestionLogQuestion, Topic } from "../../types/public.type";
+import { Department, Question, QuestionLog, QuestionLogQuestion, Topic, TopicScore } from "../../types/public.type";
 import { BaseRepository } from "../../../../core/repository/base.repository";
 import { TYPES } from "../../../../core/type.core";
 
@@ -240,6 +240,27 @@ export abstract class BaseQuestionRepository extends BaseRepository {
             }
 
             return topics as Topic[];
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    protected async getScoresByTopics(topics: Topic[]): Promise<TopicScore[]> {
+        try {
+            const prisma = await this.prisma$();
+            const participant = await this.getParticipant();
+            const result: TopicScore[] = await prisma.topic_score.findMany({
+                where: {
+                    participant_id: participant?.id,
+                    topic_id: {
+                        in: topics.map(topic => topic.id)
+                    }
+                },
+                include: {
+                    topic: true
+                }
+            });
+            return result;
         } catch (error) {
             return throwException(error);
         }

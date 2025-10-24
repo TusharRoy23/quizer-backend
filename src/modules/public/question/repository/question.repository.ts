@@ -4,7 +4,7 @@ import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
-import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer } from "../../types/public.type";
+import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic, TopicScore } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import CronJob from "node-cron";
@@ -15,6 +15,13 @@ import { ILangChainService } from "../../../../core/openai/interface/ILangChain.
 import { IQuestionDiscussionService } from "../../../../core/langgraph/interface/IQuestionDiscussion.service";
 import { QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
 import { AgenticRole } from "../../../../shared/utils/enum";
+
+type score = {
+    [key: string]: {
+        total_questions: number;
+        correct_answers: number;
+    };
+}
 
 @injectable()
 export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
@@ -44,12 +51,13 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             const topics = await this.getTopicsByUUIDsAndDepartmentUUID(payload.topics, payload.department);
             if (!department || !topics) return '';
 
+            const topicScores: TopicScore[] = await this.getScoresByTopics(topics);
+
             const questionPayload: QuestionLogPayloadType = {
                 department: department?.id,
                 participant: participant?.id,
                 timer: payload.timer,
-                question_count: payload.question_count,
-                difficulty: payload.difficulty,
+                question_count: payload.question_count
             };
             const prisma = await this.prisma$();
             const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -57,7 +65,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id, tx);
                 return savedQuestionLog;
             });
-            const questions = await this.langChainService.generatedQuestions(department, topics, payload);
+            const questions = await this.langChainService.generatedQuestions(department, topics, topicScores, payload);
             await this.saveQuestions(questions, result.id);
 
             return result.uuid; // Return the UUID of the question log
@@ -129,7 +137,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             const prisma = await this.prisma$();
             const questionLog = await this.getQuestionLogByUUID(questionLogUUID, false);
 
-            const questions = await prisma.question_log_question.findMany({
+            const questions: Question[] = await prisma.question_log_question.findMany({
                 where: {
                     question_log_id: questionLog.id,
                     is_oral: false
@@ -146,32 +154,54 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 score: 0
             };
 
+            const score: score = {};
+
             questions.forEach((question: Question) => {
+                const isCorrectAnswer = question.answer && question.answer.join(',') === question?.selected_answer?.join(',');
                 if (question?.selected_answer && question?.selected_answer?.length > 0) {
                     result.total_answers += 1
                 }
 
-                if (question.answer && question.answer.join(',') === question?.selected_answer?.join(',')) {
+                if (isCorrectAnswer) {
                     result.correct_answers += 1;
+                }
+
+                if (question.topic) {
+                    if (!score[question.topic]) {
+                        score[question.topic] = {
+                            total_questions: 1,
+                            correct_answers: isCorrectAnswer ? 1 : 0
+                        }
+                    } else {
+                        score[question.topic] = {
+                            total_questions: score[question.topic].total_questions + 1,
+                            correct_answers: isCorrectAnswer ? score[question.topic].correct_answers + 1 : score[question.topic].correct_answers
+                        }
+                    }
                 }
             });
 
             result.score = (result.correct_answers / result.total_questions) * 100;
             //! PROBLEM: An operation failed because it depends on one or more records 
             //! that were required but not found. Record to update not found.
-            const questionLogUpdate = await prisma.question_log.update({
-                where: {
-                    uuid: questionLogUUID,
-                    completed: false,
-                    is_oral: false
-                },
-                data: {
-                    completed: true, // Mark the question log as completed,
-                    score: result.score,
-                    total_answers: result.total_answers,
-                    total_correct: result.correct_answers,
-                }
-            });
+            const questionLogUpdate = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                await this.updateTopicScore(score, tx)
+                const isUpdated = await tx.question_log.update({
+                    where: {
+                        uuid: questionLogUUID,
+                        completed: false,
+                        is_oral: false
+                    },
+                    data: {
+                        completed: true, // Mark the question log as completed,
+                        score: result.score,
+                        total_answers: result.total_answers,
+                        total_correct: result.correct_answers,
+                    }
+                });
+                return isUpdated;
+            })
+
 
             if (!questionLogUpdate) {
                 throw new NotFoundException('Question log not found or already completed');
@@ -713,6 +743,57 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
+    private async updateTopicScore(topicScore: score, prisma: Prisma.TransactionClient): Promise<boolean> {
+        try {
+            const participant = this.getParticipant();
+            const keys = Object.keys(topicScore);
+            const topics: Topic[] = await prisma.topic.findMany({
+                where: {
+                    name: {
+                        in: keys
+                    }
+                },
+                select: {
+                    id: true,
+                    uuid: true,
+                    name: true
+                }
+            });
+
+            // Use upsert for each topic score
+            const upsertOperations = topics.map((topic: Topic) => {
+                const selectedTopic = topicScore[topic.name];
+                if (!selectedTopic) return null;
+
+                const score = Math.floor((selectedTopic.correct_answers / selectedTopic.total_questions) * 100);
+
+                return prisma.topic_score.upsert({
+                    where: {
+                        participant_topic_unique: {
+                            participant_id: participant.id,
+                            topic_id: topic.id
+                        }
+                    },
+                    update: {
+                        score: score,
+                    },
+                    create: {
+                        participant_id: participant.id,
+                        topic_id: topic.id,
+                        score: score,
+                    }
+                });
+            }).filter(Boolean); // Remove null values
+
+            // Execute all upsert operations
+            const results = await Promise.all(upsertOperations);
+            return results.length > 0;
+
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
     private async updateKeywordExample(keywordUUID: string, example: string): Promise<void> {
         try {
             const prisma = await this.prisma$();
@@ -1044,45 +1125,4 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
         }
     }
-
-    // private wrapReadableStream(
-    //     baseStream: ReadableStream<Uint8Array>,
-    //     options?: {
-    //         onComplete?: (fullText: string) => Promise<void> | void; // callback when stream ends
-    //         onErrorText?: string; // fallback message if error
-    //     }
-    // ): ReadableStream<Uint8Array> {
-    //     const encoder = new TextEncoder();
-    //     const decoder = new TextDecoder();
-    //     let fullContent = "";
-
-    //     return new ReadableStream({
-    //         async start(controller) {
-    //             try {
-    //                 const reader = baseStream.getReader();
-
-    //                 while (true) {
-    //                     const { done, value } = await reader.read();
-
-    //                     if (done) {
-    //                         if (options?.onComplete && fullContent.trim()) {
-    //                             await options.onComplete(fullContent.trim());
-    //                         }
-    //                         controller.close();
-    //                         break;
-    //                     }
-
-    //                     const chunk = decoder.decode(value, { stream: true });
-    //                     fullContent += chunk;
-
-    //                     controller.enqueue(encoder.encode(chunk));
-    //                 }
-    //             } catch (error) {
-    //                 const errorMsg = options?.onErrorText ?? "Error generating response. Please try again.";
-    //                 controller.enqueue(encoder.encode(errorMsg));
-    //                 controller.close();
-    //             }
-    //         }
-    //     });
-    // }
 }
