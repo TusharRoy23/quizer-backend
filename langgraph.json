@@ -1,7 +1,7 @@
 {
     "$schema": "https://langgra.ph/schema.json",
     "graphs": {
-        "question-discussion": "./src/core/langgraph/graph-export.ts:graph"
+        "question-generation": "./src/core/langgraph/studio/question-gen-graph.ts:questionGraph"
     },
     "env": "./.env"
 }

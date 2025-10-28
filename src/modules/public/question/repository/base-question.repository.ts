@@ -202,12 +202,13 @@ export abstract class BaseQuestionRepository extends BaseRepository {
         }
     }
 
-    protected async getDepartmentByUUID(uuid: string): Promise<Department | null> {
+    protected async getDepartmentByUUID(uuid: string, is_global: boolean = true): Promise<Department | null> {
         try {
             const prisma = await this.prisma$();
             const department = await prisma.department.findFirst({
                 where: {
-                    uuid: uuid
+                    uuid: uuid,
+                    is_global: is_global
                 }
             });
 
@@ -221,7 +222,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
         }
     }
 
-    protected async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string): Promise<Topic[] | null> {
+    protected async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string, is_global: boolean = true): Promise<Topic[] | null> {
         try {
             const prisma = await this.prisma$();
             const topics = await prisma.topic.findMany({
@@ -231,7 +232,8 @@ export abstract class BaseQuestionRepository extends BaseRepository {
                     },
                     department_topic_departmentTodepartment: {
                         uuid: departmentUuid
-                    }
+                    },
+                    is_global: is_global
                 },
             });
 
@@ -356,6 +358,17 @@ export abstract class BaseQuestionRepository extends BaseRepository {
                     controller.enqueue(encoder.encode(errorMsg));
                     controller.close();
                 }
+            }
+        });
+    }
+
+    protected returnErrorStream(): ReadableStream {
+        const encoder = new TextEncoder();
+        return new ReadableStream({
+            start(controller) {
+                const errorMsg = "Error: Unable to generate explanation at this time.";
+                controller.enqueue(encoder.encode(errorMsg));
+                controller.close();
             }
         });
     }

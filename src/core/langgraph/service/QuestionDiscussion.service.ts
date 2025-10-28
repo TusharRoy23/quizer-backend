@@ -29,4 +29,12 @@ export class QuestionDiscussionService implements IQuestionDiscussionService {
     public async getQuestionDiscussionMessages(questionUUID: string): Promise<any[]> {
         return this.questionDiscussionRespository.getQuestionDiscussionMessages(questionUUID);
     }
+
+    public async initResponseToGenerateQuestion(): Promise<ReadableStream> {
+        return this.questionDiscussionRespository.initResponseToGenerateQuestion();
+    }
+
+    public async getResponseToGenerateQuestion(userMessage: string): Promise<string> {
+        return this.questionDiscussionRespository.getResponseToGenerateQuestion(userMessage);
+    }
 }
