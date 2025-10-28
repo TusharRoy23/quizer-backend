@@ -142,3 +142,8 @@ export type CustomQuestion = {
     timer: number;
     question_count: number;
 }
+
+export type AgentStepState = {
+    content: string | null,
+    next_step: string | null
+}
