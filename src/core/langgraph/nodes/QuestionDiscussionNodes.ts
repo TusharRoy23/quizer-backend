@@ -36,7 +36,6 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
         }
 
         if (this.containsLink(lastUserMessage)) {
-            console.log("link detected");
             return { currentIntent: "avoid_unnecessary_content" };
         }
 

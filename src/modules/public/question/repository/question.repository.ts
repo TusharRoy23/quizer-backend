@@ -4,7 +4,7 @@ import { TYPES } from "../../../../core/type.core";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
-import { PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic, TopicScore } from "../../types/public.type";
+import { CustomQuestion, PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic, TopicScore } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import CronJob from "node-cron";
@@ -12,9 +12,6 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { BaseQuestionRepository } from "./base-question.repository";
 import { ILangChainService } from "../../../../core/openai/interface/ILangChain.service";
-import { IQuestionDiscussionService } from "../../../../core/langgraph/interface/IQuestionDiscussion.service";
-import { QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
-import { AgenticRole } from "../../../../shared/utils/enum";
 
 type score = {
     [key: string]: {
@@ -28,8 +25,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
-        @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService,
-        @inject(TYPES.IQuestionDiscussionService) readonly questionDiscussionService: IQuestionDiscussionService
+        @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService
     ) {
         super(databaseService);
         this.cronJob(); // Schedule the cron job to update quiz timers
@@ -39,7 +35,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         CronJob.schedule('*/30 * * * *', async () => this.updateQuizesTimer());
     }
 
-    public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
+    public async generatedQuestions(payload: QuestionGeneratePayloadType, is_global: boolean = true): Promise<string> {
         try {
             const participant = this.getParticipant();
             await this.checkPromptInProgress();
@@ -47,8 +43,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             if (questionLog) {
                 return questionLog.uuid; // Return existing ongoing quiz UUID
             }
-            const department = await this.getDepartmentByUUID(payload.department);
-            const topics = await this.getTopicsByUUIDsAndDepartmentUUID(payload.topics, payload.department);
+            const department = await this.getDepartmentByUUID(payload.department, is_global);
+            const topics = await this.getTopicsByUUIDsAndDepartmentUUID(payload.topics, payload.department, is_global);
             if (!department || !topics) return '';
 
             const topicScores: TopicScore[] = await this.getScoresByTopics(topics);
@@ -70,6 +66,64 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
             return result.uuid; // Return the UUID of the question log
         } catch (error: any) {
+            return throwException(error);
+        }
+    }
+
+    public async generateCustomQuestions(payload: CustomQuestion): Promise<string> {
+        try {
+            const participant = this.getParticipant();
+            const prisma = await this.prisma$();
+            let department = await prisma.department.findUnique({
+                where: {
+                    participant_id: participant.id,
+                    is_global: false,
+                    name: payload.department
+                }
+            });
+            if (!department?.id) {
+                department = await prisma.department.create({
+                    data: {
+                        name: payload.department,
+                        is_global: false,
+                        participant_id: participant.id
+                    }
+                });
+            }
+
+            const topicPayload = payload.topics?.map(topic => ({
+                name: topic,
+                is_global: false,
+                department: department?.id,
+                participant_id: participant.id
+            }));
+
+            const topicCount = await prisma.topic.createMany({
+                data: topicPayload,
+                skipDuplicates: true
+            });
+            if (!topicCount.count) {
+                throw new NotFoundException('Topics are not created.');
+            }
+            const topics = await prisma.topic.findMany({
+                where: {
+                    department: department.id,
+                    is_global: false,
+                    participant_id: participant.id,
+                    name: {
+                        in: payload.topics
+                    }
+                }
+            });
+            const questionGeneratePayload: QuestionGeneratePayloadType = {
+                department: department?.uuid,
+                topics: topics?.map((topic: Topic) => topic.uuid),
+                question_count: payload.question_count,
+                timer: payload.timer
+            };
+            const quizUUid = await this.generatedQuestions(questionGeneratePayload, false);
+            return quizUUid;
+        } catch (error) {
             return throwException(error);
         }
     }
@@ -510,47 +564,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             return this.wrapReadableStream(baseStream, {
                 onComplete: async (fullText) => {
                     await this.updateKeywordExample(keywordUUID, fullText);
-                },
-                onErrorText: "Error generating explanation. Please try again."
-            });
-        } catch (error) {
-            const encoder = new TextEncoder();
-            return new ReadableStream({
-                start(controller) {
-                    const errorMsg = "Error: Unable to generate explanation at this time.";
-                    controller.enqueue(encoder.encode(errorMsg));
-                    controller.close();
-                }
-            });
-        }
-    }
-
-    public async getExplanationsFromAgent(questionUUID: string): Promise<string[]> {
-        try {
-            const result = await this.questionDiscussionService.startNewSession(questionUUID);
-            // console.log('QQQ result: ', result);
-            return [];
-        } catch (error) {
-            return throwException(error);
-        }
-    }
-
-    public async getExplanationFromAgent(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<string | null> {
-        try {
-            const result = await this.questionDiscussionService.handleUserMessage(questionUUID, payload.question);
-            return result || null;
-        } catch (error) {
-            return throwException(error);
-        }
-    }
-
-    public async getExplanationFromAgentStream(questionUUID: string, payload: QuestionExplanationPayloadType): Promise<ReadableStream> {
-        try {
-            const stream = await this.questionDiscussionService.handleStreamUserMessage(questionUUID, payload.question);
-            return this.wrapReadableStream(stream, {
-                onComplete: async (fullText) => {
-                    await this.questionDiscussionService.saveQuestionDiscussionMessage(questionUUID, payload.question, AgenticRole.USER);
-                    await this.questionDiscussionService.saveQuestionDiscussionMessage(questionUUID, fullText, AgenticRole.ASSISTANT);
                 },
                 onErrorText: "Error generating explanation. Please try again."
             });

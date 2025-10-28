@@ -17,6 +17,7 @@ import { VerbalQuestionGeneratePayloadDto, VerbalQuestionGeneratePayloadType } f
 import { ValidateQuizType } from "../../../../middlewares/validate-quiz-type.middleware";
 import { QuestionExplanationPayloadDto, QuestionExplanationPayloadType } from "../dto/question-explanation-payload.dto";
 import { IQuestionDiscussionService } from "../../../../core/langgraph/interface/IQuestionDiscussion.service";
+import { QuestionGenerateConversationPayloadDto, QuestionGenerateConversationPayloadType } from "../dto/question-generate-conversation-payload.dto";
 
 @controller("/question", AuthStrategy.authenticate("jwt", { session: false }), RequestContextMiddleware, SessionMiddleware)
 export class QuestionController {
@@ -212,7 +213,7 @@ export class QuestionController {
     @httpGet("/explanation/agent/:questionUUID", ValidateUUIDParam("questionUUID"))
     public async getExplanationsFromAgent(req: Request, res: Response) {
         const questionUUID = req.params.questionUUID;
-        const result = await this.questionService.getExplanationsFromAgent(questionUUID);
+        const result = await this.questionDiscussionService.startNewSession(questionUUID);
         return res.status(200).json({ data: result });
     }
 
@@ -222,7 +223,7 @@ export class QuestionController {
     ) {
         const questionUUID = req.params.questionUUID;
         try {
-            const stream = await this.questionService.getExplanationFromAgentStream(questionUUID, payload);
+            const stream = await this.questionDiscussionService.handleStreamUserMessage(questionUUID, payload.question);
             this.streamingSuccessResponse(req, res, stream);
         } catch (error) {
             this.streamingErrorResponse(res, error);
@@ -234,6 +235,24 @@ export class QuestionController {
         const questionUUID = req.params.questionUUID;
         const messages = await this.questionDiscussionService.getQuestionDiscussionMessages(questionUUID);
         return res.status(200).json({ data: messages });
+    }
+
+    @httpPost("/discussion/initialization")
+    public async initResponseToGenerateQuestion(req: Request, res: Response) {
+        try {
+            const stream = await this.questionDiscussionService.initResponseToGenerateQuestion();
+            this.streamingSuccessResponse(req, res, stream);
+        } catch (error) {
+            this.streamingErrorResponse(res, error);
+        }
+    }
+
+    @httpPost("/discussion/generate", DtoValidationMiddleware(QuestionGenerateConversationPayloadDto))
+    public async getResponseToGenerateQuestion(
+        @requestBody() payload: QuestionGenerateConversationPayloadType, req: Request, res: Response
+    ) {
+        const data = await this.questionDiscussionService.getResponseToGenerateQuestion(payload.message);
+        return res.status(201).json({ data });
     }
 
     @httpPost("/verbal/generate", DtoValidationMiddleware(VerbalQuestionGeneratePayloadDto))

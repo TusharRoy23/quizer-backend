@@ -6,5 +6,7 @@ export interface IQuestionDiscussionRepository {
     handleStreamUserMessage(questionUUID: string, userMessage: string): Promise<ReadableStream>;
     saveQuestionDiscussionMessage(questionUUID: string, message: string, role: AgenticRole): Promise<string>;
     startNewSession(questionUUID: string): Promise<any>;
-    getQuestionDiscussionMessages(questionUUID: string): Promise<QuestionDiscussionMessage[]>
+    getQuestionDiscussionMessages(questionUUID: string): Promise<QuestionDiscussionMessage[]>;
+    initResponseToGenerateQuestion(): Promise<ReadableStream>;
+    getResponseToGenerateQuestion(userMessage: string): Promise<string>;
 }

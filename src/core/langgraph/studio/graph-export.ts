@@ -11,7 +11,7 @@ import { z } from "zod";
 import { StateGraph, START, END } from "@langchain/langgraph";
 import { Annotation } from "@langchain/langgraph";
 import { ChatDeepSeek } from "@langchain/deepseek";
-import { QuestionDiscussionState } from "./states/question-discussion.state";
+import { QuestionDiscussionState } from "../states/question-discussion.state";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 // Use your exact state structure for accurate visualization
