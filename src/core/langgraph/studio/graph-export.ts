@@ -52,7 +52,7 @@ const RouteDiscussionSchema = z.object({
 
 const deepseekModel = new ChatDeepSeek({
     model: 'deepseek-coder',
-    temperature: 0.1,
+    temperature: 0.4,
     cache: false
 });
 const questionContext = {
