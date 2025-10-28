@@ -26,7 +26,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
     ) {
         this.deepSeekModel = new ChatDeepSeek({
             model: "deepseek-coder",
-            temperature: 0.1,
+            temperature: 0.4,
             cache: false,
         });
     }
@@ -109,14 +109,14 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
 
             const sysPrompt = `
                     ${baseSystemPrompt}
-                        Now, can you check if it is a valid Department? 
-                        Ex. Educational Institution, Corporate Office, & Software Industry
-                        Return true if it is valid otherwise false & also a message with hints.
-                        Also Return 3 topics of the given department as a string array.
-                        Remember, user can also ask non-specific dept. Such as Engineering, Policy Maker, etc.
-                        These type of dept can be specified. Such as for engineering - software engineering, mechanical engineering,
-                        civil engineering, etc.
-                        If you find this type of thing, return false & also a message with hints.
+                        Check if the given department is valid based on known departments 
+                        (e.g., Educational Institution, Engineering, Corporate Office, Software Industry, Medicine, Human Resource etc.).
+                        Return:
+                        - isValid: true/false
+                        - message: short hint if invalid or needs clarification
+                        - topics: 3 related topics as a string array
+                        If the input is too broad (e.g., Engineering, Policy Maker), return isValid=false and 
+                        suggest more specific options (e.g., Software Engineering, Mechanical Engineering).
                     `;
             const userPrompt = `
                         User provided: {department}
@@ -131,7 +131,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             });
 
             if (!result.isValid) {
-                prompt = `${department} - ${result?.message}`;
+                prompt = `${result?.message}`;
             } else {
                 return {
                     messages: [

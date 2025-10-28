@@ -7,7 +7,7 @@ import { z } from "zod";
 const checkpointer = new MemorySaver();
 const deepSeekModel = new ChatDeepSeek({
     model: 'deepseek-coder',
-    temperature: 0.1,
+    temperature: 0.4,
     cache: false
 });
 
