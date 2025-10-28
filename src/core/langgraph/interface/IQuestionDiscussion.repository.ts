@@ -1,4 +1,4 @@
-import { QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
+import { AgentStepState, QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
 import { AgenticRole } from "../../../shared/utils/enum";
 
 export interface IQuestionDiscussionRepository {
@@ -8,5 +8,5 @@ export interface IQuestionDiscussionRepository {
     startNewSession(questionUUID: string): Promise<any>;
     getQuestionDiscussionMessages(questionUUID: string): Promise<QuestionDiscussionMessage[]>;
     initResponseToGenerateQuestion(): Promise<ReadableStream>;
-    getResponseToGenerateQuestion(userMessage: string): Promise<string>;
+    getResponseToGenerateQuestion(userMessage: string): Promise<AgentStepState>;
 }

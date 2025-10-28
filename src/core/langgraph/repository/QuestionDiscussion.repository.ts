@@ -7,7 +7,7 @@ import { BaseQuestionRepository } from "../../../modules/public/question/reposit
 import { IDatabaseService } from "../../interface/IDatabase.service";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { AgenticRole } from "../../../shared/utils/enum";
-import { QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
+import { AgentStepState, QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
 import { IQuestionGraphBuilder } from "../interface/IQuestionGraphBuilder";
 import { Command } from "@langchain/langgraph";
 
@@ -203,7 +203,7 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
         }
     }
 
-    public async getResponseToGenerateQuestion(userMessage: string): Promise<string> {
+    public async getResponseToGenerateQuestion(userMessage: string): Promise<AgentStepState> {
         try {
             const participant = this.getParticipant();
             const config = {
@@ -212,11 +212,17 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
             const data = await this.questionGenerationGraph.invoke(
                 new Command({ resume: userMessage }), config
             );
-            let value = null;
+            const value: AgentStepState = {
+                content: null,
+                next_step: null
+            };
             if (Object.keys(data).includes('__interrupt__')) {
-                value = data?.__interrupt__[0]?.value;
+                value.content = data?.__interrupt__[0]?.value;
+                value.next_step = 'interrupt';
             } else if (Object.keys(data).includes('messages')) {
-                value = data?.messages[0]?.content;
+                const message = data?.messages[0]?.content;
+                value.content = message?.content;
+                value.next_step = message?.next_step;
             }
             return value;
 

@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { ChatDeepSeek } from "@langchain/deepseek";
 import { Command, END, interrupt } from "@langchain/langgraph";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
@@ -8,7 +7,6 @@ import { IQuestionGenerationNodes } from "../interface/IQuestionGenerationNodes"
 import { isValidPositiveNumber } from "../../../shared/utils/utils";
 import { TYPES } from "../../type.core";
 import { IQuestionRepository } from "../../../modules/public/question/interface/IQuestion.repository";
-import { IQuestionDiscussionRepository } from "../interface/IQuestionDiscussion.repository";
 
 const baseSystemPrompt = `
     You are a teacher for a student. As you will create some questions depends on-
@@ -53,7 +51,11 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         ]);
         return {
             messages: [
-                { role: "assistant", content: prompt.content, timestamp: Date.now() }
+                {
+                    role: "assistant",
+                    content: prompt.content,
+                    timestamp: Date.now()
+                }
             ],
             lastAssistantMessage: prompt.content
         }
@@ -63,7 +65,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         Ask for permission for further action
     */
     async askForPermission(state: QuestionGenerationState) {
-        const prompt = `
+        let prompt = `
                     ${state.lastAssistantMessage}
                 `;
         while (true) {
@@ -84,12 +86,12 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
                 answer: answer
             });
             const permission = result.permission.toLocaleLowerCase();
-            return {
-                messages: [
-                    { role: "assistant", content: permission, timestamp: Date.now() },
-                ],
-                lastAssistantMessage: permission
+            if (typeof permission === "string" && permission === "yes") {
+                return new Command({ goto: "askForDepartment" });
+            } else if (typeof permission === "string" && permission === "no") {
+                return new Command({ goto: "endOfDiscussion" });
             }
+            prompt = `You have to type "Yes" or "No" for further action.`;
         }
     }
 
@@ -284,17 +286,22 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         `;
         while (true) {
             const isItConfirm = interrupt(prompt);
-            return {
-                messages: [
-                    { role: "assistant", content: state.generationContext, timestamp: Date.now() },
-                ],
-                lastAssistantMessage: isItConfirm
-            };
+            if (typeof isItConfirm === "string" && isItConfirm.toLowerCase() === 'no') {
+                return new Command({ goto: "endOfDiscussion" });
+            } else if (typeof isItConfirm === "string" && isItConfirm.toLowerCase() === 'yes') {
+                return new Command({
+                    goto: "generateQuestions", update: {
+                        messages: [
+                            { role: "assistant", content: state.generationContext, timestamp: Date.now() },
+                        ]
+                    }
+                });
+            }
+            prompt = `You need to type "Yes" or "No" for further action.`;
         }
     }
 
     async generateQuestions(state: QuestionGenerationState) {
-        //! Need to call a function to create quiz & send an UUID to the user.
         const { department, topics, timer, question_count } = state.generationContext;
         const quizUUID = await this.questionRepository.generateCustomQuestions({
             department: department || '',
@@ -302,18 +309,37 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             timer: timer || 1,
             question_count: question_count || 5
         });
-        return {
-            messages: [
-                { role: "assistant", content: quizUUID, timestamp: Date.now() },
-            ],
-        };
+        return new Command({
+            goto: END, update: {
+                messages: [
+                    {
+                        role: "assistant",
+                        content: {
+                            content: quizUUID,
+                            next_step: "QUIZ"
+                        },
+                        timestamp: Date.now()
+                    },
+                ]
+            }
+        });
     }
 
     async endOfDiscussion(state: QuestionGenerationState) {
-        return {
-            messages: [
-                { role: "assistant", content: "Thank you for your time. You can close the chat.", timestamp: Date.now() }
-            ],
-        }
+        return new Command({
+            goto: END,
+            update: {
+                messages: [
+                    {
+                        role: "assistant",
+                        content: {
+                            content: "Thank you for your time. You can close the chat.",
+                            next_step: "END"
+                        },
+                        timestamp: Date.now()
+                    }
+                ]
+            }
+        });
     }
 }
