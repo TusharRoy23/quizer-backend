@@ -35,7 +35,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         CronJob.schedule('*/30 * * * *', async () => this.updateQuizesTimer());
     }
 
-    public async generatedQuestions(payload: QuestionGeneratePayloadType, is_global: boolean = true): Promise<string> {
+    public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
         try {
             const participant = this.getParticipant();
             await this.checkPromptInProgress();
@@ -43,8 +43,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             if (questionLog) {
                 return questionLog.uuid; // Return existing ongoing quiz UUID
             }
-            const department = await this.getDepartmentByUUID(payload.department, is_global);
-            const topics = await this.getTopicsByUUIDsAndDepartmentUUID(payload.topics, payload.department, is_global);
+            const department = await this.getDepartmentByUUID(payload.department);
+            const topics = await this.getTopicsByUUIDsAndDepartmentUUID(payload.topics, payload.department);
             if (!department || !topics) return '';
 
             const topicScores: TopicScore[] = await this.getScoresByTopics(topics);
@@ -76,8 +76,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             const prisma = await this.prisma$();
             let department = await prisma.department.findUnique({
                 where: {
-                    participant_id: participant.id,
-                    is_global: false,
                     name: payload.department
                 }
             });
@@ -121,7 +119,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 question_count: payload.question_count,
                 timer: payload.timer
             };
-            const quizUUid = await this.generatedQuestions(questionGeneratePayload, false);
+            const quizUUid = await this.generatedQuestions(questionGeneratePayload);
             return quizUUid;
         } catch (error) {
             return throwException(error);
