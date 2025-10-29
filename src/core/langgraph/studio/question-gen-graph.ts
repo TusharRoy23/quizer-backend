@@ -3,6 +3,8 @@ import { ChatDeepSeek } from "@langchain/deepseek";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { askPermissionSchema, departmentNodeSchema, InputValidationSchema, QuestionGenerationStateSchema } from "../states/question-generation.state";
 import { z } from "zod";
+import { isValidPositiveNumber } from "../../../shared/utils/utils";
+import { NextStep } from "../../../shared/utils/enum";
 
 const checkpointer = new MemorySaver();
 const deepSeekModel = new ChatDeepSeek({
@@ -14,7 +16,7 @@ const deepSeekModel = new ChatDeepSeek({
 const outputSchema = deepSeekModel.withStructuredOutput(InputValidationSchema);
 
 
-let baseSystemPrompt = `
+const baseSystemPrompt = `
     You are a teacher for a student. As you will create some questions depends on-
     1. Department- Valid & existing Department.
     2. Topic(s)- Valid topic(s) which must be valid under the given department.
@@ -40,21 +42,22 @@ export const questionGraph = new StateGraph(QuestionGenerationStateSchema)
         ]);
         return {
             messages: [
-                { role: "assistant", content: prompt.content, timestamp: Date.now() }
+                {
+                    role: "assistant",
+                    content: prompt.content,
+                    timestamp: Date.now()
+                }
             ],
-            initConversationMessage: prompt.content
+            lastAssistantMessage: prompt.content
         }
     })
     .addNode("askForPermission", async (state) => {
         let prompt = `
-            ${state.initConversationMessage}
-        `;
+                    ${state.lastAssistantMessage}
+                `;
         while (true) {
             const answer = interrupt(prompt);
-            const sysPrompt = `
-                Return "yes" if the user agreed otherwise "no".
-                If user said none of them, return "none".
-            `;
+            const sysPrompt = `Return "yes" if the user agreed otherwise "no". If user said none of them, return "none".`;
             const userPrompt = `User said: {answer}`;
 
             const promptTemplate = await ChatPromptTemplate.fromMessages([
@@ -67,34 +70,35 @@ export const questionGraph = new StateGraph(QuestionGenerationStateSchema)
                 answer: answer
             });
             const permission = result.permission.toLocaleLowerCase();
-            if (permission === "yes") {
-                return new Command({ goto: "askDepartment" })
-            } else if (permission === "no") {
-                return new Command({ goto: END });
-            } else {
-                prompt = `You have to say "Yes" or "No" for further action.`;
+            if (typeof permission === "string" && permission === "yes") {
+                return new Command({ goto: "askForDepartment" });
+            } else if (typeof permission === "string" && permission === "no") {
+                return new Command({ goto: "endOfDiscussion" });
             }
+            prompt = `You have to type **Yes** or **No** for further action.`;
         }
     })
     .addNode("askDepartment", async (state) => {
         const askDeptSchema = deepSeekModel.withStructuredOutput(departmentNodeSchema);
-        let prompt = `
-                    Let's begin setting up your question generation.
-                    Please tell me the department (e.g., Software Engineering, Math, Physics, Chemistry, etc.).
-                `;
+        let prompt = `Let's begin setting up your question generation.
+                \n\nPlease tell me the department (e.g., Software Engineering, Math, Physics, Chemistry, etc.).`;
         while (true) {
             const department = interrupt(prompt);
 
             const sysPrompt = `
-            ${baseSystemPrompt}
-                Now, can you check if it is a valid Department? 
-                Ex. Educational Institution, Corporate Office, & Software Industry
-                Return true if it is valid otherwise false.
-                Also Return 3 topics of the given department as a string array.
-            `;
+                            ${baseSystemPrompt}
+                                Check if the given department is valid based on known departments 
+                                (e.g., Educational Institution, Engineering, Corporate Office, Software Industry, Medicine, Human Resource etc.).
+                                Return:
+                                - isValid: true/false
+                                - message: short hint if invalid or needs clarification
+                                - topics: 3 related topics as a string array
+                                If the input is too broad (e.g., Engineering, Policy Maker), return isValid=false and 
+                                suggest more specific options (e.g., Software Engineering, Mechanical Engineering).
+                            `;
             const userPrompt = `
-                User provide department name: {department}
-            `;
+                                User provided: {department}
+                            `;
 
             const promptTemplate = await ChatPromptTemplate.fromMessages([
                 ["system", sysPrompt],
@@ -105,7 +109,7 @@ export const questionGraph = new StateGraph(QuestionGenerationStateSchema)
             });
 
             if (!result.isValid) {
-                prompt = `${department} - This is an invalid Department`;
+                prompt = `${result?.message}`;
             } else {
                 return {
                     messages: [
@@ -120,25 +124,25 @@ export const questionGraph = new StateGraph(QuestionGenerationStateSchema)
         }
     })
     .addNode("askTopics", async (state) => {
+        const outputSchema = deepSeekModel.withStructuredOutput(InputValidationSchema);
         const department = state.generationContext?.department;
         const hintFortopics = state.hintFortopics || [];
-        let prompt = `
-            Great! You selected department: ${department}.
-            Please provide up to two topics within ${department}.
-            N.B. Please use comma(,) separated value for multiple topics
-            Example: ${hintFortopics?.join(', ')}, etc.
-        `;
+        let prompt = `Great! You selected **${department}**.
+                \n\nPlease provide **up to two topics** within this department.
+                \n\n**Note:** Use commas (,) to separate multiple topics.
+                \n\nExample: ${hintFortopics?.join(", ")}.`;
+
         while (true) {
             const topics = interrupt(prompt);
             const sysPrompt = `
-                ${baseSystemPrompt}
-                Now, can you check if these are valid Topics of {department} department?
-                Return true if it is valid otherwise false.
-            `;
+                                ${baseSystemPrompt}
+                                Now, can you check if these are valid Topics of {department} department?
+                                Return true if it is valid otherwise false.
+                            `;
             const userPrompt = `
-                Department: {department},
-                Topics: {topics}
-            `;
+                                Department: {department},
+                                Topics: {topics}
+                            `;
             const promptTemplate = await ChatPromptTemplate.fromMessages([
                 ["system", sysPrompt],
                 ["user", userPrompt]
@@ -149,10 +153,8 @@ export const questionGraph = new StateGraph(QuestionGenerationStateSchema)
             });
 
             if (!result.isValid) {
-                prompt = `
-                    ${topics} - These topics are invalid for ${department} Department.
-                    N.B. Please use comma(,) separated value for multiple topics
-                `;
+                prompt = `**${topics}** - These topics are invalid for **${department}** Department.
+                        \n\nN.B. Please use **comma(,)** separated value for multiple topics`;
             } else {
                 return {
                     messages: [
@@ -160,7 +162,7 @@ export const questionGraph = new StateGraph(QuestionGenerationStateSchema)
                     ],
                     generationContext: {
                         ...state.generationContext,
-                        topics: topics
+                        topics: topics.split(",").map((topic: string) => topic.trim())
                     }
                 };
             }
@@ -168,85 +170,84 @@ export const questionGraph = new StateGraph(QuestionGenerationStateSchema)
     })
     .addNode("askTimer", async (state) => {
         const { department, topics } = state.generationContext;
-        let prompt = `
-            Got it. Department: ${department}, Topics: ${topics}.
-            How long should the timer be (in minutes)?
-            Max: 20 minutes.
-            Min: 1 minute
-        `;
+        let prompt = `Got it. **Department: ${department}**, **Topics: ${topics}**.
+                \n\nHow long should the timer be **(in minutes)**? 
+                \n\n**Max**: 20 minutes.
+                \n\n**Min**: 1 minute.`;
         while (true) {
             const timer = interrupt(prompt);
-            if (typeof timer != "number") {
+            if (!isValidPositiveNumber(timer)) {
                 prompt = `Time must be an number`;
-            } else if (typeof timer === "number" && (timer < 1 || timer > 20)) {
-                prompt = `
-                    Max: 20 minutes.
-                    Min: 1 minute
-                `;
             } else {
-                return {
-                    messages: [
-                        { role: "assistant", content: timer, timestamp: Date.now() },
-                    ],
-                    generationContext: {
-                        ...state.generationContext,
-                        timer: timer
-                    }
-                };
+                const number = Number(timer);
+                if (number < 1 || number > 20) {
+                    prompt = `**Max**: 20 minutes.
+                            **Min**: 1 minute.`;
+                } else {
+                    return {
+                        messages: [
+                            { role: "assistant", content: number, timestamp: Date.now() },
+                        ],
+                        generationContext: {
+                            ...state.generationContext,
+                            timer: number
+                        }
+                    };
+                }
             }
         }
     })
     .addNode("askQuestionCount", async (state) => {
         const questionCountArr = [5, 10, 15];
         const { timer } = state.generationContext;
-        let prompt = `
-            Perfect. The timer is set to ${timer} minute(s).
-            How many questions would you like to generate? (5, 10, or 15)
-        `;
+        let prompt = `Perfect. The timer is set to **${timer}** minute(s).
+        \n\nHow many questions would you like to generate? (**5**, **10**, or **15**)`;
         while (true) {
             const questionCount = interrupt(prompt);
-            if (typeof questionCount != "number" || !questionCountArr.includes(questionCount)) {
-                prompt = `We need valid numbers to generate questions. And it should be - 5, 10, or 15`;
+            if (!isValidPositiveNumber(questionCount)) {
+                prompt = `We need valid numbers to generate questions.`;
             } else {
-                return {
-                    messages: [
-                        { role: "assistant", content: questionCount, timestamp: Date.now() },
-                    ],
-                    generationContext: {
-                        ...state.generationContext,
-                        question_count: questionCount
-                    }
-                };
+                const number = Number(questionCount);
+                if (!questionCountArr.includes(number)) {
+                    prompt = `Number should be - **5**, **10**, or **15**`;
+                } else {
+                    return {
+                        messages: [
+                            { role: "assistant", content: number, timestamp: Date.now() },
+                        ],
+                        generationContext: {
+                            ...state.generationContext,
+                            question_count: number
+                        }
+                    };
+                }
             }
         }
     })
     .addNode("askForConfirmGeneration", async (state) => {
         const { department, topics, timer, question_count } = state.generationContext;
 
-        let prompt = `
-            Here's a summary of your setup:
-            - Department: ${department}
-            - Topics: ${topics}
-            - Timer: ${timer} minutes
-            - Question Count: ${question_count}
-
-            Should I proceed with question generation?
-            Please type "Yes" or "No".
-        `;
+        let prompt = `Here's a summary of your setup:
+        \n\n**Department**: ${department}
+        \n\n**Topics**: ${topics}.
+        \n\n**Timer**: ${timer} minutes.
+        \n\n**Question Count**: ${question_count}.
+        \n\nShould I proceed with question generation?
+        \n\nPlease type **Yes** or **No**.`;
         while (true) {
             const isItConfirm = interrupt(prompt);
-            if (typeof isItConfirm === "string" && isItConfirm.toLowerCase() === 'yes') {
-                return {
-                    messages: [
-                        { role: "assistant", content: isItConfirm, timestamp: Date.now() },
-                    ],
-                    confirmedFields: Object.keys(state.generationContext)
-                };
-            } else if (typeof isItConfirm === "string" && isItConfirm.toLowerCase() === 'no') {
-                return new Command({ goto: END })
-            } else {
-                prompt = `You need to type "Yes" or "No" for further action.`;
+            if (typeof isItConfirm === "string" && isItConfirm.toLowerCase() === 'no') {
+                return new Command({ goto: "endOfDiscussion" });
+            } else if (typeof isItConfirm === "string" && isItConfirm.toLowerCase() === 'yes') {
+                return new Command({
+                    goto: "generateQuestions", update: {
+                        messages: [
+                            { role: "assistant", content: state.generationContext, timestamp: Date.now() },
+                        ]
+                    }
+                });
             }
+            prompt = `You need to type **Yes** or **No** for further action.`;
         }
     })
     .addEdge(START, "startConversation")

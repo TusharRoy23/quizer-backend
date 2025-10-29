@@ -36,7 +36,6 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
      * Start the conversation.
      */
     async initializeConversation(state: QuestionGenerationState) {
-        //! ongoing quiz checker
         const systemPrompt = `
             You're a smart & helpful tutor. You will going to ask about these below topics on your next conversation with the student.
             - Department.
