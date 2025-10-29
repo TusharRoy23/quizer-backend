@@ -6,7 +6,7 @@ import { throwException } from "../../../shared/errors/all.exception";
 import { BaseQuestionRepository } from "../../../modules/public/question/repository/base-question.repository";
 import { IDatabaseService } from "../../interface/IDatabase.service";
 import { AIMessageChunk } from "@langchain/core/messages";
-import { AgenticRole } from "../../../shared/utils/enum";
+import { AgenticRole, NextStep } from "../../../shared/utils/enum";
 import { AgentStepState, QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
 import { IQuestionGraphBuilder } from "../interface/IQuestionGraphBuilder";
 import { Command } from "@langchain/langgraph";
@@ -214,11 +214,12 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
             );
             const value: AgentStepState = {
                 content: null,
-                next_step: null
+                next_step: NextStep.END,
+                role: AgenticRole.ASSISTANT
             };
             if (Object.keys(data).includes('__interrupt__')) {
                 value.content = data?.__interrupt__[0]?.value;
-                value.next_step = 'interrupt';
+                value.next_step = NextStep.INTERRUPT;
             } else if (Object.keys(data).includes('messages')) {
                 const message = data?.messages[0]?.content;
                 value.content = message?.content;

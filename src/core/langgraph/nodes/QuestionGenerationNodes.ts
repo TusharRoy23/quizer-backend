@@ -7,6 +7,7 @@ import { IQuestionGenerationNodes } from "../interface/IQuestionGenerationNodes"
 import { isValidPositiveNumber } from "../../../shared/utils/utils";
 import { TYPES } from "../../type.core";
 import { IQuestionRepository } from "../../../modules/public/question/interface/IQuestion.repository";
+import { NextStep } from "../../../shared/utils/enum";
 
 const baseSystemPrompt = `
     You are a teacher for a student. As you will create some questions depends on-
@@ -70,10 +71,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
                 `;
         while (true) {
             const answer = interrupt(prompt);
-            const sysPrompt = `
-                        Return "yes" if the user agreed otherwise "no".
-                        If user said none of them, return "none".
-                    `;
+            const sysPrompt = `Return "yes" if the user agreed otherwise "no". If user said none of them, return "none".`;
             const userPrompt = `User said: {answer}`;
 
             const promptTemplate = await ChatPromptTemplate.fromMessages([
@@ -91,7 +89,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             } else if (typeof permission === "string" && permission === "no") {
                 return new Command({ goto: "endOfDiscussion" });
             }
-            prompt = `You have to type "Yes" or "No" for further action.`;
+            prompt = `You have to type **Yes** or **No** for further action.`;
         }
     }
 
@@ -100,10 +98,8 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
      */
     async askForDepartment(state: QuestionGenerationState) {
         const askDeptSchema = this.deepSeekModel.withStructuredOutput(departmentNodeSchema);
-        let prompt = `
-            Let's begin setting up your question generation.
-            Please tell me the department (e.g., Software Engineering, Math, Physics, Chemistry, etc.).
-        `;
+        let prompt = `Let's begin setting up your question generation.
+        \n\nPlease tell me the department (e.g., Software Engineering, Math, Physics, Chemistry, etc.).`;
         while (true) {
             const department = interrupt(prompt);
 
@@ -153,12 +149,11 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         const outputSchema = this.deepSeekModel.withStructuredOutput(InputValidationSchema);
         const department = state.generationContext?.department;
         const hintFortopics = state.hintFortopics || [];
-        let prompt = `
-                    Great! You selected department: ${department}.
-                    Please provide up to two topics within ${department}.
-                    N.B. Please use comma(,) separated value for multiple topics
-                    Example: ${hintFortopics?.join(', ')}, etc.
-                `;
+        let prompt = `Great! You selected **${department}**.
+        \n\nPlease provide **up to two topics** within this department.
+        \n\n**Note:** Use commas (,) to separate multiple topics.
+        \n\nExample: ${hintFortopics?.join(", ")}.`;
+
         while (true) {
             const topics = interrupt(prompt);
             const sysPrompt = `
@@ -180,10 +175,8 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             });
 
             if (!result.isValid) {
-                prompt = `
-                    ${topics} - These topics are invalid for ${department} Department.
-                    N.B. Please use comma(,) separated value for multiple topics
-                `;
+                prompt = `**${topics}** - These topics are invalid for **${department}** Department.
+                \n\nN.B. Please use **comma(,)** separated value for multiple topics`;
             } else {
                 return {
                     messages: [
@@ -191,7 +184,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
                     ],
                     generationContext: {
                         ...state.generationContext,
-                        topics: topics.split(",")
+                        topics: topics.split(",").map((topic: string) => topic.trim())
                     }
                 };
             }
@@ -203,12 +196,10 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
      */
     async askForTimer(state: QuestionGenerationState) {
         const { department, topics } = state.generationContext;
-        let prompt = `
-            Got it. Department: ${department}, Topics: ${topics}.
-            How long should the timer be (in minutes)?
-            Max: 20 minutes.
-            Min: 1 minute
-        `;
+        let prompt = `Got it. **Department: ${department}**, **Topics: ${topics}**.
+        \n\nHow long should the timer be **(in minutes)**? 
+        \n\n**Max**: 20 minutes.
+        \n\n**Min**: 1 minute.`;
         while (true) {
             const timer = interrupt(prompt);
             if (!isValidPositiveNumber(timer)) {
@@ -216,10 +207,8 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             } else {
                 const number = Number(timer);
                 if (number < 1 || number > 20) {
-                    prompt = `
-                        Max: 20 minutes.
-                        Min: 1 minute
-                    `;
+                    prompt = `**Max**: 20 minutes.
+                    **Min**: 1 minute.`;
                 } else {
                     return {
                         messages: [
@@ -241,10 +230,8 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
     async askForQuestionCount(state: QuestionGenerationState) {
         const questionCountArr = [5, 10, 15];
         const { timer } = state.generationContext;
-        let prompt = `
-            Perfect. The timer is set to ${timer} minute(s).
-            How many questions would you like to generate? (5, 10, or 15)
-        `;
+        let prompt = `Perfect. The timer is set to **${timer}** minute(s).
+        \n\nHow many questions would you like to generate? (**5**, **10**, or **15**)`;
         while (true) {
             const questionCount = interrupt(prompt);
             if (!isValidPositiveNumber(questionCount)) {
@@ -252,7 +239,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             } else {
                 const number = Number(questionCount);
                 if (!questionCountArr.includes(number)) {
-                    prompt = `Number should be - 5, 10, or 15`;
+                    prompt = `Number should be - **5**, **10**, or **15**`;
                 } else {
                     return {
                         messages: [
@@ -274,16 +261,13 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
     async askForConfirmGeneration(state: QuestionGenerationState) {
         const { department, topics, timer, question_count } = state.generationContext;
 
-        let prompt = `
-            Here's a summary of your setup:
-            - Department: ${department}
-            - Topics: ${topics}
-            - Timer: ${timer} minutes
-            - Question Count: ${question_count}
-
-            Should I proceed with question generation?
-            Please type "Yes" or "No".
-        `;
+        let prompt = `Here's a summary of your setup:
+        \n\n**Department**: ${department}
+        \n\n**Topics**: ${topics}.
+        \n\n**Timer**: ${timer} minutes.
+        \n\n**Question Count**: ${question_count}.
+        \n\nShould I proceed with question generation?
+        \n\nPlease type **Yes** or **No**.`;
         while (true) {
             const isItConfirm = interrupt(prompt);
             if (typeof isItConfirm === "string" && isItConfirm.toLowerCase() === 'no') {
@@ -297,7 +281,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
                     }
                 });
             }
-            prompt = `You need to type "Yes" or "No" for further action.`;
+            prompt = `You need to type **Yes** or **No** for further action.`;
         }
     }
 
@@ -316,7 +300,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
                         role: "assistant",
                         content: {
                             content: quizUUID,
-                            next_step: "QUIZ"
+                            next_step: NextStep.QUIZ
                         },
                         timestamp: Date.now()
                     },
@@ -334,7 +318,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
                         role: "assistant",
                         content: {
                             content: "Thank you for your time. You can close the chat.",
-                            next_step: "END"
+                            next_step: NextStep.END
                         },
                         timestamp: Date.now()
                     }
