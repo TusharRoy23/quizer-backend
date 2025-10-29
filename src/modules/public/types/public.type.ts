@@ -1,3 +1,5 @@
+import { AgenticRole, NextStep } from "../../../shared/utils/enum";
+
 export type Department = {
     id: number;
     uuid: string;
@@ -145,5 +147,6 @@ export type CustomQuestion = {
 
 export type AgentStepState = {
     content: string | null,
-    next_step: string | null
+    next_step: NextStep,
+    role: AgenticRole
 }
