@@ -202,13 +202,12 @@ export abstract class BaseQuestionRepository extends BaseRepository {
         }
     }
 
-    protected async getDepartmentByUUID(uuid: string, is_global: boolean = true): Promise<Department | null> {
+    protected async getDepartmentByUUID(uuid: string): Promise<Department | null> {
         try {
             const prisma = await this.prisma$();
             const department = await prisma.department.findFirst({
                 where: {
-                    uuid: uuid,
-                    is_global: is_global
+                    uuid: uuid
                 }
             });
 
@@ -232,8 +231,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
                     },
                     department_topic_departmentTodepartment: {
                         uuid: departmentUuid
-                    },
-                    is_global: is_global
+                    }
                 },
             });
 
