@@ -14,7 +14,7 @@ datasource db {
 model department {
   id                                 Int            @id @default(autoincrement()) @db.SmallInt
   created_at                         DateTime       @default(now()) @db.Timestamptz(6)
-  name                               String?        @unique @db.VarChar
+  name                               String?        @db.VarChar
   uuid                               String?        @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   is_global                          Boolean        @default(true)
   participant_id                     Int?           @default(0)
