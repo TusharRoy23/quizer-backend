@@ -21,5 +21,5 @@ export interface IQuestionRepository {
     getStreamedKeywordExplanation(keywordUuid: string): Promise<ReadableStream>;
     getStreamedKeywordExample(keywordUUID: string): Promise<ReadableStream>;
     getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]>;
-    generateCustomQuestions(payload: CustomQuestion): Promise<string>;
+    generateCustomQuestions(payload: CustomQuestion): Promise<QuestionGeneratePayloadType>;
 }

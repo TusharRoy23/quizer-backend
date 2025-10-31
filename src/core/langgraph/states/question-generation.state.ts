@@ -1,10 +1,20 @@
 import { z } from "zod";
 
+export enum Intent {
+    EXIT = "exit",
+    CHANGE = "change",
+    INFO = "info",
+    HELP = "help",
+    CONTINUE = "continue"
+}
+
 export const QuestionGenerationContextSchema = z.object({
     department: z.string().nullable().default(null),
     topics: z.array(z.string()).min(1).max(2).default([]),
     timer: z.number().int().positive().nullable().default(1), // in minutes
     question_count: z.enum(["5", "10", "15"]).transform(Number).nullable().default("5"),
+    lastNode: z.string().nullable().default(null),
+    intent: z.nativeEnum(Intent).nullable().default(null),
 });
 
 export type QuestionGenerationContext = z.infer<typeof QuestionGenerationContextSchema>;
@@ -26,10 +36,24 @@ export const QuestionGenerationStateSchema = z.object({
         question_count: "5",
     }),
     lastAssistantMessage: z.string().nullable().default(null),
+    lastUserMessage: z.string().nullable().default(null),
     hintFortopics: z.array(z.string()).default([])
 });
 
 export type QuestionGenerationState = z.infer<typeof QuestionGenerationStateSchema>;
+
+export const IntentSchema = z.object({
+    intent: z.nativeEnum(Intent)
+});
+
+export const HandlerSchema = z.object({
+    field: z.enum(["department", "topics", "timer", "question_count", "none"]),
+    message: z.string()
+});
+
+export const HelperSchema = z.object({
+    response: z.string()
+});
 
 /*
     Utility
@@ -47,3 +71,12 @@ export const departmentNodeSchema = z.object({
     topics: z.array(z.string()).default([]),
     message: z.string()
 });
+
+export const NodeMap = {
+    "department": "askForDepartment",
+    "topics": "askForTopics",
+    "timer": "askForTimer",
+    "question_count": "askForQuestionCount",
+    "confirmation": "askForConfirmGeneration",
+    "none": "none"
+}
