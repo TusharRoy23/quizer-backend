@@ -10,4 +10,7 @@ export interface IQuestionGenerationNodes {
     askForConfirmGeneration(state: QuestionGenerationState): any;
     endOfDiscussion(state: QuestionGenerationState): any;
     generateQuestions(state: QuestionGenerationState): any;
+    changeHandler(state: QuestionGenerationState): any;
+    infoHandler(state: QuestionGenerationState): any;
+    askForHelp(state: QuestionGenerationState): any;
 }

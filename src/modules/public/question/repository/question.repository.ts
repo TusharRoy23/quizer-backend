@@ -70,7 +70,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
-    public async generateCustomQuestions(payload: CustomQuestion): Promise<string> {
+    public async generateCustomQuestions(payload: CustomQuestion): Promise<QuestionGeneratePayloadType> {
         try {
             const participant = this.getParticipant();
             const prisma = await this.prisma$();
@@ -119,8 +119,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 question_count: payload.question_count,
                 timer: payload.timer
             };
-            const quizUUid = await this.generatedQuestions(questionGeneratePayload);
-            return quizUUid;
+            return questionGeneratePayload;
         } catch (error) {
             return throwException(error);
         }
