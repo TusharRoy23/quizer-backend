@@ -3,10 +3,11 @@ generator client {
   output   = "../generated/prisma"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "./ERD.svg"
-}
+// To generate ERD only
+// generator erd {
+//   provider = "prisma-erd-generator"
+//   output   = "./ERD.svg"
+// }
 
 datasource db {
   provider  = "postgresql"

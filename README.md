@@ -39,6 +39,21 @@ Users can generate quizzes, interact with AI agents, and even simulate interview
 | AWS SDK (S3) | 3.890.0 |
 | Supabase JS | 2.57.2 |
 
+## ENV
+### structure 
+```bash
+./.envs
+    ./.db
+        .env
+    ./.local
+        .env
+    ./.prod
+        .env
+    ./.utils
+        .env
+```
+### Dummy variables- checkout **env.txt**.
+
 ## 🐳 Run the App with Docker
 ### 🔧 Development
 ```bash
