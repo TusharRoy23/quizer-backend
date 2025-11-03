@@ -38,6 +38,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
+    "prisma-erd-generator": "^2.0.4",
     "reflect-metadata": "^0.2.2",
     "uuid": "^11.1.0",
     "zod": "3.25.67"
