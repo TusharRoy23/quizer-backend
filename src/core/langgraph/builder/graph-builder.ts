@@ -1,9 +1,11 @@
 import { END, MemorySaver, START, StateGraph } from "@langchain/langgraph";
 import { inject, injectable } from "inversify";
-import { TYPES } from "../type.core"
-import { IQuestionDiscussionNodes } from "./interface/IQuestionDiscussionNodes";
-import { QuestionDiscussionState } from "./states/question-discussion.state";
-import { IGraphBuilder } from "./interface/IGraphBuilder";
+import { TYPES } from "../../type.core"
+import { IQuestionDiscussionNodes } from "../interface/IQuestionDiscussionNodes";
+import { QuestionDiscussionState } from "../states/question-discussion.state";
+import { IGraphBuilder } from "../interface/IGraphBuilder";
+
+const checkpointer = new MemorySaver();
 
 @injectable()
 export class GraphBuilder implements IGraphBuilder {
@@ -47,8 +49,6 @@ export class GraphBuilder implements IGraphBuilder {
             .addEdge("clarify_term", END)
             .addEdge("analyze_code_relevance", END)
             .addEdge("avoid_unnecessary_content", END);
-
-        const checkpointer = new MemorySaver();
 
         return builder.compile({
             checkpointer

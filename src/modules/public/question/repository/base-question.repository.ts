@@ -221,7 +221,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
         }
     }
 
-    protected async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string): Promise<Topic[] | null> {
+    protected async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string, is_global: boolean = true): Promise<Topic[] | null> {
         try {
             const prisma = await this.prisma$();
             const topics = await prisma.topic.findMany({
@@ -356,6 +356,17 @@ export abstract class BaseQuestionRepository extends BaseRepository {
                     controller.enqueue(encoder.encode(errorMsg));
                     controller.close();
                 }
+            }
+        });
+    }
+
+    protected returnErrorStream(): ReadableStream {
+        const encoder = new TextEncoder();
+        return new ReadableStream({
+            start(controller) {
+                const errorMsg = "Error: Unable to generate explanation at this time.";
+                controller.enqueue(encoder.encode(errorMsg));
+                controller.close();
             }
         });
     }

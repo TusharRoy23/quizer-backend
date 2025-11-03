@@ -21,7 +21,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
     constructor() {
         this.deepSeekModel = new ChatDeepSeek({
             model: 'deepseek-coder',
-            temperature: 0.1,
+            temperature: 0.4,
             cache: false
         });
     }
@@ -36,7 +36,6 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
         }
 
         if (this.containsLink(lastUserMessage)) {
-            console.log("link detected");
             return { currentIntent: "avoid_unnecessary_content" };
         }
 

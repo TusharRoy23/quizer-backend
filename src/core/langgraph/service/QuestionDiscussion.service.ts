@@ -3,6 +3,7 @@ import { TYPES } from "../../type.core";
 import { IQuestionDiscussionService } from "../interface/IQuestionDiscussion.service";
 import { IQuestionDiscussionRepository } from "../interface/IQuestionDiscussion.repository";
 import { AgenticRole } from "../../../shared/utils/enum";
+import { AgentStepState } from "../../../modules/public/types/public.type";
 
 @injectable()
 export class QuestionDiscussionService implements IQuestionDiscussionService {
@@ -28,5 +29,13 @@ export class QuestionDiscussionService implements IQuestionDiscussionService {
 
     public async getQuestionDiscussionMessages(questionUUID: string): Promise<any[]> {
         return this.questionDiscussionRespository.getQuestionDiscussionMessages(questionUUID);
+    }
+
+    public async initResponseToGenerateQuestion(): Promise<ReadableStream> {
+        return this.questionDiscussionRespository.initResponseToGenerateQuestion();
+    }
+
+    public async getResponseToGenerateQuestion(userMessage: string): Promise<AgentStepState> {
+        return this.questionDiscussionRespository.getResponseToGenerateQuestion(userMessage);
     }
 }

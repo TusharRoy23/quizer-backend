@@ -1,7 +1,11 @@
+import { AgenticRole, NextStep } from "../../../shared/utils/enum";
+
 export type Department = {
     id: number;
     uuid: string;
     name: string;
+    is_global?: boolean;
+    participant_id?: number;
     created_at: Date;
 }
 
@@ -9,6 +13,8 @@ export type Topic = {
     id: number;
     uuid: string;
     name: string;
+    is_global?: boolean;
+    participant_id?: number;
     created_at: Date;
 }
 
@@ -130,4 +136,17 @@ export type TopicScore = {
     topic_id: number;
     score: number;
     topic?: Topic
+}
+
+export type CustomQuestion = {
+    department: string;
+    topics: string[];
+    timer: number;
+    question_count: number;
+}
+
+export type AgentStepState = {
+    content: string | null,
+    next_step: NextStep,
+    role: AgenticRole
 }

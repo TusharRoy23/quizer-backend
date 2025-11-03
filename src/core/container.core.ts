@@ -35,11 +35,15 @@ import { ILangChainService } from './openai/interface/ILangChain.service';
 import { IQuestionDiscussionNodes } from './langgraph/interface/IQuestionDiscussionNodes';
 import { QuestionDiscussionNodes } from './langgraph/nodes/QuestionDiscussionNodes';
 import { IGraphBuilder } from './langgraph/interface/IGraphBuilder';
-import { GraphBuilder } from './langgraph/graph-builder';
+import { GraphBuilder } from './langgraph/builder/graph-builder';
 import { IQuestionDiscussionService } from './langgraph/interface/IQuestionDiscussion.service';
 import { QuestionDiscussionService } from './langgraph/service/QuestionDiscussion.service';
 import { IQuestionDiscussionRepository } from './langgraph/interface/IQuestionDiscussion.repository';
 import { QuestionDiscussionRepository } from './langgraph/repository/QuestionDiscussion.repository';
+import { IQuestionGenerationNodes } from './langgraph/interface/IQuestionGenerationNodes';
+import { QuestionGenerationNodes } from './langgraph/nodes/QuestionGenerationNodes';
+import { IQuestionGraphBuilder } from './langgraph/interface/IQuestionGraphBuilder';
+import { QuestionGenerationGraphBuilder } from './langgraph/builder/question-generation-builder';
 
 const container = new Container();
 
@@ -60,6 +64,8 @@ container.bind<IGraphBuilder>(TYPES.IGraphBuilder).to(GraphBuilder);
 container.bind<IQuestionDiscussionNodes>(TYPES.IQuestionDiscussionNode).to(QuestionDiscussionNodes);
 container.bind<IQuestionDiscussionService>(TYPES.IQuestionDiscussionService).to(QuestionDiscussionService);
 container.bind<IQuestionDiscussionRepository>(TYPES.IQuestionDiscussionRepository).to(QuestionDiscussionRepository);
+container.bind<IQuestionGenerationNodes>(TYPES.IQuestionGenerationNodes).to(QuestionGenerationNodes);
+container.bind<IQuestionGraphBuilder>(TYPES.IQuestionGraphBuilder).to(QuestionGenerationGraphBuilder);
 
 container.bind<RequestContextMiddleware>(RequestContextMiddleware).toSelf();
 container.bind<SessionMiddleware>(SessionMiddleware).toSelf();
