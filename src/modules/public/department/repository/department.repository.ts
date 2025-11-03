@@ -17,7 +17,11 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
     async getDepartmentList(): Promise<Department[]> {
         try {
             const prisma = await this.prisma$();
-            const department = await prisma.department.findMany();
+            const department = await prisma.department.findMany({
+                where: {
+                    is_global: true
+                }
+            });
             return department as Department[];
         } catch (error) {
             return throwException(error);
@@ -31,7 +35,8 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
                 where: {
                     department_topic_departmentTodepartment: {
                         uuid: departmentUuid
-                    }
+                    },
+                    is_global: true
                 },
                 omit: {
                     department: true

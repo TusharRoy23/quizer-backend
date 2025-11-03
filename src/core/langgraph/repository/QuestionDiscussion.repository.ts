@@ -6,19 +6,24 @@ import { throwException } from "../../../shared/errors/all.exception";
 import { BaseQuestionRepository } from "../../../modules/public/question/repository/base-question.repository";
 import { IDatabaseService } from "../../interface/IDatabase.service";
 import { AIMessageChunk } from "@langchain/core/messages";
-import { AgenticRole } from "../../../shared/utils/enum";
-import { QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
+import { AgenticRole, NextStep } from "../../../shared/utils/enum";
+import { AgentStepState, QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
+import { IQuestionGraphBuilder } from "../interface/IQuestionGraphBuilder";
+import { Command } from "@langchain/langgraph";
 
 @injectable()
 export class QuestionDiscussionRepository extends BaseQuestionRepository implements IQuestionDiscussionRepository {
     private graph: any;
+    private questionGenerationGraph: any;
 
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
-        @inject(TYPES.IGraphBuilder) private graphBuilder: IGraphBuilder,
+        @inject(TYPES.IGraphBuilder) private readonly graphBuilder: IGraphBuilder,
+        @inject(TYPES.IQuestionGraphBuilder) private readonly questionGraphBuilder: IQuestionGraphBuilder
     ) {
         super(databaseService);
         this.graph = this.graphBuilder.buildQuestionDiscussionGraph();
+        this.questionGenerationGraph = this.questionGraphBuilder.buildGraph();
     }
 
     public async handleUserMessage(questionUUID: string, userMessage: string): Promise<string | null> {
@@ -77,7 +82,7 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
             );
 
             const encoder = new TextEncoder();
-            return new ReadableStream({
+            const finalStream = new ReadableStream({
                 async start(controller) {
                     try {
                         for await (const chunk of stream) {
@@ -93,8 +98,15 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
                     }
                 }
             });
+            return this.wrapReadableStream(finalStream, {
+                onComplete: async (fullText) => {
+                    await this.saveQuestionDiscussionMessage(questionUUID, userMessage, AgenticRole.USER);
+                    await this.saveQuestionDiscussionMessage(questionUUID, fullText, AgenticRole.ASSISTANT);
+                },
+                onErrorText: "Error generating explanation. Please try again."
+            });
         } catch (error) {
-            return throwException(error);
+            return this.returnErrorStream();
         }
     }
 
@@ -114,7 +126,6 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
                     sub_topic: question.sub_topic
                 },
             }, { configurable: { thread_id: questionUUID } });
-            console.log('result: ', result);
             return result;
         } catch (error) {
             return throwException(error);
@@ -150,6 +161,72 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
                 }
             });
             return messages?.length ? messages : [];
+        } catch (error) {
+            return throwException(error);
+        }
+    }
+
+    public async initResponseToGenerateQuestion(): Promise<ReadableStream> {
+        try {
+            const participant = this.getParticipant();
+            const config = {
+                configurable: { thread_id: `user-${participant.google_id}` },
+                streamMode: "messages"
+            };
+            const stream = await this.questionGenerationGraph.stream(
+                {}, config
+            );
+            const encoder = new TextEncoder();
+            const readableStream = new ReadableStream({
+                async start(controller) {
+                    try {
+                        for await (const chunk of stream) {
+                            const [messageChunk]: [AIMessageChunk] = chunk;
+                            const text = messageChunk.content.toString();
+                            if (text && typeof text === 'string') {
+                                controller.enqueue(encoder.encode(text));
+                            }
+                        }
+                        controller.close();
+                    } catch (error) {
+                        controller.error(error);
+                    }
+                }
+            });
+            return this.wrapReadableStream(readableStream, {
+                onComplete: async (fullText) => {
+                },
+                onErrorText: "Error generating explanation. Please try again."
+            });
+        } catch (error) {
+            return this.returnErrorStream();
+        }
+    }
+
+    public async getResponseToGenerateQuestion(userMessage: string): Promise<AgentStepState> {
+        try {
+            const participant = this.getParticipant();
+            const config = {
+                configurable: { thread_id: `user-${participant.google_id}` }
+            };
+            const data = await this.questionGenerationGraph.invoke(
+                new Command({ resume: userMessage }), config
+            );
+            const value: AgentStepState = {
+                content: null,
+                next_step: NextStep.END,
+                role: AgenticRole.ASSISTANT
+            };
+            if (Object.keys(data).includes('__interrupt__')) {
+                value.content = data?.__interrupt__[0]?.value;
+                value.next_step = NextStep.INTERRUPT;
+            } else if (Object.keys(data).includes('messages')) {
+                const message = data?.messages[0]?.content;
+                value.content = message?.content;
+                value.next_step = message?.next_step;
+            }
+            return value;
+
         } catch (error) {
             return throwException(error);
         }

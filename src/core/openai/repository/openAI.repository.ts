@@ -14,7 +14,7 @@ export class OpenAIRepository implements IOpenAIRepository {
             response_format: {
                 type: "json_object"
             },
-            temperature: 0.0
+            temperature: 0.4
         });
         return completion.choices[0]?.message?.content;
     }
@@ -27,7 +27,7 @@ export class OpenAIRepository implements IOpenAIRepository {
                 messages: [
                     { role: "user", content: prompt }
                 ],
-                temperature: 0.0,
+                temperature: 0.4,
                 stream: true
             });
 

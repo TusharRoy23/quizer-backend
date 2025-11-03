@@ -19,3 +19,9 @@ export enum AgenticRole {
     ASSISTANT = 'ASSISTANT',
     SYSTEM = 'SYSTEM'
 }
+
+export enum NextStep {
+    INTERRUPT = 'INTERRUPT',
+    QUIZ = 'QUIZ',
+    END = 'END'
+}
