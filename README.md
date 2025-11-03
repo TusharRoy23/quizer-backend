@@ -83,6 +83,9 @@ docker compose -f docker-compose.dev.yml run dev sh
 npx prisma migrate dev --name migration_name
 ```
 
+## Frontend Repository
+* [Quizer](https://github.com/TusharRoy23/quizer)
+
 ## 💡 Future Plans
 * Leaderboard and ranking system
 * Personalized quiz recommendations
