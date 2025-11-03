@@ -2,7 +2,7 @@
 This project is an AI-generated quiz application that helps learners assess their understanding across different subjects.
 Users can generate quizzes, interact with AI agents, and even simulate interviews to enhance learning confidence.
 ## ERD
-[Quizer ERD] (https://github.com/TusharRoy23/quizer-backend/blob/master/ERD.svg)
+![Quizer ERD](https://github.com/TusharRoy23/quizer-backend/blob/master/ERD.svg)
 ## ✨ Features
 ✅ Smart Quiz Generation
 * Choose department, topic(s), question count, and timer to generate customized quizzes.
