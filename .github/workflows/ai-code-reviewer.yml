@@ -11,8 +11,8 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             id-token: write # Required for OIDC
-            contents: read
-            pull-requests: read
+            contents: write
+            pull-requests: write
             issues: write # For posting comments
 
         steps:
