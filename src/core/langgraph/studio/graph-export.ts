@@ -195,7 +195,6 @@ export const graph = new StateGraph(QuestionDiscussionState)
     .addNode("explain_incorrect", async (state) => {
         const { questionContext, messages } = state;
         const lastUserMessage = messages.at(-1)?.content || "";
-        console.log('lastUserMessage: ', lastUserMessage);
 
         const systemPrompt = `
             You are a teacher explaining why certain multiple-choice options are incorrect.

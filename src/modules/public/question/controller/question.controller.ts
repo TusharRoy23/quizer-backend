@@ -375,24 +375,6 @@ export class QuestionController {
                     if (typeof (res as any).flush === 'function') {
                         (res as any).flush();
                     }
-
-                    // Send each character individually with delay
-                    // for (const char of textChunk) {
-                    //     if (req.destroyed) {
-                    //         // Client disconnected, stop processing
-                    //         return;
-                    //     }
-
-                    //     res.write(char);
-
-                    //     // Add delay for typing effect (adjust timing as needed)
-                    //     await new Promise(resolve => setTimeout(resolve, 0));
-
-                    //     // Force flush the response to send immediately
-                    //     if (typeof (res as any).flush === 'function') {
-                    //         (res as any).flush();
-                    //     }
-                    // }
                 }
             } catch (error) {
                 console.error('Stream processing error:', error);
