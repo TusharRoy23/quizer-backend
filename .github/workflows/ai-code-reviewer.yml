@@ -20,7 +20,9 @@ jobs:
               with:
                   fetch-depth: 0 # Full history for diff comparison
 
-            - uses: TusharRoy23/ai-code-reviewer@v0.0.5
+            - uses: TusharRoy23/ai-code-reviewer@v0.0.6
               with:
                   trigger-phrase: "@ai-code-reviewer review"
                   review-mode: "full"
+                  #   llm: ${{ secrets.LLM }}
+                  #   llm-api-key: ${{ secrets.LLM_API_KEY }}
