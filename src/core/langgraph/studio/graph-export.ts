@@ -130,7 +130,6 @@ export const graph = new StateGraph(QuestionDiscussionState)
     })
     .addNode("explain_correctness", async (state: typeof QuestionDiscussionState.State) => {
         const { questionContext, messages } = state;
-        console.log('explainCorrectness: ', questionContext);
         const lastUserMessage = messages.at(-1)?.content || "";
 
         const systemPrompt = `
@@ -168,7 +167,6 @@ export const graph = new StateGraph(QuestionDiscussionState)
     })
     .addNode("provide_examples", async (state) => {
         const { questionContext, messages } = state;
-        console.log('provideExamples: ', questionContext);
         const lastUserMessage = messages.at(-1)?.content || "";
 
         const systemPrompt = `
@@ -196,7 +194,6 @@ export const graph = new StateGraph(QuestionDiscussionState)
     })
     .addNode("explain_incorrect", async (state) => {
         const { questionContext, messages } = state;
-        console.log('explainIncorrectOptions: ', questionContext);
         const lastUserMessage = messages.at(-1)?.content || "";
 
         const systemPrompt = `

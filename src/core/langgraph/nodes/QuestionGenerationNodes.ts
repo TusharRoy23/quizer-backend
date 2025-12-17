@@ -486,7 +486,6 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         const result = await promptTemplate.pipe(
             this.deepSeekModel.withStructuredOutput(HandlerSchema)
         ).invoke({ input: state.lastUserMessage });
-        console.log('result: ', result);
         const field = result.field;
         if (field === "none") {
             const userInput = interrupt(`What would you like to change?\n\n(department/topics/timer/question-count)`);
