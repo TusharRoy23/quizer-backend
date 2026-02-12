@@ -1,5 +1,3 @@
-import { ChatDeepSeek } from "@langchain/deepseek";
-import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { inject, injectable } from "inversify";
 import { z } from "zod";
@@ -10,6 +8,7 @@ import { throwException } from "../../../shared/errors/all.exception";
 import { IDatabaseService } from "../../interface/IDatabase.service";
 import { TYPES } from "../../type.core";
 import { BaseQuestionRepository } from "../../../modules/public/question/repository/base-question.repository";
+import { LLMService } from "../../service/llm.service";
 
 const quizSchema = z.object({
     questions: z.array(
@@ -30,23 +29,11 @@ const keywordSchema = z.object({
 
 @injectable()
 export class LangChainRepository extends BaseQuestionRepository implements ILangChainRepository {
-    // private llmModel: ChatDeepSeek;
-    private llmModel: ChatOpenAI;
-
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
+        @inject(TYPES.ILLMService) private readonly llmService: LLMService
     ) {
         super(databaseService);
-        // this.llmModel = new ChatDeepSeek({
-        //     model: 'deepseek-coder',
-        //     temperature: 1.0,
-        //     cache: false
-        // });
-        this.llmModel = new ChatOpenAI({
-            modelName: 'gpt-4o-mini',
-            temperature: 0.7,
-            cache: false
-        });
     }
 
     public async generatedQuestions(
@@ -58,7 +45,7 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
         try {
             const topicNames = topics.map((t) => t.name).join(", ");
             const uniquenessKey = Math.random().toString(36).substring(2, 8);
-            const modelWithSchema = this.llmModel.withStructuredOutput(quizSchema, {
+            const modelWithSchema = this.llmService.openAIllmModel.withStructuredOutput(quizSchema, {
                 name: `quiz_generator`,
                 strict: true
             });
@@ -191,7 +178,7 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
                     "{prompt}"
                 ]
             ]);
-            const chain = promptTemplate.pipe(this.llmModel);
+            const chain = promptTemplate.pipe(this.llmService.openAIllmModel);
             const stream = await chain.stream({
                 prompt: prompt
             });
@@ -219,7 +206,7 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
 
     public async generateQuestionKeywords(question: Question): Promise<string[]> {
         try {
-            const modelWithSchema = this.llmModel.withStructuredOutput(keywordSchema);
+            const modelWithSchema = this.llmService.openAIllmModel.withStructuredOutput(keywordSchema);
             const promptTemplate = await ChatPromptTemplate.fromMessages([
                 [
                     "system",

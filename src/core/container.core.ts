@@ -44,6 +44,7 @@ import { IQuestionGenerationNodes } from './langgraph/interface/IQuestionGenerat
 import { QuestionGenerationNodes } from './langgraph/nodes/QuestionGenerationNodes';
 import { IQuestionGraphBuilder } from './langgraph/interface/IQuestionGraphBuilder';
 import { QuestionGenerationGraphBuilder } from './langgraph/builder/question-generation-builder';
+import { LLMService } from './service/llm.service';
 
 const container = new Container();
 
@@ -86,5 +87,8 @@ container.bind<IVerbalQuestionService>(TYPES.IVerbalQuestionService).to(VerbalQu
 //? User Module
 container.bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository);
 container.bind<IUserService>(TYPES.IUserService).to(UserService);
+
+//? LLM Service
+container.bind<LLMService>(TYPES.ILLMService).to(LLMService).inSingletonScope();
 
 export default container;
