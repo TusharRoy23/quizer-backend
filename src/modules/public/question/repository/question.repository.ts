@@ -53,7 +53,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 department: department?.id,
                 participant: participant?.id,
                 timer: payload.timer,
-                question_count: payload.question_count
+                question_count: payload.question_count,
+                assessment_type: payload.assessment_type
             };
             const prisma = await this.prisma$();
             const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -88,7 +89,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                     }
                 });
             }
-
+            //! Need to fix the topic creation for the same participant and department
+            //! Because it is creating duplicate topics for the same participant and department
             const topicPayload = payload.topics?.map(topic => ({
                 name: topic,
                 is_global: false,
@@ -96,13 +98,13 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 participant_id: participant.id
             }));
 
-            const topicCount = await prisma.topic.createMany({
+            // Create topics if they do not exist (skipDuplicates prevents duplicates)
+            await prisma.topic.createMany({
                 data: topicPayload,
                 skipDuplicates: true
             });
-            if (!topicCount.count) {
-                throw new NotFoundException('Topics are not created.');
-            }
+
+            // Fetch topics after creation to ensure all exist
             const topics = await prisma.topic.findMany({
                 where: {
                     department: department.id,
@@ -113,11 +115,26 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                     }
                 }
             });
+
+            // if (!topics.length) {
+            //     throw new NotFoundException('Topics are not created.');
+            // }
+            // const topics = await prisma.topic.findMany({
+            //     where: {
+            //         department: department.id,
+            //         is_global: false,
+            //         participant_id: participant.id,
+            //         name: {
+            //             in: payload.topics
+            //         }
+            //     }
+            // });
             const questionGeneratePayload: QuestionGeneratePayloadType = {
                 department: department?.uuid,
                 topics: topics?.map((topic: Topic) => topic.uuid),
                 question_count: payload.question_count,
-                timer: payload.timer
+                timer: payload.timer,
+                assessment_type: payload.assessment_type
             };
             return questionGeneratePayload;
         } catch (error) {

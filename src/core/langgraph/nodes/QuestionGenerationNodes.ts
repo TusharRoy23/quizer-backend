@@ -7,14 +7,15 @@ import { IQuestionGenerationNodes } from "../interface/IQuestionGenerationNodes"
 import { isValidPositiveNumber } from "../../../shared/utils/utils";
 import { TYPES } from "../../type.core";
 import { IQuestionRepository } from "../../../modules/public/question/interface/IQuestion.repository";
-import { NextStep } from "../../../shared/utils/enum";
+import { AssessmentType, NextStep } from "../../../shared/utils/enum";
 
 const baseSystemPrompt = `
     You are a teacher for a student. As you will create some questions depends on-
-    1. Department- Valid & existing Department.
-    2. Topic(s)- Valid topic(s) which must be valid under the given department.
-    3. Timer- Valid time in minutes to run the exam. Max: 20 min & Min: 1 min
-    4. Question Count- How many questions user want to answer? User can select: 5, 10 or 15 questions.
+    1. Assessment Type- General Intelligence or Knowledge Assessment.
+    2. Department- Valid & existing Department.
+    3. Topic(s)- Valid topic(s) which must be valid under the given department.
+    4. Timer- Valid time in minutes to run the exam. Max: 20 min & Min: 1 min
+    5. Question Count- How many questions user want to answer? User can select: 5, 10 or 15 questions.
 
 `;
 
@@ -38,6 +39,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
     async initializeConversation(state: QuestionGenerationState) {
         const systemPrompt = `
             You're a smart & helpful tutor. You will going to ask about these below topics on your next conversation with the student.
+            - Assessment Type. There are two types- General Intelligence & Knowledge Assessment.
             - Department.
             - Topic(s) of that department.
             - Timer for quiz. And it must be in minutes.
@@ -82,11 +84,71 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             });
             const permission = result.permission.toLocaleLowerCase();
             if (typeof permission === "string" && permission === "yes") {
-                return new Command({ goto: "askForDepartment", update: { lastAssistantMessage: null } });
+                return new Command({ goto: "askForAssessmentType", update: { lastAssistantMessage: null } });
             } else if (typeof permission === "string" && permission === "no") {
                 return new Command({ goto: "endOfDiscussion", update: { lastAssistantMessage: null } });
             }
             prompt = `You have to type **Yes** or **No** for further action.`;
+        }
+    }
+
+    /*
+    * Ask for assessment type
+    */
+    async askForAssessmentType(state: QuestionGenerationState) {
+        let prompt = `Before we proceed, could you please specify the assessment type for your quiz?
+                      \n\nYou can choose between:
+                      \n\n A) General Intelligence
+                      \n\n B) Knowledge Assessment
+                      \n\n Please select A or B`;
+
+        if (state.lastAssistantMessage) {
+            prompt = `${state.lastAssistantMessage}\n\nNow, select your assessment type.`;
+        }
+
+        while (true) {
+            const assessmentType = interrupt(prompt);
+            const intent = await this.detectGlobalIntent(assessmentType);
+
+            // Handle global intents
+            if (intent !== 'continue') {
+                const value = {
+                    lastUserMessage: assessmentType,
+                    generationContext: {
+                        ...state.generationContext,
+                        lastNode: "assessment_type"
+                    }
+                };
+                return this.handleGlobalIntent({
+                    intent,
+                    valueForChangeHandler: value,
+                    valueForInfoHandler: value,
+                    valueForHelper: value
+                });
+            }
+
+            const selectedOption = assessmentType.toLowerCase();
+            if (selectedOption === 'a' || selectedOption === 'b') {
+                const selectedAssessment = selectedOption === 'a' ? AssessmentType.GENERAL_INTELLIGENCE : AssessmentType.KNOWLEDGE_ASSESSMENT;
+                return new Command({
+                    goto: "askForDepartment",
+                    update: {
+                        messages: [
+                            { role: "assistant", content: selectedAssessment, timestamp: Date.now() },
+                        ],
+                        generationContext: {
+                            ...state.generationContext,
+                            assessment_type: selectedAssessment,
+                            lastNode: "assessment_type"
+                        },
+                        lastAssistantMessage: null
+                    }
+                });
+            } else {
+                prompt = `Please type a valid assessment type: 1 or 2. \n
+                1. General Intelligence
+                2. Knowledge Assessment.`;
+            }
         }
     }
 
@@ -399,9 +461,10 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
      * Confirm before generation
      */
     async askForConfirmGeneration(state: QuestionGenerationState) {
-        const { department, topics, timer, question_count } = state.generationContext;
+        const { assessment_type, department, topics, timer, question_count } = state.generationContext;
 
         let prompt = `Here's a summary of your setup:
+                \n\n**Assessment Type**: ${assessment_type}
                 \n\n**Department**: ${department}
                 \n\n**Topics**: ${topics}.
                 \n\n**Timer**: ${timer} minutes.
@@ -444,8 +507,9 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
     }
 
     async generateQuestions(state: QuestionGenerationState) {
-        const { department, topics, timer, question_count } = state.generationContext;
+        const { department, topics, timer, question_count, assessment_type } = state.generationContext;
         const questionGeneratePayload = await this.questionRepository.generateCustomQuestions({
+            assessment_type: assessment_type || AssessmentType.KNOWLEDGE_ASSESSMENT,
             department: department || '',
             topics: topics,
             timer: timer || 1,
@@ -472,6 +536,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         const sysPrompt = `
                         1. Identify which quiz setup element user wants to change.
                         2. If you don't indentify, return none:
+                        - assessment_type
                         - department
                         - topics
                         - timer
@@ -488,7 +553,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         ).invoke({ input: state.lastUserMessage });
         const field = result.field;
         if (field === "none") {
-            const userInput = interrupt(`What would you like to change?\n\n(department/topics/timer/question-count)`);
+            const userInput = interrupt(`What would you like to change?\n\n(assessment type/department/topics/timer/question-count)`);
             return new Command({ goto: "changeHandler", update: { ...state.generationContext, lastUserMessage: userInput } });
         }
 
@@ -500,9 +565,10 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         });
     }
 
-    async infoHandler(state: QuestionGenerationState): Promise<Command<"askForDepartment" | "initializeConversation" | "askForTopics" | "askForTimer" | "askForQuestionCount">> {
+    async infoHandler(state: QuestionGenerationState): Promise<Command<"askForAssessmentType" | "askForDepartment" | "initializeConversation" | "askForTopics" | "askForTimer" | "askForQuestionCount">> {
         const lastNode = state.generationContext.lastNode;
         const infoMap = {
+            assessment_type: "The assessment type determines the focus of the quiz, such as General Intelligence or Knowledge Assessment.",
             department: "The department represents the main subject area of the quiz, such as Software Engineering or Mathematics.",
             topics: "Topics are specific areas within the chosen department, like 'Algorithms' under Software Engineering.",
             timer: "The timer sets how long the student has to complete the quiz, in minutes.",
@@ -512,6 +578,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
 
         const sysPrompt = `
                 Identify which concept the user is asking about:
+                - assessment_type
                 - department
                 - topics
                 - timer
@@ -614,9 +681,9 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             Identify if the user wants to:
             - "exit" → stop, quit, end, or cancel the process
             - "change" → modify or update a previous value
-            - "info" → ask for meaning/explanation/clearance about department, topic, timer, or question count
+            - "info" → ask for meaning/explanation/clearance about assessment type, department, topic, timer, or question count
             - "continue" → provide a normal valid input. But check is it really are topic(s) or ask for help. If it is Help, return "help"
-            - "help" → need help/assist to find/select/choose/look department, topic, timer, or question count or if you need more information.
+            - "help" → need help/assist to find/select/choose/look assessment type, department, topic, timer, or question count or if you need more information.
             Respond only with one of: exit, change, info, continue, help
         `;
 

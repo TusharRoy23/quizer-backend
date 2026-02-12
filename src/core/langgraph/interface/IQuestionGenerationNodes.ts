@@ -2,6 +2,7 @@ import { QuestionGenerationState } from "../states/question-generation.state";
 
 export interface IQuestionGenerationNodes {
     initializeConversation(state: QuestionGenerationState): any;
+    askForAssessmentType(state: QuestionGenerationState): any;
     askForPermission(state: QuestionGenerationState): any;
     askForDepartment(state: QuestionGenerationState): any;
     askForTopics(state: QuestionGenerationState): any;

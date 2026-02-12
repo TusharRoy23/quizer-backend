@@ -5,4 +5,5 @@ export type QuestionLogPayloadType = {
     question_count: number;
     difficulty?: string;
     is_oral?: boolean;
+    assessment_type?: string;
 }

@@ -1,5 +1,10 @@
-import { z, string, number, enum as enum_, array } from 'zod';
+import { z, string, number, array } from 'zod';
+import { AssessmentType } from '../../../../shared/utils/enum';
+
 export const QuestionGeneratePayloadDto = z.object({
+    assessment_type: z.enum(
+        [AssessmentType.GENERAL_INTELLIGENCE, AssessmentType.KNOWLEDGE_ASSESSMENT]
+    ).default(AssessmentType.KNOWLEDGE_ASSESSMENT).optional(),
     department: string({
         required_error: 'Department is required',
         invalid_type_error: 'Department must be a uuid',

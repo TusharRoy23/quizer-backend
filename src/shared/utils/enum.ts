@@ -25,3 +25,8 @@ export enum NextStep {
     QUIZ = 'QUIZ',
     END = 'END'
 }
+
+export enum AssessmentType {
+    GENERAL_INTELLIGENCE = 'GENERAL_INTELLIGENCE',
+    KNOWLEDGE_ASSESSMENT = 'KNOWLEDGE_ASSESSMENT',
+}
