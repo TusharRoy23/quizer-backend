@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AssessmentType } from "../../../shared/utils/enum";
 
 export enum Intent {
     EXIT = "exit",
@@ -9,6 +10,7 @@ export enum Intent {
 }
 
 export const QuestionGenerationContextSchema = z.object({
+    assessment_type: z.nativeEnum(AssessmentType).default(AssessmentType.KNOWLEDGE_ASSESSMENT),
     department: z.string().nullable().default(null),
     topics: z.array(z.string()).min(1).max(2).default([]),
     timer: z.number().int().positive().nullable().default(1), // in minutes
@@ -30,6 +32,7 @@ export type Message = z.infer<typeof MessageSchema>;
 export const QuestionGenerationStateSchema = z.object({
     messages: z.array(MessageSchema).default([]),
     generationContext: QuestionGenerationContextSchema.default({
+        assessment_type: AssessmentType.KNOWLEDGE_ASSESSMENT,
         department: null,
         topics: [],
         timer: 1,
@@ -47,7 +50,7 @@ export const IntentSchema = z.object({
 });
 
 export const HandlerSchema = z.object({
-    field: z.enum(["department", "topics", "timer", "question_count", "none"]),
+    field: z.enum(["assessment_type", "department", "topics", "timer", "question_count", "none"]),
     message: z.string()
 });
 
@@ -73,6 +76,7 @@ export const departmentNodeSchema = z.object({
 });
 
 export const NodeMap = {
+    "assessment_type": "askForAssessmentType",
     "department": "askForDepartment",
     "topics": "askForTopics",
     "timer": "askForTimer",

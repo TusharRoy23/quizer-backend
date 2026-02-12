@@ -18,7 +18,10 @@ export class QuestionGenerationGraphBuilder implements IQuestionGraphBuilder {
         const builder = new StateGraph(QuestionGenerationStateSchema)
             .addNode("initializeConversation", (state) => this.questionGenerationNodes.initializeConversation(state))
             .addNode("askForPermission", (state) => this.questionGenerationNodes.askForPermission(state), {
-                ends: ["askForDepartment", END]
+                ends: ["askForAssessmentType", END]
+            })
+            .addNode("askForAssessmentType", (state) => this.questionGenerationNodes.askForAssessmentType(state), {
+                ends: ["askForDepartment", "changeHandler", "infoHandler", "askForHelp"]
             })
             .addNode("askForDepartment", (state) => this.questionGenerationNodes.askForDepartment(state), {
                 ends: ["askForTopics", "changeHandler", "infoHandler", "askForHelp"]
@@ -36,16 +39,16 @@ export class QuestionGenerationGraphBuilder implements IQuestionGraphBuilder {
                 ends: ["endOfDiscussion", "generateQuestions", END]
             })
             .addNode("askForHelp", (state) => this.questionGenerationNodes.askForHelp(state), {
-                ends: ["askForDepartment", "initializeConversation", "askForTopics", "askForTimer", "askForQuestionCount"]
+                ends: ["askForAssessmentType", "askForDepartment", "initializeConversation", "askForTopics", "askForTimer", "askForQuestionCount"]
             })
             .addNode("generateQuestions", (state) => this.questionGenerationNodes.generateQuestions(state))
             .addNode("changeHandler", (state) =>
                 this.questionGenerationNodes.changeHandler(state),
-                { ends: ["askForDepartment", "initializeConversation", "askForTopics", "askForTimer", "askForQuestionCount"] }
+                { ends: ["askForAssessmentType", "askForDepartment", "initializeConversation", "askForTopics", "askForTimer", "askForQuestionCount"] }
             )
             .addNode("infoHandler", (state) =>
                 this.questionGenerationNodes.infoHandler(state), {
-                ends: ["askForDepartment", "initializeConversation", "askForTopics", "askForTimer", "askForQuestionCount"]
+                ends: ["askForAssessmentType", "askForDepartment", "initializeConversation", "askForTopics", "askForTimer", "askForQuestionCount"]
             }
             )
             .addNode("endOfDiscussion", (state) => this.questionGenerationNodes.endOfDiscussion(state))

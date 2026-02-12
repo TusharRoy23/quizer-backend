@@ -1,4 +1,5 @@
 import { ChatDeepSeek } from "@langchain/deepseek";
+import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { inject, injectable } from "inversify";
 import { z } from "zod";
@@ -29,15 +30,21 @@ const keywordSchema = z.object({
 
 @injectable()
 export class LangChainRepository extends BaseQuestionRepository implements ILangChainRepository {
-    private deepSeekModel: ChatDeepSeek;
+    // private llmModel: ChatDeepSeek;
+    private llmModel: ChatOpenAI;
 
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
     ) {
         super(databaseService);
-        this.deepSeekModel = new ChatDeepSeek({
-            model: 'deepseek-coder',
-            temperature: 0.4,
+        // this.llmModel = new ChatDeepSeek({
+        //     model: 'deepseek-coder',
+        //     temperature: 1.0,
+        //     cache: false
+        // });
+        this.llmModel = new ChatOpenAI({
+            modelName: 'gpt-4o-mini',
+            temperature: 0.7,
             cache: false
         });
     }
@@ -51,39 +58,77 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
         try {
             const topicNames = topics.map((t) => t.name).join(", ");
             const uniquenessKey = Math.random().toString(36).substring(2, 8);
-            const modelWithSchema = this.deepSeekModel.withStructuredOutput(quizSchema);
+            const modelWithSchema = this.llmModel.withStructuredOutput(quizSchema, {
+                name: `quiz_generator`,
+                strict: true
+            });
 
             const promptTemplate = await ChatPromptTemplate.fromMessages([
                 [
                     "system",
-                    `You are an expert quiz generator. Generate exactly {question_count} questions about the specified topics.
-                    
-                    CRITICAL RULES:
-                    - You MUST generate exactly {question_count} questions, no more no less
-                    - Every question MUST be directly related to "{topicNames}" topics. 
-                      But don't create a question with mixed topics. 1 question 1 topic.
-                    - Include variety: scenario-based, definition, application, problem-solving
+                    `You are an expert quiz generator.
+                    GENERATION ID: {uniquenessKey} - Use this to create COMPLETELY NEW questions.
+                    IMPORTANT: For each call with new {uniquenessKey}, generate 100% novel questions. 
+                    Never reuse phrasing, scenarios, or examples from prior generations.
+
+                    IMPORTANT DISTINCTION:
+                    - If the assessment type is "GIA" (General Intelligence Assessment), you MUST generate 
+                    cognitive ability test questions.
+                    - GIA questions test reasoning ability, NOT domain knowledge.
+                    - NEVER explain what GIA is.
+                    - NEVER ask questions about how GIA is conducted.
+                    - NEVER generate HR, psychology, or theory questions about intelligence.
+
+                    FOR GIA QUESTIONS:
+                    - Questions must be self-contained and domain-neutral
+                    - Allowed GIA categories only:
+                    - Numerical Reasoning
+                    - Logical Reasoning
+                    - Abstract / Pattern Recognition
+                    - Verbal Reasoning
+                    - Attention & Rule-Based Reasoning
+                    - Each question must test problem-solving, inference, or pattern detection
+                    - Assume the test-taker has no prior subject knowledge
+                    - Prefer time-pressure style questions
+
+                    GENERAL RULES:
+                    - Generate exactly {question_count} questions
+                    - Every question MUST belong to exactly ONE topic
+                    - Do NOT mix topics in a single question
                     - For CHOICE questions: exactly 4 options, single answer [0-3]
-                    - For MULTIPLE_CHOICE questions: 4 options, multiple answers
-                    - Highest Difficulity Level is 100% & Lowest is 0. 
-                      If given level is more than 100 or lower than 0, please keep within range (0 to 100)
-                    - To Return Topic value, stay within these "{topicNames}" names only 
-                    - Return valid JSON only, no additional text`
+                    - For MULTIPLE_CHOICE questions: exactly 4 options, multiple answers
+                    - Difficulty range is 0–100 only
+                    - Topic value MUST be one of: {topicNames}
+                    - Return valid JSON only, no additional text
+                    `
                 ],
                 [
                     "user",
-                    `Generate {question_count} questions for {departmentName}.
-                    
-                    TOPICS TO COVER: {topicNames}
-                    DIFFICULTY LEVEL FOR TOPICS: {difficulty_level}
+                    `
+                    Assessment Type: {assessmentType}
 
-                    Question distribution requirements:
-                    - {scenarioCount} scenario-based questions
-                    - {misconceptionCount} common misconception questions  
-                    - {advancedCount} advanced application questions
-                    - Remaining questions: mixed formats
+                    Generate {question_count} questions.
 
-                    Ensure questions are novel, practical, and avoid textbook repetition.`
+                    DEPARTMENT: {departmentName}
+
+                    TOPICS (interpret based on QUESTION_MODE):
+                    {topicNames}
+
+                    DIFFICULTY LEVEL: {difficulty_level}
+
+                    Question distribution:
+                    - {scenarioCount} scenario-based
+                    - {misconceptionCount} trap / misleading-option questions
+                    - {advancedCount} advanced reasoning questions
+                    - Remaining: mixed reasoning formats
+
+                    If Assessment Type is GENERAL_INTELLIGENCE:
+                    - Questions must be time-pressure friendly
+                    - No explanatory text in questions
+                    - No real-world domain assumptions
+                    - No academic framing
+
+                    Ensure questions are novel and suitable for pre-employment assessment`
                 ],
             ]);
 
@@ -110,7 +155,8 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
                 uniquenessKey: uniquenessKey,
                 scenarioCount: scenarioCount,
                 misconceptionCount: misconceptionCount,
-                advancedCount: advancedCount
+                advancedCount: advancedCount,
+                assessmentType: payload.assessment_type
             });
 
             return response.questions.map(q => ({
@@ -145,7 +191,7 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
                     "{prompt}"
                 ]
             ]);
-            const chain = promptTemplate.pipe(this.deepSeekModel);
+            const chain = promptTemplate.pipe(this.llmModel);
             const stream = await chain.stream({
                 prompt: prompt
             });
@@ -173,7 +219,7 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
 
     public async generateQuestionKeywords(question: Question): Promise<string[]> {
         try {
-            const modelWithSchema = this.deepSeekModel.withStructuredOutput(keywordSchema);
+            const modelWithSchema = this.llmModel.withStructuredOutput(keywordSchema);
             const promptTemplate = await ChatPromptTemplate.fromMessages([
                 [
                     "system",

@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
@@ -9,7 +9,6 @@ import { TYPES } from "../../../../core/type.core";
 
 @injectable()
 export abstract class BaseQuestionRepository extends BaseRepository {
-    protected prisma: PrismaClient;
 
     constructor(
         @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService

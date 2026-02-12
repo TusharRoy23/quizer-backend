@@ -1,4 +1,4 @@
-import { AgenticRole, NextStep } from "../../../shared/utils/enum";
+import { AgenticRole, AssessmentType, NextStep } from "../../../shared/utils/enum";
 
 export type Department = {
     id: number;
@@ -139,6 +139,7 @@ export type TopicScore = {
 }
 
 export type CustomQuestion = {
+    assessment_type: AssessmentType;
     department: string;
     topics: string[];
     timer: number;
