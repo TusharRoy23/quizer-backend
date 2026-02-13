@@ -4,7 +4,7 @@ import { IDatabaseService } from "../interface/IDatabase.service";
 
 @injectable()
 export class DatabaseService implements IDatabaseService {
-    private prisma: PrismaClient;
+    public readonly prisma: PrismaClient;
 
     constructor() {
         this.prisma = new PrismaClient({
@@ -20,7 +20,9 @@ export class DatabaseService implements IDatabaseService {
             query: {
                 $allModels: {
                     findMany: async ({ args, query }: { args: any, query: (args: any) => Promise<any[]> }) => {
-                        /* Can Be used for modify the response */
+                        /*
+                            * Modifying the response
+                        */
                         const results = await query(args);
                         return results;
                     },
@@ -35,17 +37,15 @@ export class DatabaseService implements IDatabaseService {
                         args: any;
                         query: (args: any) => Promise<any>;
                     }) => {
-                        /* Can Be used for modify the response */
+                        /*
+                            * Modifying the response
+                        */
                         const result = await query(args);
                         return result;
                     }
                 }
             }
         }) as PrismaClient;
-    }
-
-    public async getPrismaClient(): Promise<PrismaClient> {
-        return this.prisma;
     }
 
     public async disconnect(): Promise<void> {

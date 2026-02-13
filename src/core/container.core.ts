@@ -45,13 +45,15 @@ import { QuestionGenerationNodes } from './langgraph/nodes/QuestionGenerationNod
 import { IQuestionGraphBuilder } from './langgraph/interface/IQuestionGraphBuilder';
 import { QuestionGenerationGraphBuilder } from './langgraph/builder/question-generation-builder';
 import { LLMService } from './service/llm.service';
+import { ICronService } from './interface/ICron.service';
+import { CronService } from './service/cron.service';
 
-const container = new Container();
+const container = new Container({ defaultScope: "Singleton" });
 
 //? Database Module
-container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService).inSingletonScope();
+container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService);
 //? S3 Module
-container.bind<IS3Service>(TYPES.IS3Service).to(S3Service).inSingletonScope();
+container.bind<IS3Service>(TYPES.IS3Service).to(S3Service);
 //? OpenAI Module
 container.bind<IOpenAIService>(TYPES.IOpenAIService).to(OpenAIService);
 container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(OpenAIRepository);
@@ -89,6 +91,7 @@ container.bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository);
 container.bind<IUserService>(TYPES.IUserService).to(UserService);
 
 //? LLM Service
-container.bind<LLMService>(TYPES.ILLMService).to(LLMService).inSingletonScope();
+container.bind<LLMService>(TYPES.ILLMService).to(LLMService);
+container.bind<ICronService>(TYPES.ICronService).to(CronService);
 
 export default container;

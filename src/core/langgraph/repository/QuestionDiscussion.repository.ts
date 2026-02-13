@@ -4,7 +4,6 @@ import { IQuestionDiscussionRepository } from "../interface/IQuestionDiscussion.
 import { TYPES } from "../../type.core";
 import { throwException } from "../../../shared/errors/all.exception";
 import { BaseQuestionRepository } from "../../../modules/public/question/repository/base-question.repository";
-import { IDatabaseService } from "../../interface/IDatabase.service";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { AgenticRole, NextStep } from "../../../shared/utils/enum";
 import { AgentStepState, QuestionDiscussionMessage } from "../../../modules/public/types/public.type";
@@ -17,11 +16,10 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
     private questionGenerationGraph: any;
 
     constructor(
-        @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IGraphBuilder) private readonly graphBuilder: IGraphBuilder,
         @inject(TYPES.IQuestionGraphBuilder) private readonly questionGraphBuilder: IQuestionGraphBuilder
     ) {
-        super(databaseService);
+        super();
         this.graph = this.graphBuilder.buildQuestionDiscussionGraph();
         this.questionGenerationGraph = this.questionGraphBuilder.buildGraph();
     }
@@ -140,8 +138,7 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
                 message: message,
                 role: role
             };
-            const prisma = await this.prisma$();
-            await prisma.question_discussion.create({
+            await this.prisma$.question_discussion.create({
                 data: payload
             });
             return "Message saved successfully.";
@@ -152,8 +149,7 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
 
     public async getQuestionDiscussionMessages(questionUUID: string): Promise<QuestionDiscussionMessage[]> {
         try {
-            const prisma = await this.prisma$();
-            const messages = await prisma.question_discussion.findMany({
+            const messages = await this.prisma$.question_discussion.findMany({
                 where: {
                     question_log_question: {
                         uuid: questionUUID
@@ -234,8 +230,7 @@ export class QuestionDiscussionRepository extends BaseQuestionRepository impleme
 
     private async getLastAssistantMessage(questionUUID: string): Promise<string | null> {
         try {
-            const prisma = await this.prisma$();
-            const lastMessage = await prisma.question_discussion.findFirst({
+            const lastMessage = await this.prisma$.question_discussion.findFirst({
                 where: {
                     question_log_question: {
                         uuid: questionUUID

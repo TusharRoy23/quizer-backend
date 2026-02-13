@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 export interface IDatabaseService {
-    getPrismaClient(): Promise<PrismaClient>;
+    readonly prisma: PrismaClient;
     disconnect(): Promise<void>;
     healthCheck(): Promise<boolean>;
 }

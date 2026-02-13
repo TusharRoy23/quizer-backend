@@ -1,23 +1,14 @@
-import { inject, injectable } from "inversify";
+import { injectable } from "inversify";
 import { IDepartmentRepository } from "../interface/IDepartment.repository";
-import { TYPES } from "../../../../core/type.core";
-import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BaseRepository } from "../../../../core/repository/base.repository";
 import { Department, Topic } from "../../types/public.type";
 import { throwException } from "../../../../shared/errors/all.exception";
 
 @injectable()
 export class DepartmentRepository extends BaseRepository implements IDepartmentRepository {
-    constructor(
-        @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
-    ) {
-        super(databaseService);
-    }
-
     async getDepartmentList(): Promise<Department[]> {
         try {
-            const prisma = await this.prisma$();
-            const department = await prisma.department.findMany({
+            const department = await this.prisma$.department.findMany({
                 where: {
                     is_global: true
                 }
@@ -30,8 +21,7 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
 
     async getTopicsByDepartment(departmentUuid: string): Promise<Topic[]> {
         try {
-            const prisma = await this.prisma$();
-            const topic = await prisma.topic.findMany({
+            const topic = await this.prisma$.topic.findMany({
                 where: {
                     department_topic_departmentTodepartment: {
                         uuid: departmentUuid
@@ -50,8 +40,7 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
 
     async getDepartmentByUUID(uuid: string): Promise<Department | null> {
         try {
-            const prisma = await this.prisma$();
-            const department = await prisma.department.findFirst({
+            const department = await this.prisma$.department.findFirst({
                 where: {
                     uuid: uuid
                 }
@@ -65,8 +54,7 @@ export class DepartmentRepository extends BaseRepository implements IDepartmentR
 
     async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string): Promise<Topic[] | null> {
         try {
-            const prisma = await this.prisma$();
-            const topics = await prisma.topic.findMany({
+            const topics = await this.prisma$.topic.findMany({
                 where: {
                     uuid: {
                         in: uuids

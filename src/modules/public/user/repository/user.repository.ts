@@ -9,16 +9,9 @@ import { ParticipantPayloadType } from "../dto/participant-payload.dto";
 import { NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 
 export class UserRepository extends BaseRepository implements IUserRepository {
-    constructor(
-        @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
-    ) {
-        super(databaseService);
-    }
-
     async createUser(payload: UserPayloadType): Promise<User> {
         try {
-            const prisma = await this.prisma$();
-            const user = await prisma.user.create({
+            const user = await this.prisma$.user.create({
                 data: {
                     name: payload.name,
                     email: payload.email,
@@ -33,8 +26,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
 
     async getUserByEmail(email: string): Promise<User | null> {
         try {
-            const prisma = await this.prisma$();
-            const user = await prisma.user.findFirst({
+            const user = await this.prisma$.user.findFirst({
                 where: {
                     email: email
                 }
@@ -51,10 +43,9 @@ export class UserRepository extends BaseRepository implements IUserRepository {
 
     async createParticipant(payload: ParticipantPayloadType): Promise<Participant | null> {
         try {
-            const prisma = await this.prisma$();
             let participant = await this.getParticipantByEmail(payload.email);
             if (!participant) {
-                participant = await prisma.participant.create({
+                participant = await this.prisma$.participant.create({
                     data: {
                         name: payload.name,
                         email: payload.email,
@@ -71,8 +62,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
 
     async getParticipantByEmail(email: string): Promise<Participant | null> {
         try {
-            const prisma = await this.prisma$();
-            const participant = await prisma.participant.findFirst({
+            const participant = await this.prisma$.participant.findFirst({
                 where: {
                     email: email
                 }
@@ -89,13 +79,12 @@ export class UserRepository extends BaseRepository implements IUserRepository {
 
     async generateSessionForParticipant(email: string): Promise<Participant> {
         try {
-            const prisma = await this.prisma$();
             const participant = await this.getParticipantByEmail(email);
             if (!participant) {
                 throw new NotFoundException('Participant not found');
             }
 
-            const updatedParticipant = await prisma.participant.update({
+            const updatedParticipant = await this.prisma$.participant.update({
                 where: {
                     uuid: participant.uuid
                 },

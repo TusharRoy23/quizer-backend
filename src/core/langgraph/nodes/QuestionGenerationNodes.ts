@@ -8,6 +8,7 @@ import { isValidPositiveNumber } from "../../../shared/utils/utils";
 import { TYPES } from "../../type.core";
 import { IQuestionRepository } from "../../../modules/public/question/interface/IQuestion.repository";
 import { AssessmentType, NextStep } from "../../../shared/utils/enum";
+import { LLMService } from "../../service/llm.service";
 
 const baseSystemPrompt = `
     You are a teacher for a student. As you will create some questions depends on-
@@ -21,17 +22,10 @@ const baseSystemPrompt = `
 
 @injectable()
 export class QuestionGenerationNodes implements IQuestionGenerationNodes {
-    private deepSeekModel: ChatDeepSeek;
-
     constructor(
-        @inject(TYPES.IQuestionRepository) private readonly questionRepository: IQuestionRepository
-    ) {
-        this.deepSeekModel = new ChatDeepSeek({
-            model: "deepseek-coder",
-            temperature: 0.4,
-            cache: false,
-        });
-    }
+        @inject(TYPES.IQuestionRepository) private readonly questionRepository: IQuestionRepository,
+        @inject(TYPES.ILLMService) private readonly llmService: LLMService
+    ) { }
 
     /**
      * Start the conversation.
@@ -48,7 +42,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             Please use simple, professional, and educational tone for a student.
             Ask user by saying - "If you want to continue say "Yes" otherwise "No".
         `;
-        const prompt = await this.deepSeekModel.invoke([
+        const prompt = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt }
         ]);
         return {
@@ -78,7 +72,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
                 ["user", userPrompt]
             ]);
             const result = await promptTemplate.pipe(
-                this.deepSeekModel.withStructuredOutput(askPermissionSchema)
+                this.llmService.deepSeekllmModel.withStructuredOutput(askPermissionSchema)
             ).invoke({
                 answer: answer
             });
@@ -156,7 +150,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
      * Ask for department
      */
     async askForDepartment(state: QuestionGenerationState) {
-        const askDeptSchema = this.deepSeekModel.withStructuredOutput(departmentNodeSchema);
+        const askDeptSchema = this.llmService.deepSeekllmModel.withStructuredOutput(departmentNodeSchema);
         let prompt = `Let's begin setting up your question generation.
                         \n\nPlease tell me the department (e.g., Software Engineering, Math, Physics, Chemistry, etc.).`;
         if (state.lastAssistantMessage) {
@@ -229,7 +223,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
      * Ask for topics
      */
     async askForTopics(state: QuestionGenerationState) {
-        const outputSchema = this.deepSeekModel.withStructuredOutput(InputValidationSchema);
+        const outputSchema = this.llmService.deepSeekllmModel.withStructuredOutput(InputValidationSchema);
         const department = state.generationContext?.department;
         const hintFortopics = state.hintFortopics || [];
         let prompt = `Great! You selected **${department}**.
@@ -549,7 +543,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
             ["user", "User said: {input}"]
         ]);
         const result = await promptTemplate.pipe(
-            this.deepSeekModel.withStructuredOutput(HandlerSchema)
+            this.llmService.deepSeekllmModel.withStructuredOutput(HandlerSchema)
         ).invoke({ input: state.lastUserMessage });
         const field = result.field;
         if (field === "none") {
@@ -592,7 +586,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         ]);
 
         const result = await promptTemplate.pipe(
-            this.deepSeekModel.withStructuredOutput(HandlerSchema)
+            this.llmService.deepSeekllmModel.withStructuredOutput(HandlerSchema)
         ).invoke({ input: state.lastUserMessage, keyword: lastNode });
 
         const field = result.field;
@@ -640,7 +634,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         ]);
 
         const result = await promptTemplate.pipe(
-            this.deepSeekModel.withStructuredOutput(HelperSchema)
+            this.llmService.deepSeekllmModel.withStructuredOutput(HelperSchema)
         ).invoke({
             input: state.lastUserMessage,
             department: department,
@@ -693,7 +687,7 @@ export class QuestionGenerationNodes implements IQuestionGenerationNodes {
         ]);
 
         const result = await promptTemplate
-            .pipe(this.deepSeekModel.withStructuredOutput(IntentSchema))
+            .pipe(this.llmService.deepSeekllmModel.withStructuredOutput(IntentSchema))
             .invoke({ input: userInput });
 
         return result.intent;

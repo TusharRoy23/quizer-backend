@@ -5,7 +5,6 @@ import { ILangChainRepository } from "../interface/ILangChain.repository";
 import { Department, Question, QuestionType, Topic, TopicScore } from "../../../modules/public/types/public.type";
 import { QuestionGeneratePayloadType } from "../../../modules/public/question/dto/question-generate-payload.dto";
 import { throwException } from "../../../shared/errors/all.exception";
-import { IDatabaseService } from "../../interface/IDatabase.service";
 import { TYPES } from "../../type.core";
 import { BaseQuestionRepository } from "../../../modules/public/question/repository/base-question.repository";
 import { LLMService } from "../../service/llm.service";
@@ -30,10 +29,9 @@ const keywordSchema = z.object({
 @injectable()
 export class LangChainRepository extends BaseQuestionRepository implements ILangChainRepository {
     constructor(
-        @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.ILLMService) private readonly llmService: LLMService
     ) {
-        super(databaseService);
+        super();
     }
 
     public async generatedQuestions(
