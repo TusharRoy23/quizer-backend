@@ -56,10 +56,10 @@ export class S3Service implements IS3Service {
     }
 
     // Generate unique key for audio files
-    generateAudioKey(questionLogUUID: string, mimeType: string = 'audio/mpeg'): string {
+    generateAudioKey(preKeyStr: string, mimeType: string = 'audio/mpeg'): string {
         const timestamp = Date.now();
         const extension = this.getFileExtensionFromMime(mimeType);
-        return `audio-answers/${questionLogUUID}/${timestamp}.${extension}`;
+        return `audio-answers/${preKeyStr}/${timestamp}.${extension}`;
     }
 
     private getFileExtensionFromMime(mimeType: string): string {

@@ -239,7 +239,8 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
                 return null;
             }
             const audio = await this.openAIService.getOpenAITextToSpeech(question.question || '');
-            const audioKey = this.s3Service.generateAudioKey(question.question_log.uuid);
+            const key = `${participant.google_id}/${question.question_log.uuid}`;
+            const audioKey = this.s3Service.generateAudioKey(key);
             const url = await this.uploadToS3(audio as Buffer, audioKey, 'audio/mpeg');
             // await new Promise(resolve => setTimeout(resolve, 5000)); // wait for 30 sec.
 
