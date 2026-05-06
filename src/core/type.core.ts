@@ -18,5 +18,7 @@ export const TYPES = {
     IQuestionDiscussionService: Symbol.for("IQuestionDiscussionService"),
     IQuestionDiscussionRepository: Symbol.for("IQuestionDiscussionRepository"),
     IQuestionGenerationNodes: Symbol.for("IQuestionGenerationNodes"),
-    IQuestionGraphBuilder: Symbol.for("IQuestionGraphBuilder")
+    IQuestionGraphBuilder: Symbol.for("IQuestionGraphBuilder"),
+    ILLMService: Symbol.for("ILLMService"),
+    ICronService: Symbol.for("ICronService")
 }

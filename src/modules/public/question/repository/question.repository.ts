@@ -1,13 +1,11 @@
 import { inject, injectable } from "inversify";
 import { IQuestionRepository } from "../interface/IQuestion.repository";
 import { TYPES } from "../../../../core/type.core";
-import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { QuestionGeneratePayloadType } from "../dto/question-generate-payload.dto";
 import { CustomQuestion, PaginationParams, PaginationResponse, Question, QuestionKeyword, QuestionLog, QuizTimer, Topic, TopicScore } from "../../types/public.type";
 import { QuestionSavePayloadType } from "../dto/question-save-payload.dto";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
-import CronJob from "node-cron";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { BaseQuestionRepository } from "./base-question.repository";
@@ -23,16 +21,10 @@ type score = {
 @injectable()
 export class QuestionRepository extends BaseQuestionRepository implements IQuestionRepository {
     constructor(
-        @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
         @inject(TYPES.ILangChainService) readonly langChainService: ILangChainService
     ) {
-        super(databaseService);
-        this.cronJob(); // Schedule the cron job to update quiz timers
-    }
-
-    private cronJob() {
-        CronJob.schedule('*/30 * * * *', async () => this.updateQuizesTimer());
+        super();
     }
 
     public async generatedQuestions(payload: QuestionGeneratePayloadType): Promise<string> {
@@ -56,8 +48,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 question_count: payload.question_count,
                 assessment_type: payload.assessment_type
             };
-            const prisma = await this.prisma$();
-            const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+
+            const result = await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
                 const savedQuestionLog = await this.saveQuestionLog(questionPayload, tx);
                 await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id, tx);
                 return savedQuestionLog;
@@ -74,14 +66,14 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
     public async generateCustomQuestions(payload: CustomQuestion): Promise<QuestionGeneratePayloadType> {
         try {
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
-            let department = await prisma.department.findUnique({
+
+            let department = await this.prisma$.department.findUnique({
                 where: {
                     name: payload.department
                 }
             });
             if (!department?.id) {
-                department = await prisma.department.create({
+                department = await this.prisma$.department.create({
                     data: {
                         name: payload.department,
                         is_global: false,
@@ -99,13 +91,13 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             }));
 
             // Create topics if they do not exist (skipDuplicates prevents duplicates)
-            await prisma.topic.createMany({
+            await this.prisma$.topic.createMany({
                 data: topicPayload,
                 skipDuplicates: true
             });
 
             // Fetch topics after creation to ensure all exist
-            const topics = await prisma.topic.findMany({
+            const topics = await this.prisma$.topic.findMany({
                 where: {
                     department: department.id,
                     is_global: false,
@@ -119,7 +111,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             // if (!topics.length) {
             //     throw new NotFoundException('Topics are not created.');
             // }
-            // const topics = await prisma.topic.findMany({
+            // const topics = await this.prisma$.topic.findMany({
             //     where: {
             //         department: department.id,
             //         is_global: false,
@@ -165,8 +157,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     public async saveAnswerForQuestion(questionLogUUID: string, payload: QuestionSavePayloadType): Promise<Question> {
         try {
-            const prisma = await this.prisma$();
-            const questionLog = await prisma.question_log.findUnique({
+
+            const questionLog = await this.prisma$.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
@@ -179,7 +171,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             }
 
             const submittedAnswers = payload.answers.sort((a, b) => a - b);
-            const update = await prisma.question_log_question.update({
+            const update = await this.prisma$.question_log_question.update({
                 where: {
                     uuid: payload.uuid,
                     question_log: {
@@ -202,10 +194,10 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     public async submitQuestionLog(questionLogUUID: string): Promise<string> {
         try {
-            const prisma = await this.prisma$();
+
             const questionLog = await this.getQuestionLogByUUID(questionLogUUID, false);
 
-            const questions: Question[] = await prisma.question_log_question.findMany({
+            const questions: Question[] = await this.prisma$.question_log_question.findMany({
                 where: {
                     question_log_id: questionLog.id,
                     is_oral: false
@@ -252,7 +244,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             result.score = (result.correct_answers / result.total_questions) * 100;
             //! PROBLEM: An operation failed because it depends on one or more records 
             //! that were required but not found. Record to update not found.
-            const questionLogUpdate = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            const questionLogUpdate = await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
                 await this.updateTopicScore(score, tx)
                 const isUpdated = await tx.question_log.update({
                     where: {
@@ -305,7 +297,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
     public async getQuestionLogs(paginationParams: PaginationParams): Promise<PaginationResponse<QuestionLog>> {
         try {
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
+
             const { skip, take } = paginationParams;
             const condition = {
                 participant: participant?.id,
@@ -313,10 +305,10 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 is_oral: false
             }
             // Get total count for pagination metadata
-            const total = await prisma.question_log.count({
+            const total = await this.prisma$.question_log.count({
                 where: condition,
             });
-            const questionLogs = await prisma.question_log.findMany({
+            const questionLogs = await this.prisma$.question_log.findMany({
                 where: condition,
                 orderBy: {
                     id: 'desc' // Order by ID in descending order
@@ -345,9 +337,9 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     public async getQuizTimer(questionLogUUID: string): Promise<QuizTimer> {
         try {
-            const prisma = await this.prisma$();
+
             const participant = this.getParticipant();
-            let questionLog = await prisma.question_log.findUnique({
+            let questionLog = await this.prisma$.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
@@ -395,7 +387,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     public async getQuestionKeywords(questionUUID: string): Promise<QuestionKeyword[]> {
         try {
-            const prisma = await this.prisma$();
+
             const keywords = await this.getKeywords(questionUUID);
 
             if (keywords && keywords.length) {
@@ -416,7 +408,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                     question_id: question?.id,
                     keyword: keyword.trim(),
                 }));
-                await prisma.question_keyword.createMany({
+                await this.prisma$.question_keyword.createMany({
                     data: keywordData,
                     skipDuplicates: true,
                 });
@@ -433,9 +425,9 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
     public async getLatestOngoingQuiz(): Promise<QuestionLog | null> {
         try {
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
+
             this.updateQuizesTimer();
-            const questionLog = await prisma.question_log.findFirst({
+            const questionLog = await this.prisma$.question_log.findFirst({
                 where: {
                     participant: participant?.id,
                     completed: false, // Ensure the question log is not completed
@@ -509,8 +501,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private async updateQuestionKeyword(keywordUUID: string, explanation: string) {
         try {
-            const prisma = await this.prisma$();
-            await prisma.question_keyword.update({
+
+            await this.prisma$.question_keyword.update({
                 where: {
                     uuid: keywordUUID,
                 },
@@ -525,8 +517,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private async getAKeyword(keywordUuid: string): Promise<any> {
         try {
-            const prisma = await this.prisma$();
-            const keyword = await prisma.question_keyword.findUnique({
+
+            const keyword = await this.prisma$.question_keyword.findUnique({
                 where: {
                     uuid: keywordUuid,
                 },
@@ -612,9 +604,9 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     public async checkIfParticipatedInQuiz(isVerbal: boolean = false): Promise<boolean> {
         try {
-            const prisma = await this.prisma$();
+
             const participant = this.getParticipant();
-            const count = await prisma.question_log.count({
+            const count = await this.prisma$.question_log.count({
                 where: {
                     participant: participant?.id,
                     is_oral: isVerbal
@@ -628,7 +620,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     public async getExplanationForQuestion(questionUUID: string) {
         try {
-            const prisma = await this.prisma$();
+
             const question: Question = await this.getQuestionDetails(questionUUID);
             if (question?.explanation) {
                 return question.explanation;
@@ -655,7 +647,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             const parsedJSON = JSON.parse(response);
             const explanation = parsedJSON['explanation'].trim();
             // Update the question with the generated explanation
-            await prisma.question_log_question.update({
+            await this.prisma$.question_log_question.update({
                 where: { uuid: questionUUID },
                 data: { explanation: explanation }
             });
@@ -717,7 +709,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
     public async getQuestionsByQuery(query: string, limit: number, similarityThreshold: number): Promise<Question[]> {
         try {
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
+
 
             const queryEmbedding = await this.openAIService.getOpenAIEmbedding(query);
             const embeddingArray = queryEmbedding.data[0].embedding;
@@ -753,7 +745,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             sqlQuery += ` LIMIT $${params.length + 1}`;
             params.push(limit);
 
-            const questions: Question[] = await prisma.$queryRawUnsafe(sqlQuery, ...params);
+            const questions: Question[] = await this.prisma$.$queryRawUnsafe(sqlQuery, ...params);
 
             return questions.map((question: Question) => ({
                 uuid: question.uuid,
@@ -770,11 +762,57 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         }
     }
 
+    public async updateQuizesTimer() {
+        try {
+            await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
+                const logs = await tx.question_log.findMany({
+                    where: {
+                        completed: false, // Only update incomplete logs
+                        generated: true,
+                        end_time: { not: null },
+                        timezone_offset: { not: null }
+                    },
+                    select: {
+                        uuid: true,
+                        end_time: true,
+                        timezone_offset: true
+                    }
+                });
+
+                for (const questionLog of logs) {
+                    if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
+
+                    const now = new Date();
+                    const endTime = new Date(questionLog.end_time);
+
+                    // Calculate remaining time in seconds
+                    const remainingMs = endTime.getTime() - now.getTime();
+                    if (remainingMs <= 0) {
+                        // If the timer has expired, mark the question log as completed
+                        await tx.question_log.updateMany({
+                            where: {
+                                uuid: questionLog.uuid,
+                                completed: false
+                            },
+                            data: {
+                                completed: true
+                            }
+                        });
+                    }
+                }
+            });
+
+        } catch (error: any) {
+            return throwException(error);
+
+        }
+    }
+
     private async updateTopicScore(topicScore: score, prisma: Prisma.TransactionClient): Promise<boolean> {
         try {
             const participant = this.getParticipant();
             const keys = Object.keys(topicScore);
-            const topics: Topic[] = await prisma.topic.findMany({
+            const topics: Topic[] = await this.prisma$.topic.findMany({
                 where: {
                     name: {
                         in: keys
@@ -823,8 +861,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private async updateKeywordExample(keywordUUID: string, example: string): Promise<void> {
         try {
-            const prisma = await this.prisma$();
-            await prisma.question_keyword.update({
+
+            await this.prisma$.question_keyword.update({
                 where: {
                     uuid: keywordUUID,
                 },
@@ -867,8 +905,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private async saveExplanation(questionUUID: string, explanation: string) {
         try {
-            const prisma = await this.prisma$();
-            await prisma.question_log_question.update({
+
+            await this.prisma$.question_log_question.update({
                 where: { uuid: questionUUID },
                 data: { explanation: explanation }
             });
@@ -879,8 +917,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private async getKeywords(questionUUID: string) {
         try {
-            const prisma = await this.prisma$();
-            const keywords = await prisma.question_keyword.findMany({
+
+            const keywords = await this.prisma$.question_keyword.findMany({
                 where: {
                     question_log_question: {
                         uuid: questionUUID,
@@ -908,8 +946,8 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         try {
             const participant = this.getParticipant();
 
-            const prisma = await this.prisma$();
-            const questionLog = await prisma.question_log.findUnique({
+
+            const questionLog = await this.prisma$.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: isCompleted, // Ensure the question log is not completed
@@ -950,7 +988,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private async getQuestionsBylogUUID(questionLogUUID: string, isCompleted: boolean = false): Promise<Question[]> {
         try {
-            const prisma = await this.prisma$();
+
             const participant = this.getParticipant();
             if (!isCompleted) {
                 const quizTimer = await this.getQuizTimer(questionLogUUID);
@@ -959,7 +997,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 }
             }
 
-            const questions = await prisma.question_log_question.findMany({
+            const questions = await this.prisma$.question_log_question.findMany({
                 where: {
                     question_log: {
                         uuid: questionLogUUID,
@@ -993,7 +1031,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
         // Save the questions to the database
         // This is a placeholder function. Implement the actual logic to save the questions.
         try {
-            const prisma = await this.prisma$();
+
             const questionData = questions.map((question: Question) => ({
                 question_log_id: questionLogId,
                 question: question.question,
@@ -1004,7 +1042,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 topic: question.topic || undefined, // Ensure topic is trimmed
                 sub_topic: question.sub_topic || undefined, // Ensure sub_topic is trimmed
             }));
-            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
                 const count = await tx.question_log_question.createMany({
                     data: questionData,
                     skipDuplicates: true, // Skip duplicates if any
@@ -1029,9 +1067,9 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
     private async generateEmbeddingsForQuestions(questionLogId: number): Promise<void> {
         try {
-            const prisma = await this.prisma$();
 
-            const questions = await prisma.$queryRaw<
+
+            const questions = await this.prisma$.$queryRaw<
                 { id: number; question: string; topic: string; sub_topic: string; options: any }[]
             >`SELECT id, question, topic, sub_topic, options, explanation
             FROM question_log_question WHERE question_log_id = ${questionLogId}`;
@@ -1054,7 +1092,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
             const updateResults = await Promise.allSettled(
                 questions.map((question: any, index: number) =>
                     this.updateWithRetry(
-                        prisma,
+                        this.prisma$,
                         question.id,
                         embeddingResponse.data[index].embedding
                     )
@@ -1091,7 +1129,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
 
         while (attempt <= maxRetries) {
             try {
-                await prisma.$executeRawUnsafe(`
+                await this.prisma$.$executeRawUnsafe(`
                 UPDATE question_log_question 
                 SET embedding = '${JSON.stringify(embedding)}'::vector
                 WHERE id = ${questionId}
@@ -1103,53 +1141,6 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 console.warn(`Retrying update for question ${questionId} (attempt ${attempt})`);
                 await new Promise(r => setTimeout(r, 500 * attempt));
             }
-        }
-    }
-
-    private async updateQuizesTimer() {
-        try {
-            const prisma = await this.prisma$();
-            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-                const logs = await tx.question_log.findMany({
-                    where: {
-                        completed: false, // Only update incomplete logs
-                        generated: true,
-                        end_time: { not: null },
-                        timezone_offset: { not: null }
-                    },
-                    select: {
-                        uuid: true,
-                        end_time: true,
-                        timezone_offset: true
-                    }
-                });
-
-                for (const questionLog of logs) {
-                    if (!questionLog?.end_time && questionLog.timezone_offset == null) continue;
-
-                    const now = new Date();
-                    const endTime = new Date(questionLog.end_time);
-
-                    // Calculate remaining time in seconds
-                    const remainingMs = endTime.getTime() - now.getTime();
-                    if (remainingMs <= 0) {
-                        // If the timer has expired, mark the question log as completed
-                        await tx.question_log.updateMany({
-                            where: {
-                                uuid: questionLog.uuid,
-                                completed: false
-                            },
-                            data: {
-                                completed: true
-                            }
-                        });
-                    }
-                }
-            });
-
-        } catch (error: any) {
-            return throwException(error);
-
         }
     }
 }

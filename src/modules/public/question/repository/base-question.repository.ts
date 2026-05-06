@@ -1,21 +1,12 @@
-import { inject, injectable } from "inversify";
+import { injectable } from "inversify";
 import { Prisma } from "@prisma/client";
-import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { BadRequestException, NotFoundException, throwException } from "../../../../shared/errors/all.exception";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { Department, Question, QuestionLog, QuestionLogQuestion, Topic, TopicScore } from "../../types/public.type";
 import { BaseRepository } from "../../../../core/repository/base.repository";
-import { TYPES } from "../../../../core/type.core";
 
 @injectable()
 export abstract class BaseQuestionRepository extends BaseRepository {
-
-    constructor(
-        @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService
-    ) {
-        super(databaseService);
-    }
-
     protected async saveQuestionLog(payload: QuestionLogPayloadType, tx: Prisma.TransactionClient): Promise<QuestionLog> {
         // Save the question log to the database
         // This is a placeholder function. Implement the actual logic to save the question log.
@@ -41,8 +32,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async updateQuizTimer(questionLogUUID: string): Promise<QuestionLog | undefined> {
         try {
-            const prisma = await this.prisma$();
-            const questionLog: QuestionLog = await prisma.question_log.findUnique({
+            const questionLog: QuestionLog = await this.prisma$.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     completed: false, // Ensure the question log is not completed
@@ -62,7 +52,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
             const expiresAt = new Date(Date.now() + questionLog.timer * 60 * 1000);
             const expiresAtUTC = new Date(expiresAt.toISOString());
 
-            const questionUpdatedLog = await prisma.question_log.update({
+            const questionUpdatedLog = await this.prisma$.question_log.update({
                 where: { uuid: questionLogUUID },
                 data: {
                     end_time: expiresAtUTC, // Store as UTC
@@ -98,9 +88,8 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async checkPromptInProgress(): Promise<boolean> {
         try {
-            const prisma = await this.prisma$();
             const participant = this.getParticipant();
-            const questionLog = await prisma.question_log.findFirst({
+            const questionLog = await this.prisma$.question_log.findFirst({
                 where: {
                     participant: participant?.id,
                     generated: false, // Ensure the participant does not have a quiz in generation process
@@ -117,9 +106,8 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async getOngoingQuiz(): Promise<QuestionLog | null> {
         try {
-            const prisma = await this.prisma$();
             const participant = this.getParticipant();
-            const questionLog = await prisma.question_log.findFirst({
+            const questionLog = await this.prisma$.question_log.findFirst({
                 where: {
                     participant: participant?.id,
                     completed: false, // Ensure the participant does not have an ongoing quiz,
@@ -134,9 +122,8 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async deleteGeneratedQuestion(questionLogId: number) {
         try {
-            const prisma = await this.prisma$();
             // delete quesstion log & connected data
-            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
                 await tx.question_log_topic.deleteMany({
                     where: {
                         question_log_id: questionLogId,
@@ -155,9 +142,8 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async isMoreQuizAllowed(is_oral: boolean = false): Promise<boolean> {
         try {
-            const prisma = await this.prisma$();
             const participant = this.getParticipant();
-            const questionLog = await prisma.question_log.findFirst({
+            const questionLog = await this.prisma$.question_log.findFirst({
                 where: {
                     is_oral,
                     participant: participant?.id,
@@ -174,7 +160,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
             const timezoneOffset = questionLog?.timezone_offset ? questionLog.timezone_offset : now.getTimezoneOffset(); // Minutes from UTC
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000 + (timezoneOffset * 60 * 1000));
 
-            const quizCount = await prisma.question_log.count({
+            const quizCount = await this.prisma$.question_log.count({
                 where: {
                     is_oral,
                     participant: participant?.id,
@@ -203,8 +189,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async getDepartmentByUUID(uuid: string): Promise<Department | null> {
         try {
-            const prisma = await this.prisma$();
-            const department = await prisma.department.findFirst({
+            const department = await this.prisma$.department.findFirst({
                 where: {
                     uuid: uuid
                 }
@@ -222,8 +207,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async getTopicsByUUIDsAndDepartmentUUID(uuids: Array<string>, departmentUuid: string, is_global: boolean = true): Promise<Topic[] | null> {
         try {
-            const prisma = await this.prisma$();
-            const topics = await prisma.topic.findMany({
+            const topics = await this.prisma$.topic.findMany({
                 where: {
                     uuid: {
                         in: uuids
@@ -246,9 +230,8 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async getScoresByTopics(topics: Topic[]): Promise<TopicScore[]> {
         try {
-            const prisma = await this.prisma$();
             const participant = await this.getParticipant();
-            const result: TopicScore[] = await prisma.topic_score.findMany({
+            const result: TopicScore[] = await this.prisma$.topic_score.findMany({
                 where: {
                     participant_id: participant?.id,
                     topic_id: {
@@ -267,8 +250,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async getQuestionDetails(questionUUID: string): Promise<Question> {
         try {
-            const prisma = await this.prisma$();
-            const question = await prisma.question_log_question.findUnique({
+            const question = await this.prisma$.question_log_question.findUnique({
                 where: {
                     uuid: questionUUID,
                     is_oral: false
@@ -285,8 +267,7 @@ export abstract class BaseQuestionRepository extends BaseRepository {
 
     protected async getQuestionLogByQuestionUUID(questionUUID: string): Promise<QuestionLogQuestion | null> {
         try {
-            const prisma = await this.prisma$();
-            const questionLog = await prisma.question_log_question.findUnique({
+            const questionLog = await this.prisma$.question_log_question.findUnique({
                 where: {
                     uuid: questionUUID,
                     is_oral: false

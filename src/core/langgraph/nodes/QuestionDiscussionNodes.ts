@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { ChatDeepSeek } from "@langchain/deepseek";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { injectable } from "inversify"
+import { inject, injectable } from "inversify"
 import { IQuestionDiscussionNodes } from "../interface/IQuestionDiscussionNodes";
 import { QuestionContext, QuestionDiscussionState } from "../states/question-discussion.state";
+import { TYPES } from "../../type.core";
+import { LLMService } from "../../service/llm.service";
 
 const RouteDiscussionSchema = z.object({
     currentIntent: z.enum([
@@ -16,18 +17,12 @@ const RouteDiscussionSchema = z.object({
 
 @injectable()
 export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
-    private deepSeekModel: ChatDeepSeek;
-
-    constructor() {
-        this.deepSeekModel = new ChatDeepSeek({
-            model: 'deepseek-coder',
-            temperature: 0.4,
-            cache: false
-        });
-    }
+    constructor(
+        @inject(TYPES.ILLMService) private readonly llmService: LLMService
+    ) { }
 
     async initializeDiscussion(state: typeof QuestionDiscussionState.State) {
-        const modelWithSchema = this.deepSeekModel.withStructuredOutput(RouteDiscussionSchema);
+        const modelWithSchema = this.llmService.deepSeekllmModel.withStructuredOutput(RouteDiscussionSchema);
 
         const lastUserMessage = state.messages?.at(-1)?.content || "";
 
@@ -103,7 +98,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             Student asked: "${lastUserMessage}".
         `;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
         ]);
@@ -139,7 +134,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
 
         const userPrompt = `Student asked: "${lastUserMessage}"`;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
         ]);
@@ -169,7 +164,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             Explain briefly why the incorrect answers are wrong.
         `;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
         ]);
@@ -198,7 +193,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             Explain background context.
         `;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
         ]);
@@ -234,7 +229,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             Student asked: "${lastUserMessage}".
         `;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
         ]);
@@ -279,7 +274,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             Student asked: "${lastUserMessage}".
         `;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
         ]);
@@ -318,7 +313,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             """
         `;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
         ]);
@@ -343,7 +338,7 @@ export class QuestionDiscussionNodes implements IQuestionDiscussionNodes {
             Student asked: "${lastUserMessage}".
         `;
 
-        const result = await this.deepSeekModel.invoke([
+        const result = await this.llmService.deepSeekllmModel.invoke([
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
         ]);

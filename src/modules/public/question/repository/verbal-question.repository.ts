@@ -1,7 +1,6 @@
 import { inject, injectable } from "inversify";
 import { IVerbalQuestionRepository } from "../interface/IVerbalQuestion.repository";
 import { NotFoundException, throwException } from "../../../../shared/errors/all.exception";
-import { IDatabaseService } from "../../../../core/interface/IDatabase.service";
 import { IOpenAIService } from "../../../../core/openai/interface/IOpenAI.service";
 import { IDepartmentService } from "../../department/interface/IDepartment.service";
 import { TYPES } from "../../../../core/type.core";
@@ -15,12 +14,11 @@ import { BaseQuestionRepository } from "./base-question.repository";
 @injectable()
 export class VerbalQuestionRepository extends BaseQuestionRepository implements IVerbalQuestionRepository {
     constructor(
-        @inject(TYPES.IDatabaseService) readonly databaseService: IDatabaseService,
         @inject(TYPES.IOpenAIService) readonly openAIService: IOpenAIService,
         @inject(TYPES.IDepartmentService) readonly departmentService: IDepartmentService,
         @inject(TYPES.IS3Service) private readonly s3Service: IS3Service
     ) {
-        super(databaseService);
+        super();
     }
 
     public async generateVerbalQuestion(payload: VerbalQuestionGeneratePayloadType): Promise<string> {
@@ -59,8 +57,8 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
                 difficulty: payload.difficulty,
                 is_oral: true
             };
-            const prisma = await this.prisma$();
-            const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+
+            const result = await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
                 const savedQuestionLog = await this.saveQuestionLog(questionPayload, tx);
                 await this.connectTopicsWithQuestionLog(topics, savedQuestionLog.id, tx);
                 return savedQuestionLog;
@@ -75,9 +73,9 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
 
     public async getGeneratedVerbalQuestions(questionLogUUID: string): Promise<OralQuestion[]> {
         try {
-            const prisma = await this.prisma$();
+
             const participant = this.getParticipant();
-            const questions = await prisma.question_log_question.findMany({
+            const questions = await this.prisma$.question_log_question.findMany({
                 where: {
                     question_log: {
                         uuid: questionLogUUID,
@@ -111,8 +109,8 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
         try {
             // setup the endtimer for the quiz
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
-            const question = await prisma.question_log_question.findUnique({
+
+            const question = await this.prisma$.question_log_question.findUnique({
                 where: {
                     question_log: {
                         completed: false,
@@ -172,8 +170,8 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
     public async transcribeAudio(audio: Express.Multer.File, questionUUID: string): Promise<boolean> {
         try {
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
-            const question = await prisma.question_log_question.findUnique({
+
+            const question = await this.prisma$.question_log_question.findUnique({
                 where: {
                     uuid: questionUUID,
                     is_transcribed: false,
@@ -192,7 +190,7 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
                 throw new NotFoundException('Question already transcribed or not found');
             }
             const transcription = await this.openAIService.getOpenAIAudioTranscription(audio);
-            await prisma.question_log_question.update({
+            await this.prisma$.question_log_question.update({
                 where: { uuid: questionUUID },
                 data: {
                     is_transcribed: true,
@@ -221,8 +219,8 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
     public async getVerbalQuizAudio(questionUUID: string): Promise<string | null> {
         try {
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
-            const question = await prisma.question_log_question.findUnique({
+
+            const question = await this.prisma$.question_log_question.findUnique({
                 where: {
                     uuid: questionUUID,
                     is_transcribed: false,
@@ -241,14 +239,15 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
                 return null;
             }
             const audio = await this.openAIService.getOpenAITextToSpeech(question.question || '');
-            const audioKey = this.s3Service.generateAudioKey(question.question_log.uuid);
+            const key = `${participant.google_id}/${question.question_log.uuid}`;
+            const audioKey = this.s3Service.generateAudioKey(key);
             const url = await this.uploadToS3(audio as Buffer, audioKey, 'audio/mpeg');
             // await new Promise(resolve => setTimeout(resolve, 5000)); // wait for 30 sec.
 
             // const url = "https://nomro-dev-s3-01.s3.ap-southeast-2.amazonaws.com/1758396014540.mp3";
 
             // update URL in DB
-            await prisma.question_log_question.update({
+            await this.prisma$.question_log_question.update({
                 where: { uuid: questionUUID },
                 data: {
                     audio_url: url,
@@ -265,8 +264,8 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
     public async submitVerbalLog(questionLogUUID: string): Promise<string> {
         try {
             const participant = this.getParticipant();
-            const prisma = await this.prisma$();
-            const questionLog: QuestionLog = await prisma.question_log.findUnique({
+
+            const questionLog: QuestionLog = await this.prisma$.question_log.findUnique({
                 where: {
                     uuid: questionLogUUID,
                     participant: participant?.id,
@@ -278,7 +277,7 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
             if (!questionLog) {
                 throw new NotFoundException('Question log not found or already submitted');
             }
-            await prisma.question_log.update({
+            await this.prisma$.question_log.update({
                 where: {
                     uuid: questionLogUUID,
                     participant: participant?.id,
@@ -301,9 +300,9 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
 
     public async feedbackForVerbalQuestion(questionLogUUID: string): Promise<OralQuestion[] | null> {
         try {
-            const prisma = await this.prisma$();
+
             const participant = this.getParticipant();
-            const questions = await prisma.question_log_question.findMany({
+            const questions = await this.prisma$.question_log_question.findMany({
                 where: {
                     question_log: {
                         uuid: questionLogUUID,
@@ -329,7 +328,7 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
 
     public async getVerbalQuestionLogs(paginationParams: PaginationParams): Promise<PaginationResponse<QuestionLog>> {
         try {
-            const prisma = await this.prisma$();
+
             const participant = this.getParticipant();
             const { skip, take } = paginationParams;
             const condition = {
@@ -338,10 +337,10 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
                 is_oral: true
             }
             // Get total count for pagination metadata
-            const total = await prisma.question_log.count({
+            const total = await this.prisma$.question_log.count({
                 where: condition,
             });
-            const questionLogs = await prisma.question_log.findMany({
+            const questionLogs = await this.prisma$.question_log.findMany({
                 where: condition,
                 orderBy: {
                     id: 'desc' // Order by ID in descending order
@@ -378,7 +377,7 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
 
     private async updateVerbalQuestionEndTime(question: OralQuestion, timer: number): Promise<OralQuestion> {
         try {
-            const prisma = await this.prisma$();
+
             // Calculate end time in UTC
             const now = new Date();
 
@@ -386,7 +385,7 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
             const expiresAt = new Date(Date.now() + question.oral_timer * 60 * 1000);
             const expiresAtUTC = new Date(expiresAt.toISOString());
 
-            const updatedQuestion = await prisma.question_log_question.update({
+            const updatedQuestion = await this.prisma$.question_log_question.update({
                 where: { uuid: question.uuid },
                 data: {
                     oral_end_time: expiresAtUTC, // Store as UTC
@@ -402,7 +401,7 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
         // Save the questions to the database
         // This is a placeholder function. Implement the actual logic to save the questions.
         try {
-            const prisma = await this.prisma$();
+
             const questionData = questions.map((question: OralQuestion) => ({
                 question_log_id: questionLogId,
                 question: question.question,
@@ -413,7 +412,7 @@ export class VerbalQuestionRepository extends BaseQuestionRepository implements 
                 sub_topic: question.sub_topic || undefined, // Ensure sub_topic is trimmed
                 oral_timer: timer
             }));
-            await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
                 const count = await tx.question_log_question.createMany({
                     data: questionData,
                     skipDuplicates: true, // Skip duplicates if any
