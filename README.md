@@ -83,6 +83,59 @@ docker compose -f docker-compose.dev.yml run dev sh
 npx prisma migrate dev --name migration_name
 ```
 
+## Commands For AWS Lambda
+### Build Resources/Dependencies with lambda function
+```
+> pip install -r requirements.txt \
+    --target ./package \
+    --platform manylinux2014_x86_64 \
+    --implementation cp \
+    --python-version 3.12 \
+    --only-binary=:all:
+
+> cd package && zip -r ../deployment.zip . && cd ..
+> zip deployment.zip handler.py
+```
+### Build only Resource/Dependencies (For Lambda Layers)
+```
+# Create folder
+> mkdir layer
+> mkdir python
+
+# Build resource inside python folder
+> pip install -r requirements.txt \
+    --target ./layer/python \
+    --platform manylinux2014_x86_64 \
+    --implementation cp \
+    --python-version 3.12 \
+    --only-binary=:all:
+
+# Zip Resource
+> cd layer
+> zip layer.zip python
+
+# Zip handler function
+> zip handler.zip handler
+```
+### Test locally using SAM
+```
+# Create events folder
+> mkdir events
+
+# Create json file inside folder
+> cd events
+> touch test-event.json
+
+# Create env.json (Put Importent env variables. Ex. LLM-API-KEY)
+> touch env.json
+
+# SAM build
+> sam build
+
+# SAM local invocation
+> sam local invoke samResourceName --event events/test-event.json --env-vars env.json
+```
+
 ## Frontend Repository
 * [Quizer](https://github.com/TusharRoy23/quizer)
 

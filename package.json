@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.1043.0",
     "@aws-sdk/client-s3": "^3.890.0",
     "@aws-sdk/s3-request-presigner": "^3.890.0",
     "@langchain/core": "^0.3.78",

@@ -47,6 +47,8 @@ import { QuestionGenerationGraphBuilder } from './langgraph/builder/question-gen
 import { LLMService } from './service/llm.service';
 import { ICronService } from './interface/ICron.service';
 import { CronService } from './service/cron.service';
+import { ILambdaService } from './interface/ILambda.service';
+import { LambdaService } from './service/lambda.service';
 
 const container = new Container({ defaultScope: "Singleton" });
 
@@ -54,6 +56,8 @@ const container = new Container({ defaultScope: "Singleton" });
 container.bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService);
 //? S3 Module
 container.bind<IS3Service>(TYPES.IS3Service).to(S3Service);
+//? Lambda Service
+container.bind<ILambdaService>(TYPES.ILambdaService).to(LambdaService);
 //? OpenAI Module
 container.bind<IOpenAIService>(TYPES.IOpenAIService).to(OpenAIService);
 container.bind<IOpenAIRepository>(TYPES.IOpenAIRepository).to(OpenAIRepository);

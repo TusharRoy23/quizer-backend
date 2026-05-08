@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: Question Chunk Processor Lambda
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true # hides value from CloudFormation logs
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 256
+    Runtime: python3.12
+    Environment:
+      Variables:
+        OPENAI_API_KEY: !Ref OpenAIApiKey
+
+Resources:
+  QuestionChunkProcessor:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: question-chunk-processor
+      CodeUri: ./ # points to handler.py location
+      Handler: handler.handler # filename.functionname
+      Description: Generates quiz questions via LLM

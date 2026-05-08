@@ -48,3 +48,11 @@ generated/
 # LangGraph API
 .langgraph_api
 .envs
+
+# Lambda function utils
+/src/utils/lambda-functions/*/package
+/src/utils/lambda-functions/*/deployment.zip
+/src/utils/lambda-functions/*/env.*
+/src/utils/lambda-functions/*/.aws-sam
+/src/utils/lambda-functions/*/layer
+/src/utils/lambda-functions/*/handler.zip

@@ -8,6 +8,8 @@ import { throwException } from "../../../shared/errors/all.exception";
 import { TYPES } from "../../type.core";
 import { BaseQuestionRepository } from "../../../modules/public/question/repository/base-question.repository";
 import { LLMService } from "../../service/llm.service";
+import { ILambdaService } from "../../interface/ILambda.service";
+import { AssessmentType } from "../../../shared/utils/enum";
 
 const quizSchema = z.object({
     questions: z.array(
@@ -29,7 +31,8 @@ const keywordSchema = z.object({
 @injectable()
 export class LangChainRepository extends BaseQuestionRepository implements ILangChainRepository {
     constructor(
-        @inject(TYPES.ILLMService) private readonly llmService: LLMService
+        @inject(TYPES.ILLMService) private readonly llmService: LLMService,
+        @inject(TYPES.ILambdaService) private readonly lambdaService: ILambdaService
     ) {
         super();
     }
@@ -41,86 +44,90 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
         payload: QuestionGeneratePayloadType
     ): Promise<Question[]> {
         try {
-            const topicNames = topics.map((t) => t.name).join(", ");
-            const uniquenessKey = Math.random().toString(36).substring(2, 8);
-            const modelWithSchema = this.llmService.openAIllmModel.withStructuredOutput(quizSchema, {
-                name: `quiz_generator`,
-                strict: true
-            });
-
-            const promptTemplate = await ChatPromptTemplate.fromMessages([
-                [
-                    "system",
-                    `You are an expert quiz generator.
-                    GENERATION ID: {uniquenessKey} - Use this to create COMPLETELY NEW questions.
-                    IMPORTANT: For each call with new {uniquenessKey}, generate 100% novel questions. 
-                    Never reuse phrasing, scenarios, or examples from prior generations.
-
-                    IMPORTANT DISTINCTION:
-                    - If the assessment type is "GIA" (General Intelligence Assessment), you MUST generate 
-                    cognitive ability test questions.
-                    - GIA questions test reasoning ability, NOT domain knowledge.
-                    - NEVER explain what GIA is.
-                    - NEVER ask questions about how GIA is conducted.
-                    - NEVER generate HR, psychology, or theory questions about intelligence.
-
-                    FOR GIA QUESTIONS:
-                    - Questions must be self-contained and domain-neutral
-                    - Allowed GIA categories only:
-                    - Numerical Reasoning
-                    - Logical Reasoning
-                    - Abstract / Pattern Recognition
-                    - Verbal Reasoning
-                    - Attention & Rule-Based Reasoning
-                    - Each question must test problem-solving, inference, or pattern detection
-                    - Assume the test-taker has no prior subject knowledge
-                    - Prefer time-pressure style questions
-
-                    GENERAL RULES:
-                    - Generate exactly {question_count} questions
-                    - Every question MUST belong to exactly ONE topic
-                    - Do NOT mix topics in a single question
-                    - For CHOICE questions: exactly 4 options, single answer [0-3]
-                    - For MULTIPLE_CHOICE questions: exactly 4 options, multiple answers
-                    - Difficulty range is 0–100 only
-                    - Topic value MUST be one of: {topicNames}
-                    - Return valid JSON only, no additional text
-                    `
-                ],
-                [
-                    "user",
-                    `
-                    Assessment Type: {assessmentType}
-
-                    Generate {question_count} questions.
-
-                    DEPARTMENT: {departmentName}
-
-                    TOPICS (interpret based on QUESTION_MODE):
-                    {topicNames}
-
-                    DIFFICULTY LEVEL: {difficulty_level}
-
-                    Question distribution:
-                    - {scenarioCount} scenario-based
-                    - {misconceptionCount} trap / misleading-option questions
-                    - {advancedCount} advanced reasoning questions
-                    - Remaining: mixed reasoning formats
-
-                    If Assessment Type is GENERAL_INTELLIGENCE:
-                    - Questions must be time-pressure friendly
-                    - No explanatory text in questions
-                    - No real-world domain assumptions
-                    - No academic framing
-
-                    Ensure questions are novel and suitable for pre-employment assessment`
-                ],
-            ]);
-
+            const CHUNK_SIZE = 5;
             const totalQuestions = payload.question_count;
-            const scenarioCount = Math.max(1, Math.floor(totalQuestions * 0.2));
-            const misconceptionCount = Math.max(1, Math.floor(totalQuestions * 0.2));
-            const advancedCount = Math.max(1, Math.floor(totalQuestions * 0.2));
+            const chunks = this.splitIntoChunks(totalQuestions, CHUNK_SIZE);
+
+            const topicNames = topics.map((t) => t.name).join(", ");
+            // const uniquenessKey = Math.random().toString(36).substring(2, 8);
+            // const modelWithSchema = this.llmService.openAIllmModel.withStructuredOutput(quizSchema, {
+            //     name: `quiz_generator`,
+            //     strict: true
+            // });
+
+            // const promptTemplate = await ChatPromptTemplate.fromMessages([
+            //     [
+            //         "system",
+            //         `You are an expert quiz generator.
+            //         GENERATION ID: {uniquenessKey} - Use this to create COMPLETELY NEW questions.
+            //         IMPORTANT: For each call with new {uniquenessKey}, generate 100% novel questions. 
+            //         Never reuse phrasing, scenarios, or examples from prior generations.
+
+            //         IMPORTANT DISTINCTION:
+            //         - If the assessment type is "GIA" (General Intelligence Assessment), you MUST generate 
+            //         cognitive ability test questions.
+            //         - GIA questions test reasoning ability, NOT domain knowledge.
+            //         - NEVER explain what GIA is.
+            //         - NEVER ask questions about how GIA is conducted.
+            //         - NEVER generate HR, psychology, or theory questions about intelligence.
+
+            //         FOR GIA QUESTIONS:
+            //         - Questions must be self-contained and domain-neutral
+            //         - Allowed GIA categories only:
+            //         - Numerical Reasoning
+            //         - Logical Reasoning
+            //         - Abstract / Pattern Recognition
+            //         - Verbal Reasoning
+            //         - Attention & Rule-Based Reasoning
+            //         - Each question must test problem-solving, inference, or pattern detection
+            //         - Assume the test-taker has no prior subject knowledge
+            //         - Prefer time-pressure style questions
+
+            //         GENERAL RULES:
+            //         - Generate exactly {question_count} questions
+            //         - Every question MUST belong to exactly ONE topic
+            //         - Do NOT mix topics in a single question
+            //         - For CHOICE questions: exactly 4 options, single answer [0-3]
+            //         - For MULTIPLE_CHOICE questions: exactly 4 options, multiple answers
+            //         - Difficulty range is 0–100 only
+            //         - Topic value MUST be one of: {topicNames}
+            //         - Return valid JSON only, no additional text
+            //         `
+            //     ],
+            //     [
+            //         "user",
+            //         `
+            //         Assessment Type: {assessmentType}
+
+            //         Generate {question_count} questions.
+
+            //         DEPARTMENT: {departmentName}
+
+            //         TOPICS (interpret based on QUESTION_MODE):
+            //         {topicNames}
+
+            //         DIFFICULTY LEVEL: {difficulty_level}
+
+            //         Question distribution:
+            //         - {scenarioCount} scenario-based
+            //         - {misconceptionCount} trap / misleading-option questions
+            //         - {advancedCount} advanced reasoning questions
+            //         - Remaining: mixed reasoning formats
+
+            //         If Assessment Type is GENERAL_INTELLIGENCE:
+            //         - Questions must be time-pressure friendly
+            //         - No explanatory text in questions
+            //         - No real-world domain assumptions
+            //         - No academic framing
+
+            //         Ensure questions are novel and suitable for pre-employment assessment`
+            //     ],
+            // ]);
+
+            // const totalQuestions = payload.question_count;
+            // const scenarioCount = Math.max(1, Math.floor(totalQuestions * 0.2));
+            // const misconceptionCount = Math.max(1, Math.floor(totalQuestions * 0.2));
+            // const advancedCount = Math.max(1, Math.floor(totalQuestions * 0.2));
 
             const difficultyLevel: string[] = [];
             // Difficulty Level
@@ -129,33 +136,73 @@ export class LangChainRepository extends BaseQuestionRepository implements ILang
                 difficultyLevel.push(`${topic.name}:` + (topicScore && topicScore.id ? ` ${topicScore.score + 5}` : 5) + "%")
             });
 
+            // Fire all Lambda chunks in parallel
+            const results = await Promise.allSettled(
+                chunks.map((chunkCount, index) =>
+                    this.lambdaService.invokeFunction(
+                        process.env.LAMBDA_FUNCTION_NAME || 'quizer-generate-question',
+                        {
+                            // Pass everything Lambda needs to call LLM
+                            question_count: chunkCount,
+                            chunkIndex: index,
+                            topicNames,
+                            difficultyLevel: difficultyLevel.join(','),
+                            departmentName: department.name,
+                            assessment_type: payload?.assessment_type || AssessmentType.KNOWLEDGE_ASSESSMENT,
+                            scenarioCount: Math.max(1, Math.floor(chunkCount * 0.2)),
+                            misconceptionCount: Math.max(1, Math.floor(chunkCount * 0.2)),
+                            advancedCount: Math.max(1, Math.floor(chunkCount * 0.2)),
+                        }
+                    )
+                )
+            );
+
+            // Merge all successful chunks
+            const mergedQuestions: Question[] = results
+                .filter(r => r.status === 'fulfilled')
+                .flatMap(r => (r as PromiseFulfilledResult<any>).value.questions);
+
+            console.log(`mergedQuestions:`, mergedQuestions);
+
+            return mergedQuestions;
+
             // Build runnable chain (ensure parser is in the chain)
-            const chain = promptTemplate.pipe(modelWithSchema);
+            // const chain = promptTemplate.pipe(modelWithSchema);
 
-            const response = await chain.invoke({
-                question_count: payload.question_count,
-                difficulty_level: difficultyLevel.join(','),
-                topicNames: topicNames,
-                departmentName: department.name,
-                uniquenessKey: uniquenessKey,
-                scenarioCount: scenarioCount,
-                misconceptionCount: misconceptionCount,
-                advancedCount: advancedCount,
-                assessmentType: payload.assessment_type
-            });
+            // const response = await chain.invoke({
+            //     question_count: payload.question_count,
+            //     difficulty_level: difficultyLevel.join(','),
+            //     topicNames: topicNames,
+            //     departmentName: department.name,
+            //     uniquenessKey: uniquenessKey,
+            //     scenarioCount: scenarioCount,
+            //     misconceptionCount: misconceptionCount,
+            //     advancedCount: advancedCount,
+            //     assessmentType: payload.assessment_type
+            // });
 
-            return response.questions.map(q => ({
-                question: q.question,
-                answer: q.answer || [0],
-                options: q.options || [],
-                question_type: q.question_type as unknown as QuestionType,
-                topic: q.topic || undefined,
-                sub_topic: q.sub_topic || undefined,
-                uuid: ''
-            }));
+            // return response.questions.map(q => ({
+            //     question: q.question,
+            //     answer: q.answer || [0],
+            //     options: q.options || [],
+            //     question_type: q.question_type as unknown as QuestionType,
+            //     topic: q.topic || undefined,
+            //     sub_topic: q.sub_topic || undefined,
+            //     uuid: ''
+            // }));
         } catch (error) {
             return throwException(error);
         }
+    }
+
+    private splitIntoChunks(total: number, chunkSize: number): number[] {
+        const chunks: number[] = [];
+        let remaining = total;
+        while (remaining > 0) {
+            chunks.push(Math.min(chunkSize, remaining));
+            remaining -= chunkSize;
+        }
+        return chunks; // 20 → [5, 5, 5, 5] or 13 → [5, 5, 3]
     }
 
     public async generatedStreamedExplanation(prompt: string): Promise<ReadableStream> {

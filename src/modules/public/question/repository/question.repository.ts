@@ -10,6 +10,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { QuestionLogPayloadType } from "../../../../shared/utils/types";
 import { BaseQuestionRepository } from "./base-question.repository";
 import { ILangChainService } from "../../../../core/openai/interface/ILangChain.service";
+import { AssessmentType } from "../../../../shared/utils/enum";
 
 type score = {
     [key: string]: {
@@ -46,7 +47,7 @@ export class QuestionRepository extends BaseQuestionRepository implements IQuest
                 participant: participant?.id,
                 timer: payload.timer,
                 question_count: payload.question_count,
-                assessment_type: payload.assessment_type
+                assessment_type: payload.assessment_type || AssessmentType.KNOWLEDGE_ASSESSMENT
             };
 
             const result = await this.prisma$.$transaction(async (tx: Prisma.TransactionClient) => {
